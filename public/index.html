@@ -2691,6 +2691,19 @@ input[type="color"] {
             <div class="admin-card-title">⏰ Payment Reminders</div>
           </div>
           <p style="font-size:11px;color:#71717a;margin-bottom:8px;">Expiring users ko reminder bhejo</p>
+          <div class="admin-form-group">
+            <label class="admin-form-label">📤 Send Via</label>
+            <div style="display:flex;gap:12px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendTelegram" checked style="accent-color:#3b82f6;"> ✈️ Telegram</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendWhatsApp" checked style="accent-color:#22c55e;"> 💬 WhatsApp</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSetDashMsg" checked style="accent-color:#f59e0b;"> 📢 Dashboard Msg</label>
+            </div>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">✏️ Custom Message (Optional)</label>
+            <textarea id="reminderCustomMsg" rows="2" class="admin-form-input" placeholder="Custom message... (empty = default template)" style="resize:vertical;font-size:10px;"></textarea>
+            <div style="font-size:9px;color:#71717a;margin-top:3px;">Variables: <span style="color:#f59e0b;">{'{name}'}</span> = Name, <span style="color:#f59e0b;">{'{days}'}</span> = Days left</div>
+          </div>
           <div id="reminderUserList" style="max-height:160px;overflow-y:auto;margin-bottom:8px;border:1px solid #2a2a35;border-radius:6px;padding:4px;"></div>
           <div style="display:flex;gap:4px;margin-bottom:8px;">
             <button class="admin-btn admin-btn-warning" onclick="selectAllReminders()" style="flex:1;font-size:10px;">Select All</button>
@@ -3010,13 +3023,17 @@ function showDashboard() {
     if (currentUser) {
         document.getElementById('displayUsername').textContent = currentUser.username;
         const badge = document.getElementById('subBadge');
-        badge.textContent = `${currentUser.daysLeft}d left`;
+        const daysLeft = currentUser.daysLeft > 0 ? currentUser.daysLeft : 0;
+        badge.textContent = `${daysLeft}d left`;
         
-        if (currentUser.daysLeft <= 7) {
+        if (daysLeft <= 7) {
             badge.classList.add('expired');
         } else {
             badge.classList.remove('expired');
         }
+
+        // Expired user: hide stock tips + signals, show expiry message
+        applyExpiredRestrictions(daysLeft);
         
         // Show personal message banner if admin sent one
         updateMessageBanner();
@@ -3040,7 +3057,52 @@ function showDashboard() {
     
     loadDisclaimer();
     loadAll();
-    startAutoRefresh(); // Start auto-refresh when showing dashboard
+    startAutoRefresh();
+    startCountdownTimer();
+}
+
+function applyExpiredRestrictions(daysLeft) {
+    const tipsSection = document.getElementById('stockTipsSection');
+    const tipsDivider = document.getElementById('stockTipsDivider');
+    const signalsSection = document.querySelector('div[data-section="signals"]');
+    const signalsDivider = signalsSection ? signalsSection.nextElementSibling : null;
+
+    if (daysLeft <= 0) {
+        if (tipsSection) { tipsSection.style.display = 'none'; tipsSection.dataset.expiredHidden = '1'; }
+        if (tipsDivider) { tipsDivider.style.display = 'none'; tipsDivider.dataset.expiredHidden = '1'; }
+        if (signalsSection) { signalsSection.style.display = 'none'; signalsSection.dataset.expiredHidden = '1'; }
+        if (signalsDivider && signalsDivider.tagName === 'HR') { signalsDivider.style.display = 'none'; signalsDivider.dataset.expiredHidden = '1'; }
+    } else {
+        if (tipsSection && tipsSection.dataset.expiredHidden) { tipsSection.style.display = ''; delete tipsSection.dataset.expiredHidden; }
+        if (tipsDivider && tipsDivider.dataset.expiredHidden) { tipsDivider.style.display = ''; delete tipsDivider.dataset.expiredHidden; }
+        if (signalsSection && signalsSection.dataset.expiredHidden) { signalsSection.style.display = ''; delete signalsSection.dataset.expiredHidden; }
+        if (signalsDivider && signalsDivider.dataset.expiredHidden) { signalsDivider.style.display = ''; delete signalsDivider.dataset.expiredHidden; }
+    }
+}
+
+function startCountdownTimer() {
+    if (window._countdownInterval) clearInterval(window._countdownInterval);
+    if (!currentUser || !currentUser.subscriptionExpiry) return;
+    const badge = document.getElementById('subBadge');
+    window._countdownInterval = setInterval(() => {
+        const now = Date.now();
+        const exp = new Date(currentUser.subscriptionExpiry).getTime();
+        const diff = exp - now;
+        if (diff <= 0) {
+            badge.textContent = 'EXPIRED';
+            badge.classList.add('expired');
+            applyExpiredRestrictions(0);
+            clearInterval(window._countdownInterval);
+            return;
+        }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        badge.textContent = `${d}d ${h}h ${m}m ${s}s`;
+        if (d <= 7) badge.classList.add('expired');
+        else badge.classList.remove('expired');
+    }, 1000);
 }
 
 // Load disclaimer text from server
@@ -3646,18 +3708,22 @@ async function sendReminderNow() {
         status.innerHTML = '<span style="color:#ff1744;">Select users first!</span>';
         return;
     }
+    const sendTelegram = document.getElementById('reminderSendTelegram').checked;
+    const sendWhatsApp = document.getElementById('reminderSendWhatsApp').checked;
+    const setDashMsg = document.getElementById('reminderSetDashMsg').checked;
+    const customMsg = document.getElementById('reminderCustomMsg').value.trim();
     status.innerHTML = '<span style="color:#ffab00;">⏳ Sending reminders...</span>';
     try {
         const r = await fetch(API + '/api/admin/send-reminders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ usernames: selectedUsers })
+            body: JSON.stringify({ usernames: selectedUsers, sendTelegram, sendWhatsApp, setDashMsg, customMsg })
         }).then(r => r.json());
         if (r.success) {
             let msg = `✅ ${r.message}`;
             if (r.sentTelegram > 0) msg += `\n✈️ Telegram: ${r.sentTelegram}`;
+            if (r.sentWhatsApp > 0) msg += `\n💬 WhatsApp: ${r.sentWhatsApp}`;
             if (r.waLinks && r.waLinks.length > 0) {
-                msg += `\n💬 WhatsApp: ${r.waLinks.length}`;
                 r.waLinks.forEach(wl => { window.open(wl.link, '_blank'); });
             }
             status.innerHTML = `<span style="color:#00c853;">✅ Done!</span>`;

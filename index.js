@@ -126,6 +126,27 @@ const DEFAULT_SETTINGS = {
 if (!fs.existsSync(SETTINGS_FILE)) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
     console.log('📁 Created settings.json');
+} else {
+    const existing = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    if (!existing.holidayBanners || existing.holidayBanners.length === 0) {
+        existing.holidayBanners = [{
+            id: 'banner_demo_1',
+            title: 'Happy Diwali! 🪔',
+            message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
+            bgColor: '#ff6b00',
+            textColor: '#ffffff',
+            imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
+            startDate: '2026-01-01',
+            endDate: '2026-12-31',
+            showOnDesktop: true,
+            showOnMobile: true,
+            position: 'afterIndices',
+            active: true,
+            createdAt: new Date().toISOString()
+        }];
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(existing, null, 2));
+        console.log('📁 Seeded demo banner in settings.json');
+    }
 }
 
 // Initialize stocktips file
@@ -1773,7 +1794,7 @@ app.get('/api/admin/expiring-users', checkAdmin, (req, res) => {
 // Send reminders to selected users (or all expiring if none specified)
 app.post('/api/admin/send-reminders', checkAdmin, async (req, res) => {
     try {
-        const { usernames } = req.body;
+        const { usernames, sendTelegram: doTG, sendWhatsApp: doWA, setDashMsg, customMsg } = req.body;
         const data = loadUsers();
         let sentCount = 0;
         let sentTelegram = 0;
@@ -1787,43 +1808,41 @@ app.post('/api/admin/send-reminders', checkAdmin, async (req, res) => {
             } else {
                 if (days < 0 || days > 30) continue;
             }
-            const reminderMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBearFighter Trading`;
+            const defaultMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBearFighter Trading`;
+            const reminderMsg = customMsg ? customMsg.replace(/\{name\}/g, u.fullName || u.username).replace(/\{days\}/g, days) : defaultMsg;
 
-            // Send via Telegram
-            if (u.telegramChatId) {
+            if (doTG && u.telegramChatId) {
                 await sendToTelegramChat(u.telegramChatId, reminderMsg);
                 sentTelegram++;
             }
-
-            // Send via WhatsApp
-            if (u.whatsappNumber) {
-                const waLink = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
-                if (waLink) sentWhatsApp++;
+            if (doWA && u.whatsappNumber) {
+                sentWhatsApp++;
             }
-
-            // Set as dashboard message
-            u.message = `⚠️ Your subscription expires in ${days} day(s)! Renew now.`;
-            u.msgColor = '#ff1744';
+            if (setDashMsg) {
+                u.message = customMsg ? customMsg.replace(/\{name\}/g, u.fullName || u.username).replace(/\{days\}/g, days) : `⚠️ Your subscription expires in ${days} day(s)! Renew now.`;
+                u.msgColor = '#ff1744';
+            }
             sentCount++;
         }
 
         saveUsers(data);
         logActivity('payment_reminders', `Sent to ${sentCount} users — Telegram: ${sentTelegram}, WhatsApp: ${sentWhatsApp}`);
 
-        // Generate WhatsApp links for admin to send manually
         const waLinks = [];
-        for (const u of data.users) {
-            if (!u.approved) continue;
-            const days = getDaysUntilExpiry(u);
-            if (u.whatsappNumber) {
-                if (usernames && usernames.length > 0) {
-                    if (!usernames.includes(u.username)) continue;
-                } else {
-                    if (days < 0 || days > 30) continue;
+        if (doWA) {
+            for (const u of data.users) {
+                if (!u.approved) continue;
+                const days = getDaysUntilExpiry(u);
+                if (u.whatsappNumber) {
+                    if (usernames && usernames.length > 0) {
+                        if (!usernames.includes(u.username)) continue;
+                    } else {
+                        if (days < 0 || days > 30) continue;
+                    }
+                    const reminderMsg = customMsg ? customMsg.replace(/\{name\}/g, u.fullName || u.username).replace(/\{days\}/g, days) : `⚠️ Hi ${u.fullName || u.username}, your subscription expires in ${days} day(s). Renew now! Contact: Vaibhav`;
+                    const link = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
+                    if (link) waLinks.push({ username: u.username, daysLeft: days, link });
                 }
-                const reminderMsg = `⚠️ Hi ${u.fullName || u.username}, your subscription expires in ${days} day(s). Renew now! Contact: Vaibhav`;
-                const link = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
-                if (link) waLinks.push({ username: u.username, daysLeft: days, link });
             }
         }
 
