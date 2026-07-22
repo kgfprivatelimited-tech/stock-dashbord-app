@@ -2269,6 +2269,10 @@ input[type="color"] {
               <option value="Cash">💵 Cash</option>
             </select>
           </div>
+          <div class="admin-form-row">
+            <div class="admin-form-group"><label class="admin-form-label">📅 Subscription Days</label><input type="number" id="editExpiryDays" class="admin-form-input" placeholder="e.g. 30, 90, 365" min="1" autocomplete="off"></div>
+            <div class="admin-form-group"><label class="admin-form-label">⏰ Current Expiry</label><input type="text" id="editCurrentExpiry" class="admin-form-input" readonly style="background:#1a1a24;cursor:default;"></div>
+          </div>
           <div id="userLocationDisplay" style="display:none;margin-top:12px;padding:12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:8px;">
             <div style="font-size:12px;color:#22c55e;font-weight:700;margin-bottom:6px;">📍 Last Known Location</div>
             <a id="locationLink" href="#" target="_blank" style="font-size:11px;color:#3b82f6;text-decoration:none;">View on Google Maps</a>
@@ -2473,6 +2477,16 @@ input[type="color"] {
                 <div style="display:flex;gap:16px;margin-bottom:12px;">
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowDesktop" checked style="accent-color:#f59e0b;"> 🖥️ Desktop</label>
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowMobile" checked style="accent-color:#f59e0b;"> 📱 Mobile</label>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">📍 Banner Position (Dashboard me kahan dikhe)</label>
+                    <select id="bannerPosition" class="admin-form-select">
+                        <option value="afterIndices">⬡ Indices ke Niche</option>
+                        <option value="afterStockTips">📊 Stock Tips ke Niche</option>
+                        <option value="afterHeatmap">◈ Heatmap ke Niche</option>
+                        <option value="afterSignals">◎ Signals ke Niche</option>
+                        <option value="top">⬆️ Sabse Upar (Disclaimer ke baad)</option>
+                    </select>
                 </div>
                 <div style="display:flex;gap:8px;">
                     <button class="admin-btn admin-btn-primary" onclick="saveBanner()" style="flex:1;">💾 Save</button>
@@ -4080,6 +4094,10 @@ async function editUser(username) {
     document.querySelectorAll('input[name="editMsgColor"]').forEach(r => {
         r.checked = r.value === mc;
     });
+    // Populate expiry fields
+    const daysLeft = user.daysLeft > 0 ? user.daysLeft : 0;
+    document.getElementById('editExpiryDays').value = daysLeft > 0 ? daysLeft : '';
+    document.getElementById('editCurrentExpiry').value = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' (' + daysLeft + ' days)' : 'No expiry set';
     
     // Show location if available
     const locDiv = document.getElementById('userLocationDisplay');
@@ -4122,6 +4140,7 @@ async function saveUserEdit() {
     const highlight = document.getElementById('editHighlight').checked;
     const checkedRadio = document.querySelector('input[name="editMsgColor"]:checked');
     const msgColor = checkedRadio ? checkedRadio.value : '#f59e0b';
+    const subscriptionDays = parseInt(document.getElementById('editExpiryDays').value) || 0;
     const msg = document.getElementById('editMsg');
     
     if (!fullName) {
@@ -4148,7 +4167,8 @@ async function saveUserEdit() {
                 whatsappNumber,
                 message,
                 highlight,
-                msgColor
+                msgColor,
+                subscriptionDays
             })
         }).then(r => r.json());
         
@@ -4768,7 +4788,7 @@ function renderBannerList() {
             '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + (b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : '🎊') + '</div>' +
             '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + '</div>' +
-            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + '</div>' +
+            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Indices') + '</div>' +
             '</div>' +
             '<div class="admin-action-btns">' +
             '<button class="admin-action-btn" onclick="editBanner(\'' + b.id + '\')">✏️</button>' +
@@ -4793,6 +4813,7 @@ function toggleBannerForm() {
         document.getElementById('bannerTextColor').value = '#ffffff';
         document.getElementById('bannerShowDesktop').checked = true;
         document.getElementById('bannerShowMobile').checked = true;
+        document.getElementById('bannerPosition').value = 'afterIndices';
         removeBannerImage();
     }
 }
@@ -4838,7 +4859,8 @@ async function saveBanner() {
         textColor: document.getElementById('bannerTextColor').value,
         imageUrl: hasUpload ? previewImg : (imageUrlVal || ''),
         showOnDesktop: document.getElementById('bannerShowDesktop').checked,
-        showOnMobile: document.getElementById('bannerShowMobile').checked
+        showOnMobile: document.getElementById('bannerShowMobile').checked,
+        position: document.getElementById('bannerPosition').value || 'afterIndices'
     };
     const status = document.getElementById('bannerFormStatus');
     if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
@@ -4865,6 +4887,7 @@ function editBanner(id) {
     document.getElementById('bannerTextColor').value = b.textColor || '#ffffff';
     document.getElementById('bannerShowDesktop').checked = b.showOnDesktop !== false;
     document.getElementById('bannerShowMobile').checked = b.showOnMobile !== false;
+    document.getElementById('bannerPosition').value = b.position || 'afterIndices';
     if (b.imageUrl) {
         document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
         if (b.imageUrl.startsWith('data:')) {
@@ -4916,7 +4939,24 @@ async function loadHolidayBanners() {
         document.getElementById('holidayBannerTitle').textContent = banner.title;
         document.getElementById('holidayBannerMsg').textContent = banner.message || '';
         document.getElementById('holidayBannerDismissBtn').dataset.bannerId = banner.id;
+        positionBanner(banner.position || 'afterIndices');
     } catch (e) { document.getElementById('holidayBannerWrap').style.display = 'none'; }
+}
+
+function positionBanner(pos) {
+    const wrap = document.getElementById('holidayBannerWrap');
+    const targets = {
+        'top': 'div[data-section="indices"]',
+        'afterIndices': 'hr[data-section="indices"]',
+        'afterStockTips': '#stockTipsDivider',
+        'afterHeatmap': 'hr[data-section="heatmap"]',
+        'afterSignals': '#signals-table'
+    };
+    const sel = targets[pos] || targets['afterIndices'];
+    const target = document.querySelector(sel);
+    if (target) {
+        target.parentNode.insertBefore(wrap, target.nextSibling);
+    }
 }
 
 function dismissHolidayBanner(bannerId) {

@@ -254,7 +254,10 @@ function saveUsers(data) {
 
 function loadSettings() {
     try {
-        return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+        const file = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+        const merged = { ...DEFAULT_SETTINGS, ...file };
+        if (!merged.holidayBanners) merged.holidayBanners = [];
+        return merged;
     } catch (e) {
         return { ...DEFAULT_SETTINGS };
     }
@@ -729,7 +732,7 @@ app.put('/api/admin/user/:username', checkAdmin, (req, res) => {
             return res.json({ success: false, message: 'User not found' });
         }
         
-        const { fullName, paymentAmount, paymentId, paymentMethod, message, highlight, msgColor, category, telegramChatId, whatsappNumber } = req.body;
+        const { fullName, paymentAmount, paymentId, paymentMethod, message, highlight, msgColor, category, telegramChatId, whatsappNumber, subscriptionDays } = req.body;
         
         if (fullName !== undefined) data.users[userIndex].fullName = fullName;
         if (paymentAmount !== undefined) data.users[userIndex].paymentAmount = paymentAmount;
@@ -741,6 +744,9 @@ app.put('/api/admin/user/:username', checkAdmin, (req, res) => {
         if (category !== undefined) data.users[userIndex].category = category;
         if (telegramChatId !== undefined) data.users[userIndex].telegramChatId = telegramChatId;
         if (whatsappNumber !== undefined) data.users[userIndex].whatsappNumber = whatsappNumber;
+        if (subscriptionDays && subscriptionDays > 0) {
+            data.users[userIndex].subscriptionExpiry = new Date(Date.now() + subscriptionDays * 24 * 60 * 60 * 1000).toISOString();
+        }
         
         saveUsers(data);
         logActivity('user_edited', `${req.params.username}`);
@@ -1776,28 +1782,29 @@ app.post('/api/admin/send-reminders', checkAdmin, async (req, res) => {
         for (const u of data.users) {
             if (!u.approved) continue;
             const days = getDaysUntilExpiry(u);
-            if (days > 0 && days <= 7) {
-                // If usernames provided, only send to selected ones
-                if (usernames && usernames.length > 0 && !usernames.includes(u.username)) continue;
-                const reminderMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBearFighter Trading`;
-
-                // Send via Telegram
-                if (u.telegramChatId) {
-                    await sendToTelegramChat(u.telegramChatId, reminderMsg);
-                    sentTelegram++;
-                }
-
-                // Send via WhatsApp
-                if (u.whatsappNumber) {
-                    const waLink = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
-                    if (waLink) sentWhatsApp++;
-                }
-
-                // Set as dashboard message
-                u.message = `⚠️ Your subscription expires in ${days} day(s)! Renew now.`;
-                u.msgColor = '#ff1744';
-                sentCount++;
+            if (usernames && usernames.length > 0) {
+                if (!usernames.includes(u.username)) continue;
+            } else {
+                if (days < 0 || days > 30) continue;
             }
+            const reminderMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBearFighter Trading`;
+
+            // Send via Telegram
+            if (u.telegramChatId) {
+                await sendToTelegramChat(u.telegramChatId, reminderMsg);
+                sentTelegram++;
+            }
+
+            // Send via WhatsApp
+            if (u.whatsappNumber) {
+                const waLink = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
+                if (waLink) sentWhatsApp++;
+            }
+
+            // Set as dashboard message
+            u.message = `⚠️ Your subscription expires in ${days} day(s)! Renew now.`;
+            u.msgColor = '#ff1744';
+            sentCount++;
         }
 
         saveUsers(data);
@@ -1808,8 +1815,12 @@ app.post('/api/admin/send-reminders', checkAdmin, async (req, res) => {
         for (const u of data.users) {
             if (!u.approved) continue;
             const days = getDaysUntilExpiry(u);
-            if (days > 0 && days <= 7 && u.whatsappNumber) {
-                if (usernames && usernames.length > 0 && !usernames.includes(u.username)) continue;
+            if (u.whatsappNumber) {
+                if (usernames && usernames.length > 0) {
+                    if (!usernames.includes(u.username)) continue;
+                } else {
+                    if (days < 0 || days > 30) continue;
+                }
                 const reminderMsg = `⚠️ Hi ${u.fullName || u.username}, your subscription expires in ${days} day(s). Renew now! Contact: Vaibhav`;
                 const link = generateWhatsAppLink(u.whatsappNumber, reminderMsg);
                 if (link) waLinks.push({ username: u.username, daysLeft: days, link });
@@ -1829,7 +1840,7 @@ app.get('/api/admin/reminder-status', checkAdmin, (req, res) => {
     data.users.forEach(u => {
         if (!u.approved) return;
         const days = getDaysUntilExpiry(u);
-        if (days > 0 && days <= 7) {
+        if (days >= 0) {
             expiring.push({
                 username: u.username,
                 fullName: u.fullName,
@@ -2059,7 +2070,7 @@ app.get('/api/admin/banners', checkAdmin, (req, res) => {
 
 app.post('/api/admin/banners', checkAdmin, (req, res) => {
     try {
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position } = req.body;
         if (!title || !startDate || !endDate) {
             return res.json({ success: false, message: 'Title, start date, and end date required' });
         }
@@ -2075,6 +2086,7 @@ app.post('/api/admin/banners', checkAdmin, (req, res) => {
             startDate, endDate,
             showOnDesktop: showOnDesktop !== false,
             showOnMobile: showOnMobile !== false,
+            position: position || 'afterIndices',
             active: true,
             createdAt: new Date().toISOString()
         };
@@ -2089,7 +2101,7 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         const settings = loadSettings();
         const banner = (settings.holidayBanners || []).find(b => b.id === req.params.id);
         if (!banner) return res.json({ success: false, message: 'Banner not found' });
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position } = req.body;
         if (title !== undefined) banner.title = title.trim();
         if (message !== undefined) banner.message = message.trim();
         if (bgColor !== undefined) banner.bgColor = bgColor;
@@ -2100,6 +2112,7 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         if (showOnDesktop !== undefined) banner.showOnDesktop = showOnDesktop;
         if (showOnMobile !== undefined) banner.showOnMobile = showOnMobile;
         if (active !== undefined) banner.active = active;
+        if (position !== undefined) banner.position = position;
         saveSettings(settings);
         res.json({ success: true, message: 'Banner updated!' });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
