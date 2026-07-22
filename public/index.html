@@ -2037,6 +2037,9 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('disclaimer', this)">⚙️ Disclaimer</div>
       <div class="admin-nav-item" onclick="showAdminSection('dashSettings', this)">🎛️ Dashboard Settings</div>
       <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
+      <div class="admin-nav-item" onclick="showAdminSection('maintenance', this)">🔧 Maintenance Mode</div>
+      <div class="admin-nav-item" onclick="showAdminSection('changePass', this)">🔐 Change Password</div>
+      <div class="admin-nav-item" onclick="showAdminSection('apiKeys', this)">🔑 API Keys</div>
     </div>
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
@@ -2448,6 +2451,25 @@ input[type="color"] {
                     <div class="admin-form-group"><label class="admin-form-label">Background Color</label><input type="color" id="bannerBgColor" value="#ff6b35" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
                     <div class="admin-form-group"><label class="admin-form-label">Text Color</label><input type="color" id="bannerTextColor" value="#ffffff" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
                 </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🖼️ Banner Image (Optional)</label>
+                    <input type="text" id="bannerImageUrl" class="admin-form-input" placeholder="Image URL (https://...)" style="margin-bottom:6px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <label for="bannerImageFile" class="admin-btn admin-btn-secondary" style="padding:6px 12px;cursor:pointer;font-size:11px;margin:0;">📁 Upload File</label>
+                        <input type="file" id="bannerImageFile" accept="image/*" style="display:none;" onchange="previewBannerImage(this)">
+                        <span id="bannerImageFileName" style="font-size:10px;color:#71717a;"></span>
+                    </div>
+                    <div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;padding:6px 10px;font-size:10px;color:#71717a;margin-bottom:8px;">
+                        📐 Recommended size: <b style="color:#f59e0b;">1200×300px</b> (Desktop) | <b style="color:#f59e0b;">800×200px</b> (Mobile) — Max 500KB
+                    </div>
+                    <div id="bannerImagePreview" style="display:none;margin-top:6px;border-radius:8px;overflow:hidden;border:1px solid #2a2a35;">
+                        <img id="bannerPreviewImg" style="width:100%;height:auto;max-height:120px;object-fit:cover;display:block;" alt="Preview">
+                        <div style="padding:4px 8px;background:#1a1a24;font-size:10px;color:#71717a;display:flex;justify-content:space-between;align-items:center;">
+                            <span id="bannerImageDimensions"></span>
+                            <button onclick="removeBannerImage()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
                 <div style="display:flex;gap:16px;margin-bottom:12px;">
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowDesktop" checked style="accent-color:#f59e0b;"> 🖥️ Desktop</label>
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowMobile" checked style="accent-color:#f59e0b;"> 📱 Mobile</label>
@@ -2461,6 +2483,81 @@ input[type="color"] {
             <div id="bannerList">
                 <div style="color:#71717a;font-size:11px;text-align:center;padding:20px;">No banners yet</div>
             </div>
+        </div>
+        </div>
+
+        <!-- ═══ MAINTENANCE MODE ═══ -->
+        <div id="section-maintenance" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🔧 Maintenance Mode</div>
+            </div>
+            <div class="admin-toggle-wrap">
+                <span class="admin-toggle-label">Enable Maintenance</span>
+                <div class="admin-toggle" id="maintenanceToggle" onclick="this.classList.toggle('active');toggleMaintenance();"></div>
+            </div>
+            <p style="font-size:11px;color:#71717a;margin-top:8px;">ON karne pe sirf admin access kar payega.</p>
+            <textarea id="maintenanceMsg" rows="2" class="admin-form-input" placeholder="Maintenance message..." style="resize:vertical;margin-top:8px;"></textarea>
+            <button class="admin-btn admin-btn-danger" onclick="saveMaintenanceMsg()" style="width:100%;margin-top:8px;">💾 Save Message</button>
+            <div id="maintenanceStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+        </div>
+
+        <!-- ═══ CHANGE PASSWORD ═══ -->
+        <div id="section-changePass" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🔐 Change Password</div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">New Password</label>
+                <input type="password" id="newAdminPassword" class="admin-form-input" placeholder="New password">
+            </div>
+            <div class="admin-form-group" style="margin-bottom:0;">
+                <label class="admin-form-label">Confirm Password</label>
+                <input type="password" id="confirmAdminPassword" class="admin-form-input" placeholder="Confirm password">
+            </div>
+            <button class="admin-btn admin-btn-warning" onclick="changeAdminPassword()" style="width:100%;margin-top:10px;">🔒 Update Password</button>
+            <div id="changepwStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+        </div>
+
+        <!-- ═══ API KEYS ═══ -->
+        <div id="section-apiKeys" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🔑 API Keys</div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">📈 Upstox API Key</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="password" id="settingsUpstoxKey" class="admin-form-input" placeholder="Upstox API Key" style="flex:1;">
+                    <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsUpstoxKey', this)" style="padding:8px 12px;">👁️</button>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">🔐 Upstox Access Token</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="password" id="settingsUpstoxToken" class="admin-form-input" placeholder="Upstox Access Token" style="flex:1;">
+                    <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsUpstoxToken', this)" style="padding:8px 12px;">👁️</button>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">✈️ Telegram Bot Token</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="password" id="settingsTelegramToken" class="admin-form-input" placeholder="Bot Token" style="flex:1;">
+                    <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsTelegramToken', this)" style="padding:8px 12px;">👁️</button>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">💬 Telegram Chat ID</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="password" id="settingsTelegramChatId" class="admin-form-input" placeholder="Chat ID" style="flex:1;">
+                    <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsTelegramChatId', this)" style="padding:8px 12px;">👁️</button>
+                </div>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveApiKeys()" style="width:100%;margin-top:8px;">💾 Save API Keys</button>
+            <div id="apiKeyStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
         </div>
 
@@ -2561,75 +2658,6 @@ input[type="color"] {
           <div id="broadcastStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
 
-        <!-- Maintenance Mode -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🔧 Maintenance Mode</div>
-          </div>
-          <div class="admin-toggle-wrap">
-            <span class="admin-toggle-label">Enable Maintenance</span>
-            <div class="admin-toggle" id="maintenanceToggle" onclick="this.classList.toggle('active');toggleMaintenance();"></div>
-          </div>
-          <p style="font-size:11px;color:#71717a;margin-top:8px;">ON karne pe sirf admin access kar payega.</p>
-          <textarea id="maintenanceMsg" rows="2" class="admin-form-input" placeholder="Maintenance message..." style="resize:vertical;margin-top:8px;"></textarea>
-          <button class="admin-btn admin-btn-danger" onclick="saveMaintenanceMsg()" style="width:100%;margin-top:8px;">💾 Save Message</button>
-          <div id="maintenanceStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
-        </div>
-
-        <!-- Change Password -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🔐 Change Password</div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">New Password</label>
-            <input type="password" id="newAdminPassword" class="admin-form-input" placeholder="New password">
-          </div>
-          <div class="admin-form-group" style="margin-bottom:0;">
-            <label class="admin-form-label">Confirm Password</label>
-            <input type="password" id="confirmAdminPassword" class="admin-form-input" placeholder="Confirm password">
-          </div>
-          <button class="admin-btn admin-btn-warning" onclick="changeAdminPassword()" style="width:100%;margin-top:10px;">🔒 Update Password</button>
-          <div id="changepwStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
-        </div>
-
-        <!-- API Keys -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🔑 API Keys</div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">📈 Upstox API Key</label>
-            <div style="display:flex;gap:6px;">
-              <input type="password" id="settingsUpstoxKey" class="admin-form-input" placeholder="Upstox API Key" style="flex:1;">
-              <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsUpstoxKey', this)" style="padding:8px 12px;white-space:nowrap;">👁️</button>
-            </div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">🔐 Upstox Access Token</label>
-            <div style="display:flex;gap:6px;">
-              <input type="password" id="settingsUpstoxToken" class="admin-form-input" placeholder="Upstox Access Token" style="flex:1;">
-              <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsUpstoxToken', this)" style="padding:8px 12px;white-space:nowrap;">👁️</button>
-            </div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">✈️ Telegram Bot Token</label>
-            <div style="display:flex;gap:6px;">
-              <input type="password" id="settingsTelegramToken" class="admin-form-input" placeholder="Bot Token" style="flex:1;">
-              <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsTelegramToken', this)" style="padding:8px 12px;white-space:nowrap;">👁️</button>
-            </div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">💬 Telegram Chat ID</label>
-            <div style="display:flex;gap:6px;">
-              <input type="password" id="settingsTelegramChatId" class="admin-form-input" placeholder="Chat ID" style="flex:1;">
-              <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsTelegramChatId', this)" style="padding:8px 12px;white-space:nowrap;">👁️</button>
-            </div>
-          </div>
-          <button class="admin-btn admin-btn-primary" onclick="saveApiKeys()" style="width:100%;margin-top:8px;">💾 Save API Keys</button>
-          <div id="apiKeyStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
-        </div>
-
         <!-- Scheduled Messages -->
         <div class="admin-card">
           <div class="admin-card-header">
@@ -2711,13 +2739,14 @@ input[type="color"] {
 
     <!-- HOLIDAY FESTIVAL BANNER -->
     <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
+        <img id="holidayBannerImg" style="display:none; width:100%; height:auto; max-height:200px; object-fit:cover;" alt="Banner">
         <div id="holidayBannerInner" style="padding:16px 20px; display:flex; align-items:center; gap:14px;">
             <div id="holidayBannerEmoji" style="font-size:36px; flex-shrink:0;">🎊</div>
             <div style="flex:1; min-width:0;">
                 <div id="holidayBannerTitle" style="font-size:14px; font-weight:800; letter-spacing:0.5px;"></div>
                 <div id="holidayBannerMsg" style="font-size:11px; opacity:0.9; margin-top:3px;"></div>
             </div>
-            <button onclick="dismissHolidayBanner()" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
+            <button onclick="dismissHolidayBanner(this.dataset.bannerId)" data-banner-id="" id="holidayBannerDismissBtn" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
         </div>
     </div>
 
@@ -3155,6 +3184,8 @@ function showAdminSection(section, navEl) {
         document.getElementById('section-dashboard').style.display = 'block';
     }
     if (section === 'holidayBanners') loadBanners();
+    if (section === 'maintenance') loadMaintenanceStatus();
+    if (section === 'apiKeys') loadApiKeys();
 }
 
 async function loadAdminData() {
@@ -4734,7 +4765,7 @@ function renderBannerList() {
             : b.active ? '<span style="font-size:9px;background:#22c55e;color:#000;padding:2px 6px;border-radius:4px;">Live</span>'
             : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 6px;border-radius:4px;">Off</span>';
         return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:8px;">' +
-            '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎊</div>' +
+            '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + (b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : '🎊') + '</div>' +
             '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + '</div>' +
             '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + '</div>' +
@@ -4762,13 +4793,42 @@ function toggleBannerForm() {
         document.getElementById('bannerTextColor').value = '#ffffff';
         document.getElementById('bannerShowDesktop').checked = true;
         document.getElementById('bannerShowMobile').checked = true;
+        removeBannerImage();
     }
 }
 
-function cancelBannerForm() { document.getElementById('bannerFormWrap').style.display = 'none'; }
+function cancelBannerForm() { document.getElementById('bannerFormWrap').style.display = 'none'; document.getElementById('bannerImagePreview').style.display = 'none'; document.getElementById('bannerImageUrl').value = ''; document.getElementById('bannerImageFile').value = ''; document.getElementById('bannerImageFileName').textContent = ''; }
+
+function previewBannerImage(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 500 * 1024) { customAlert('Image max 500KB honi chahiye!', '⚠️'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('bannerPreviewImg').src = e.target.result;
+        document.getElementById('bannerImagePreview').style.display = 'block';
+        document.getElementById('bannerImageFileName').textContent = file.name;
+        document.getElementById('bannerImageUrl').value = '';
+        const img = new Image();
+        img.onload = function() { document.getElementById('bannerImageDimensions').textContent = this.width + '×' + this.height + 'px | ' + Math.round(file.size/1024) + 'KB'; };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeBannerImage() {
+    document.getElementById('bannerImagePreview').style.display = 'none';
+    document.getElementById('bannerPreviewImg').src = '';
+    document.getElementById('bannerImageUrl').value = '';
+    document.getElementById('bannerImageFile').value = '';
+    document.getElementById('bannerImageFileName').textContent = '';
+}
 
 async function saveBanner() {
     const editId = document.getElementById('bannerEditId').value;
+    const imageUrlVal = document.getElementById('bannerImageUrl').value.trim();
+    const previewImg = document.getElementById('bannerPreviewImg').src;
+    const hasUpload = document.getElementById('bannerImagePreview').style.display !== 'none' && previewImg && !previewImg.endsWith('/');
     const body = {
         title: document.getElementById('bannerTitle').value.trim(),
         message: document.getElementById('bannerMessage').value.trim(),
@@ -4776,6 +4836,7 @@ async function saveBanner() {
         endDate: document.getElementById('bannerEndDate').value,
         bgColor: document.getElementById('bannerBgColor').value,
         textColor: document.getElementById('bannerTextColor').value,
+        imageUrl: hasUpload ? previewImg : (imageUrlVal || ''),
         showOnDesktop: document.getElementById('bannerShowDesktop').checked,
         showOnMobile: document.getElementById('bannerShowMobile').checked
     };
@@ -4804,6 +4865,22 @@ function editBanner(id) {
     document.getElementById('bannerTextColor').value = b.textColor || '#ffffff';
     document.getElementById('bannerShowDesktop').checked = b.showOnDesktop !== false;
     document.getElementById('bannerShowMobile').checked = b.showOnMobile !== false;
+    if (b.imageUrl) {
+        document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
+        if (b.imageUrl.startsWith('data:')) {
+            document.getElementById('bannerPreviewImg').src = b.imageUrl;
+            document.getElementById('bannerImagePreview').style.display = 'block';
+            const img = new Image();
+            img.onload = function() { document.getElementById('bannerImageDimensions').textContent = this.width + '×' + this.height + 'px (uploaded)'; };
+            img.src = b.imageUrl;
+        } else {
+            document.getElementById('bannerImagePreview').style.display = 'none';
+            removeBannerImage();
+            document.getElementById('bannerImageUrl').value = b.imageUrl;
+        }
+    } else {
+        removeBannerImage();
+    }
 }
 
 async function toggleBannerActive(id, active) {
@@ -4828,17 +4905,26 @@ async function loadHolidayBanners() {
         wrap.style.display = 'block';
         wrap.style.background = banner.bgColor || '#ff6b35';
         wrap.style.color = banner.textColor || '#ffffff';
+        const bannerImg = document.getElementById('holidayBannerImg');
+        if (banner.imageUrl) {
+            bannerImg.src = banner.imageUrl;
+            bannerImg.style.display = 'block';
+        } else {
+            bannerImg.style.display = 'none';
+            bannerImg.src = '';
+        }
         document.getElementById('holidayBannerTitle').textContent = banner.title;
         document.getElementById('holidayBannerMsg').textContent = banner.message || '';
+        document.getElementById('holidayBannerDismissBtn').dataset.bannerId = banner.id;
     } catch (e) { document.getElementById('holidayBannerWrap').style.display = 'none'; }
 }
 
-function dismissHolidayBanner() {
+function dismissHolidayBanner(bannerId) {
     const wrap = document.getElementById('holidayBannerWrap');
     wrap.style.transition = 'all 0.3s ease';
     wrap.style.maxHeight = '0'; wrap.style.opacity = '0'; wrap.style.margin = '0';
     setTimeout(() => { wrap.style.display = 'none'; }, 300);
-    try { sessionStorage.setItem('hbanner_dismissed_current', '1'); } catch(e) {}
+    try { sessionStorage.setItem('hbanner_dismissed_' + (bannerId || 'current'), '1'); } catch(e) {}
 }
 
 /* ── MARKET STATUS ── */
