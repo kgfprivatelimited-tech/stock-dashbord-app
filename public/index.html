@@ -1925,6 +1925,20 @@ input[type="color"] {
     background: rgba(255, 255, 255, 0.03);
 }
 
+/* ═══════ HOLIDAY BANNER ═══════ */
+#holidayBannerWrap { animation: bannerSlideIn 0.5s ease-out; }
+@keyframes bannerSlideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 600px) {
+    #holidayBannerWrap { margin: 6px 8px; border-radius: 10px; }
+    #holidayBannerInner { padding: 12px 14px; gap: 10px; }
+    #holidayBannerEmoji { font-size: 28px; }
+    #holidayBannerTitle { font-size: 12px; }
+    #holidayBannerMsg { font-size: 10px; }
+}
+
 /* ═══════ RESPONSIVE ═══════ */
 @media (max-width: 900px) {
     /* Admin mobile rules are now in the main mobile responsive section */
@@ -2022,6 +2036,7 @@ input[type="color"] {
       <div class="admin-nav-label">Settings</div>
       <div class="admin-nav-item" onclick="showAdminSection('disclaimer', this)">⚙️ Disclaimer</div>
       <div class="admin-nav-item" onclick="showAdminSection('dashSettings', this)">🎛️ Dashboard Settings</div>
+      <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
     </div>
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
@@ -2410,6 +2425,45 @@ input[type="color"] {
         </div>
         </div>
 
+        <!-- ═══ HOLIDAY BANNERS SECTION ═══ -->
+        <div id="section-holidayBanners" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🎉 Holiday/Festival Banners</div>
+                <button class="admin-btn admin-btn-primary" onclick="toggleBannerForm()">+ New Banner</button>
+            </div>
+            <p style="color:#71717a;font-size:11px;margin-bottom:12px;">Dashboard pe festival banners dikhao — Diwali, Holi etc.</p>
+            <div id="bannerFormWrap" style="display:none; padding:16px; background:#1a1a24; border:1px solid #2a2a35; border-radius:10px; margin-bottom:16px;">
+                <div id="bannerFormTitle" style="font-size:13px;font-weight:600;color:#f59e0b;margin-bottom:12px;">Create New Banner</div>
+                <input type="hidden" id="bannerEditId" value="">
+                <div class="admin-form-row">
+                    <div class="admin-form-group"><label class="admin-form-label">Title</label><input type="text" id="bannerTitle" class="admin-form-input" placeholder="Happy Diwali 🪔"></div>
+                    <div class="admin-form-group"><label class="admin-form-label">Message</label><input type="text" id="bannerMessage" class="admin-form-input" placeholder="Wishing you prosperity!"></div>
+                </div>
+                <div class="admin-form-row">
+                    <div class="admin-form-group"><label class="admin-form-label">Start Date</label><input type="date" id="bannerStartDate" class="admin-form-input"></div>
+                    <div class="admin-form-group"><label class="admin-form-label">End Date</label><input type="date" id="bannerEndDate" class="admin-form-input"></div>
+                </div>
+                <div class="admin-form-row">
+                    <div class="admin-form-group"><label class="admin-form-label">Background Color</label><input type="color" id="bannerBgColor" value="#ff6b35" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
+                    <div class="admin-form-group"><label class="admin-form-label">Text Color</label><input type="color" id="bannerTextColor" value="#ffffff" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
+                </div>
+                <div style="display:flex;gap:16px;margin-bottom:12px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowDesktop" checked style="accent-color:#f59e0b;"> 🖥️ Desktop</label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowMobile" checked style="accent-color:#f59e0b;"> 📱 Mobile</label>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="admin-btn admin-btn-primary" onclick="saveBanner()" style="flex:1;">💾 Save</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="cancelBannerForm()" style="flex:1;">✖ Cancel</button>
+                </div>
+                <div id="bannerFormStatus" style="font-size:11px;text-align:center;margin-top:8px;"></div>
+            </div>
+            <div id="bannerList">
+                <div style="color:#71717a;font-size:11px;text-align:center;padding:20px;">No banners yet</div>
+            </div>
+        </div>
+        </div>
+
       </div><!-- /admin-left-panel -->
 
       <!-- ═══ RIGHT SIDEBAR ═══ -->
@@ -2655,6 +2709,18 @@ input[type="color"] {
     </div>
     <hr class="divider" data-section="indices">
 
+    <!-- HOLIDAY FESTIVAL BANNER -->
+    <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
+        <div id="holidayBannerInner" style="padding:16px 20px; display:flex; align-items:center; gap:14px;">
+            <div id="holidayBannerEmoji" style="font-size:36px; flex-shrink:0;">🎊</div>
+            <div style="flex:1; min-width:0;">
+                <div id="holidayBannerTitle" style="font-size:14px; font-weight:800; letter-spacing:0.5px;"></div>
+                <div id="holidayBannerMsg" style="font-size:11px; opacity:0.9; margin-top:3px;"></div>
+            </div>
+            <button onclick="dismissHolidayBanner()" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
+        </div>
+    </div>
+
     <!-- USER MESSAGE BANNER (from admin) -->
     <div class="user-message-banner" id="userMessageBanner" style="display: none;">
         <div class="msg-banner-glow"></div>
@@ -2734,11 +2800,14 @@ input[type="color"] {
                         <th>Entry</th>
                         <th>Target</th>
                         <th>SL</th>
+                        <th>Strategy</th>
+                        <th>Conf.</th>
+                        <th>RSI</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="signals-body">
-                    <tr><td colspan="6" style="color:#333;padding:20px;text-align:center;">Loading signals...</td></tr>
+                    <tr><td colspan="9" style="color:#333;padding:20px;text-align:center;">Loading signals...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -3085,6 +3154,7 @@ function showAdminSection(section, navEl) {
     if (section === 'dashboard') {
         document.getElementById('section-dashboard').style.display = 'block';
     }
+    if (section === 'holidayBanners') loadBanners();
 }
 
 async function loadAdminData() {
@@ -3109,6 +3179,7 @@ async function loadAdminData() {
             loadReminderList();
             loadDashSettings();
             loadApiKeys();
+            loadBanners();
         }
     } catch (e) {
         customAlert('Failed to load users: ' + e.message, '❌');
@@ -4549,6 +4620,7 @@ function loadAll() {
     loadFNOAll();
     loadSignals();
     loadDashboardStockTips();
+    loadHolidayBanners();
 }
 
 // ═══════ DASHBOARD SETTINGS ═══════
@@ -4638,6 +4710,135 @@ async function saveDashboardSettings() {
     } catch (e) {
         status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>';
     }
+}
+
+/* ═══════ HOLIDAY BANNER FUNCTIONS ═══════ */
+let allBanners = [];
+
+async function loadBanners() {
+    try {
+        const r = await fetch(API + '/api/admin/banners', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (r.success) { allBanners = r.banners; renderBannerList(); }
+    } catch (e) {}
+}
+
+function renderBannerList() {
+    const container = document.getElementById('bannerList');
+    if (!allBanners.length) { container.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:20px;">No banners yet. Click "+ New Banner"</div>'; return; }
+    const now = new Date().toISOString().split('T')[0];
+    container.innerHTML = allBanners.map(b => {
+        const isExpired = b.endDate && now > b.endDate;
+        const isFuture = b.startDate && now < b.startDate;
+        const statusBadge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;">Expired</span>'
+            : isFuture ? '<span style="font-size:9px;background:#eab308;color:#000;padding:2px 6px;border-radius:4px;">Scheduled</span>'
+            : b.active ? '<span style="font-size:9px;background:#22c55e;color:#000;padding:2px 6px;border-radius:4px;">Live</span>'
+            : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 6px;border-radius:4px;">Off</span>';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:8px;">' +
+            '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎊</div>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + '</div>' +
+            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + '</div>' +
+            '</div>' +
+            '<div class="admin-action-btns">' +
+            '<button class="admin-action-btn" onclick="editBanner(\'' + b.id + '\')">✏️</button>' +
+            '<button class="admin-action-btn" onclick="toggleBannerActive(\'' + b.id + '\',' + (!b.active) + ')">' + (b.active?'👁':'🚫') + '</button>' +
+            '<button class="admin-action-btn delete" onclick="deleteBanner(\'' + b.id + '\')">🗑️</button>' +
+            '</div></div>';
+    }).join('');
+}
+
+function toggleBannerForm() {
+    const wrap = document.getElementById('bannerFormWrap');
+    const isOpen = wrap.style.display !== 'none';
+    wrap.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+        document.getElementById('bannerFormTitle').textContent = 'Create New Banner';
+        document.getElementById('bannerEditId').value = '';
+        document.getElementById('bannerTitle').value = '';
+        document.getElementById('bannerMessage').value = '';
+        document.getElementById('bannerStartDate').value = '';
+        document.getElementById('bannerEndDate').value = '';
+        document.getElementById('bannerBgColor').value = '#ff6b35';
+        document.getElementById('bannerTextColor').value = '#ffffff';
+        document.getElementById('bannerShowDesktop').checked = true;
+        document.getElementById('bannerShowMobile').checked = true;
+    }
+}
+
+function cancelBannerForm() { document.getElementById('bannerFormWrap').style.display = 'none'; }
+
+async function saveBanner() {
+    const editId = document.getElementById('bannerEditId').value;
+    const body = {
+        title: document.getElementById('bannerTitle').value.trim(),
+        message: document.getElementById('bannerMessage').value.trim(),
+        startDate: document.getElementById('bannerStartDate').value,
+        endDate: document.getElementById('bannerEndDate').value,
+        bgColor: document.getElementById('bannerBgColor').value,
+        textColor: document.getElementById('bannerTextColor').value,
+        showOnDesktop: document.getElementById('bannerShowDesktop').checked,
+        showOnMobile: document.getElementById('bannerShowMobile').checked
+    };
+    const status = document.getElementById('bannerFormStatus');
+    if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
+    if (!body.startDate || !body.endDate) { status.innerHTML = '<span style="color:#ef4444;">Dates required</span>'; return; }
+    try {
+        const url = editId ? API + '/api/admin/banners/' + editId : API + '/api/admin/banners';
+        const r = await fetch(url, { method: editId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify(body) }).then(r => r.json());
+        if (r.success) { status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; cancelBannerForm(); loadBanners(); }
+        else { status.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
+    } catch (e) { status.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+function editBanner(id) {
+    const b = allBanners.find(x => x.id === id);
+    if (!b) return;
+    document.getElementById('bannerFormWrap').style.display = 'block';
+    document.getElementById('bannerFormTitle').textContent = 'Edit: ' + b.title;
+    document.getElementById('bannerEditId').value = b.id;
+    document.getElementById('bannerTitle').value = b.title;
+    document.getElementById('bannerMessage').value = b.message || '';
+    document.getElementById('bannerStartDate').value = b.startDate || '';
+    document.getElementById('bannerEndDate').value = b.endDate || '';
+    document.getElementById('bannerBgColor').value = b.bgColor || '#ff6b35';
+    document.getElementById('bannerTextColor').value = b.textColor || '#ffffff';
+    document.getElementById('bannerShowDesktop').checked = b.showOnDesktop !== false;
+    document.getElementById('bannerShowMobile').checked = b.showOnMobile !== false;
+}
+
+async function toggleBannerActive(id, active) {
+    await fetch(API + '/api/admin/banners/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify({ active }) });
+    loadBanners();
+}
+
+async function deleteBanner(id) {
+    if (!await customConfirm('Delete this banner?', '🗑️', 'Delete')) return;
+    await fetch(API + '/api/admin/banners/' + id, { method: 'DELETE', headers: { 'admin-key': ADMIN_KEY } });
+    loadBanners();
+}
+
+async function loadHolidayBanners() {
+    try {
+        const isMobile = window.innerWidth <= 600 || /Mobi|Android/i.test(navigator.userAgent);
+        const r = await fetch(API + '/api/banners?device=' + (isMobile ? 'mobile' : 'desktop')).then(r => r.json());
+        const wrap = document.getElementById('holidayBannerWrap');
+        if (!r.success || !r.banners || !r.banners.length) { wrap.style.display = 'none'; return; }
+        const banner = r.banners[0];
+        if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+        wrap.style.background = banner.bgColor || '#ff6b35';
+        wrap.style.color = banner.textColor || '#ffffff';
+        document.getElementById('holidayBannerTitle').textContent = banner.title;
+        document.getElementById('holidayBannerMsg').textContent = banner.message || '';
+    } catch (e) { document.getElementById('holidayBannerWrap').style.display = 'none'; }
+}
+
+function dismissHolidayBanner() {
+    const wrap = document.getElementById('holidayBannerWrap');
+    wrap.style.transition = 'all 0.3s ease';
+    wrap.style.maxHeight = '0'; wrap.style.opacity = '0'; wrap.style.margin = '0';
+    setTimeout(() => { wrap.style.display = 'none'; }, 300);
+    try { sessionStorage.setItem('hbanner_dismissed_current', '1'); } catch(e) {}
 }
 
 /* ── MARKET STATUS ── */
@@ -4781,18 +4982,28 @@ async function loadSignals() {
         if (data.error) { handleAuthError(data); return; }
         if (!data || !data.length) {
             document.getElementById("signals-body").innerHTML =
-                '<tr><td colspan="6" style="color:#555;padding:20px;text-align:center;">No live data — Market Closed</td></tr>';
+                '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">Analyzing market data... Signals appear once enough data is collected.</td></tr>';
             return;
         }
-        document.getElementById("signals-body").innerHTML = data.map(d => 
-            '<tr>' +
-            '<td class="sym-cell">' + d.symbol + '</td>' +
-            '<td><span class="badge ' + d.signal.toLowerCase() + '">' + d.signal + '</span></td>' +
-            '<td class="' + cls(d.signal === 'BUY' ? 1 : -1) + '">' + fmt2(d.entry) + '</td>' +
-            '<td class="tgt">' + fmt2(d.target) + '</td>' +
-            '<td class="sl-val">' + fmt2(d.sl) + '</td>' +
-            '<td><span class="badge ' + (d.status === 'TARGET DONE' ? 'buy' : d.status === 'SL HIT' ? 'sell' : 'neutral') + '">' + d.status + '</span></td></tr>'
-        ).join("");
+        document.getElementById("signals-body").innerHTML = data.map(d => {
+            const confColor = d.confidence >= 70 ? '#00c853' : d.confidence >= 50 ? '#ffab00' : '#888';
+            const rsiVal = d.rsi ? parseFloat(d.rsi) : null;
+            let rsiHtml = '<span style="color:#555;">--</span>';
+            if (rsiVal !== null) {
+                const rsiColor = rsiVal < 30 ? '#00c853' : rsiVal > 70 ? '#ff1744' : '#ffab00';
+                rsiHtml = '<span style="color:' + rsiColor + ';font-weight:700;">' + rsiVal + '</span>';
+            }
+            return '<tr>' +
+                '<td class="sym-cell">' + d.symbol + '</td>' +
+                '<td><span class="badge ' + d.signal.toLowerCase() + '">' + d.signal + '</span></td>' +
+                '<td class="' + cls(d.signal === 'BUY' ? 1 : -1) + '">' + fmt2(d.entry) + '</td>' +
+                '<td class="tgt">' + fmt2(d.target) + '</td>' +
+                '<td class="sl-val">' + fmt2(d.sl) + '</td>' +
+                '<td style="font-size:10px;color:#888;">' + (d.strategy || '-') + '</td>' +
+                '<td><span style="color:' + confColor + ';font-weight:700;font-family:JetBrains Mono,monospace;">' + (d.confidence || '--') + '%</span></td>' +
+                '<td>' + rsiHtml + '</td>' +
+                '<td><span class="badge ' + (d.status === 'TARGET DONE' ? 'buy' : d.status === 'SL HIT' ? 'sell' : 'neutral') + '">' + d.status + '</span></td></tr>';
+        }).join("");
     } catch (e) { console.error('Signals error:', e); }
 }
 

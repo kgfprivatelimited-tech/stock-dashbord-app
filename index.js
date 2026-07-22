@@ -120,7 +120,8 @@ const DEFAULT_SETTINGS = {
     upstoxApiKey: '',
     upstoxAccessToken: '',
     telegramBotToken: '',
-    telegramChatId: ''
+    telegramChatId: '',
+    holidayBanners: []
 };
 if (!fs.existsSync(SETTINGS_FILE)) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
@@ -1098,6 +1099,150 @@ let marketCache = loadMarketCache();
 const INDICES_CACHE_TTL = 3000;   // 3 seconds (background refreshes every 2s)
 const STOCKS_CACHE_TTL = 15000;   // 15 seconds (background refreshes every 10s)
 
+// ========================================
+// REAL-TIME SIGNAL ENGINE
+// Price history buffer for EMA/RSI calculations
+// ========================================
+const SIGNAL_HISTORY_FILE = path.join(__dirname, 'signalhistory.json');
+const SIGNAL_HISTORY_MAX = 200;
+
+let signalHistory = {};
+
+function loadSignalHistory() {
+    try {
+        if (fs.existsSync(SIGNAL_HISTORY_FILE)) {
+            signalHistory = JSON.parse(fs.readFileSync(SIGNAL_HISTORY_FILE, 'utf8'));
+            console.log('📁 Signal history loaded for', Object.keys(signalHistory).length, 'stocks');
+        }
+    } catch (e) { signalHistory = {}; }
+}
+
+function saveSignalHistory() {
+    try { fs.writeFileSync(SIGNAL_HISTORY_FILE, JSON.stringify(signalHistory)); } catch (e) {}
+}
+
+function appendToHistory(symbol, ltp, volume) {
+    if (!signalHistory[symbol]) signalHistory[symbol] = [];
+    signalHistory[symbol].push({ ltp, volume: volume || 0, ts: Date.now() });
+    if (signalHistory[symbol].length > SIGNAL_HISTORY_MAX) {
+        signalHistory[symbol] = signalHistory[symbol].slice(-SIGNAL_HISTORY_MAX);
+    }
+}
+
+loadSignalHistory();
+
+function computeEMA(prices, period) {
+    if (!prices || prices.length < period) return null;
+    const k = 2 / (period + 1);
+    let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    for (let i = period; i < prices.length; i++) {
+        ema = prices[i] * k + ema * (1 - k);
+    }
+    return ema;
+}
+
+function computeRSI(prices, period) {
+    if (!prices || prices.length < period + 1) return null;
+    let gains = 0, losses = 0;
+    for (let i = prices.length - period; i < prices.length; i++) {
+        const diff = prices[i] - prices[i - 1];
+        if (diff > 0) gains += diff;
+        else losses += Math.abs(diff);
+    }
+    if (losses === 0) return 100;
+    return 100 - (100 / (1 + gains / losses));
+}
+
+function computeMomentum(prices, lookback) {
+    if (!prices || prices.length < lookback + 1) return null;
+    const past = prices[prices.length - 1 - lookback];
+    return past ? ((prices[prices.length - 1] - past) / past) * 100 : null;
+}
+
+function computeVolumeTrend(volumes) {
+    if (!volumes || volumes.length < 10) return 0;
+    const recent = volumes.slice(-5);
+    const older = volumes.slice(-10, -5);
+    const avgRecent = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const avgOlder = older.reduce((a, b) => a + b, 0) / older.length;
+    return avgOlder ? ((avgRecent - avgOlder) / avgOlder) * 100 : 0;
+}
+
+function generateSignal(symbol, stockData, history) {
+    if (!stockData || stockData.ltp <= 0) return null;
+    const ltp = stockData.ltp;
+    const pct = stockData.pct || 0;
+
+    if (!history || history.length < 5) {
+        if (Math.abs(pct) < 0.3) return null;
+        return {
+            symbol, signal: pct > 0 ? 'BUY' : 'SELL', entry: ltp,
+            target: pct > 0 ? parseFloat((ltp * 1.02).toFixed(2)) : parseFloat((ltp * 0.98).toFixed(2)),
+            sl: pct > 0 ? parseFloat((ltp * 0.99).toFixed(2)) : parseFloat((ltp * 1.01).toFixed(2)),
+            strategy: 'Momentum', confidence: Math.min(Math.abs(pct) * 20, 100).toFixed(0),
+            time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }),
+            status: 'ACTIVE', rsi: null, ema9: null, ema21: null
+        };
+    }
+
+    const prices = history.map(h => h.ltp);
+    const volumes = history.map(h => h.volume);
+    const ema9 = computeEMA(prices, Math.min(9, prices.length));
+    const ema21 = computeEMA(prices, Math.min(21, prices.length));
+    const rsi = computeRSI(prices, Math.min(14, prices.length - 1));
+    const momentum = computeMomentum(prices, Math.min(10, prices.length - 1));
+    const volTrend = computeVolumeTrend(volumes);
+
+    let buyScore = 0, sellScore = 0, reasons = [];
+
+    if (ema9 !== null && ema21 !== null) {
+        if (ema9 > ema21) { buyScore += 30; reasons.push('EMA9>EMA21'); }
+        else { sellScore += 30; reasons.push('EMA9<EMA21'); }
+    }
+    if (rsi !== null) {
+        if (rsi < 30) { buyScore += 25; reasons.push('RSI Oversold(' + rsi.toFixed(0) + ')'); }
+        else if (rsi > 70) { sellScore += 25; reasons.push('RSI Overbought(' + rsi.toFixed(0) + ')'); }
+        else if (rsi < 45) { buyScore += 10; reasons.push('RSI Low(' + rsi.toFixed(0) + ')'); }
+        else if (rsi > 55) { sellScore += 10; reasons.push('RSI High(' + rsi.toFixed(0) + ')'); }
+    }
+    if (momentum !== null) {
+        if (momentum > 0.5) { buyScore += 20; reasons.push('Positive Momentum'); }
+        else if (momentum < -0.5) { sellScore += 20; reasons.push('Negative Momentum'); }
+    }
+    if (ema9 !== null) {
+        if (ltp > ema9) { buyScore += 15; reasons.push('Price>EMA9'); }
+        else { sellScore += 15; reasons.push('Price<EMA9'); }
+    }
+    if (volTrend > 20) {
+        if (buyScore > sellScore) buyScore += 10;
+        else sellScore += 10;
+        reasons.push('Volume Rising');
+    }
+
+    const totalScore = Math.max(buyScore, sellScore);
+    if (totalScore < 35) return null;
+
+    const isBuy = buyScore > sellScore;
+    const recentPrices = prices.slice(-20);
+    const volatility = Math.max(...recentPrices) - Math.min(...recentPrices);
+    const targetDist = volatility * 0.5 || ltp * 0.02;
+    const slDist = volatility * 0.3 || ltp * 0.01;
+
+    return {
+        symbol, signal: isBuy ? 'BUY' : 'SELL', entry: ltp,
+        target: isBuy ? parseFloat((ltp + targetDist).toFixed(2)) : parseFloat((ltp - targetDist).toFixed(2)),
+        sl: isBuy ? parseFloat((ltp - slDist).toFixed(2)) : parseFloat((ltp + slDist).toFixed(2)),
+        strategy: ema9 !== null && ema21 !== null ? 'EMA Crossover' : 'Momentum',
+        confidence: Math.min(totalScore, 95).toFixed(0),
+        reasons: reasons.join(', '),
+        time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }),
+        status: 'ACTIVE',
+        rsi: rsi ? rsi.toFixed(1) : null,
+        ema9: ema9 ? parseFloat(ema9.toFixed(2)) : null,
+        ema21: ema21 ? parseFloat(ema21.toFixed(2)) : null
+    };
+}
+
 // Check if market is open (NSE timing: 9:15 AM - 3:30 PM IST)
 function isMarketOpen() {
     const now = new Date();
@@ -1470,33 +1615,22 @@ app.get('/api/fno-all', checkUserAuth, async (req, res) => {
 
 app.get('/api/signals', checkUserAuth, async (req, res) => {
     const signals = [];
-    const allStocks = [...TOP_GAINERS, ...TOP_LOSERS, ...FO_STOCKS].slice(0, 15);
-    
-    // Try to use live stock data for signals
-    const liveData = await fetchStockQuote(allStocks);
-    
+    const allStocks = [...new Set([...TOP_GAINERS, ...TOP_LOSERS, ...FO_STOCKS])];
+    const liveData = marketCache.stocks.data || {};
+
     allStocks.forEach(sym => {
-        let ltp = 0;
-        if (liveData && liveData[sym]) {
-            ltp = liveData[sym].ltp;
-        }
-        if (ltp <= 0) return;
-        
-        const isBuy = Math.random() > 0.5;
-        const target = isBuy ? parseFloat((ltp * 1.04).toFixed(2)) : parseFloat((ltp * 0.96).toFixed(2));
-        const sl = isBuy ? parseFloat((ltp * 0.97).toFixed(2)) : parseFloat((ltp * 1.03).toFixed(2));
-        
-        signals.push({
-            symbol: sym,
-            signal: isBuy ? 'BUY' : 'SELL',
-            entry: ltp,
-            target: target,
-            sl: sl,
-            status: 'ACTIVE',
-            time: moment().format('HH:mm')
-        });
+        if (!liveData[sym] || liveData[sym].ltp <= 0) return;
+        const history = signalHistory[sym] || [];
+        const signal = generateSignal(sym, liveData[sym], history);
+        if (signal) signals.push(signal);
     });
-    
+
+    signals.sort((a, b) => {
+        if (a.signal === 'BUY' && b.signal !== 'BUY') return -1;
+        if (a.signal !== 'BUY' && b.signal === 'BUY') return 1;
+        return (b.confidence || 0) - (a.confidence || 0);
+    });
+
     res.json(signals);
 });
 
@@ -1887,14 +2021,104 @@ async function refreshStocksBackground() {
         const result = await fetchStockQuote(allSymbols);
         if (result && Object.keys(result).length > 0) {
             marketCache.stocks = { data: result, timestamp: Date.now(), symbols: allSymbols.sort().join(',') };
+            Object.entries(result).forEach(([sym, data]) => {
+                if (data.ltp > 0) appendToHistory(sym, data.ltp, data.volume || 0);
+            });
         }
     } catch (e) {}
 }
+
+// ========================================
+// HOLIDAY/FESTIVAL BANNERS
+// ========================================
+
+app.get('/api/banners', (req, res) => {
+    try {
+        const settings = loadSettings();
+        const banners = settings.holidayBanners || [];
+        const now = new Date().toISOString().split('T')[0];
+        const deviceType = req.query.device || 'desktop';
+        const active = banners.filter(b => {
+            if (!b.active) return false;
+            if (b.startDate && now < b.startDate) return false;
+            if (b.endDate && now > b.endDate) return false;
+            if (deviceType === 'desktop' && !b.showOnDesktop) return false;
+            if (deviceType === 'mobile' && !b.showOnMobile) return false;
+            return true;
+        });
+        res.json({ success: true, banners: active });
+    } catch (e) { res.json({ success: true, banners: [] }); }
+});
+
+app.get('/api/admin/banners', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        res.json({ success: true, banners: settings.holidayBanners || [] });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.post('/api/admin/banners', checkAdmin, (req, res) => {
+    try {
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile } = req.body;
+        if (!title || !startDate || !endDate) {
+            return res.json({ success: false, message: 'Title, start date, and end date required' });
+        }
+        const settings = loadSettings();
+        if (!settings.holidayBanners) settings.holidayBanners = [];
+        const banner = {
+            id: 'banner_' + Date.now(),
+            title: title.trim(),
+            message: (message || '').trim(),
+            bgColor: bgColor || '#ff6b35',
+            textColor: textColor || '#ffffff',
+            imageUrl: imageUrl || '',
+            startDate, endDate,
+            showOnDesktop: showOnDesktop !== false,
+            showOnMobile: showOnMobile !== false,
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+        settings.holidayBanners.push(banner);
+        saveSettings(settings);
+        res.json({ success: true, message: 'Banner created!', banner });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const banner = (settings.holidayBanners || []).find(b => b.id === req.params.id);
+        if (!banner) return res.json({ success: false, message: 'Banner not found' });
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active } = req.body;
+        if (title !== undefined) banner.title = title.trim();
+        if (message !== undefined) banner.message = message.trim();
+        if (bgColor !== undefined) banner.bgColor = bgColor;
+        if (textColor !== undefined) banner.textColor = textColor;
+        if (imageUrl !== undefined) banner.imageUrl = imageUrl;
+        if (startDate !== undefined) banner.startDate = startDate;
+        if (endDate !== undefined) banner.endDate = endDate;
+        if (showOnDesktop !== undefined) banner.showOnDesktop = showOnDesktop;
+        if (showOnMobile !== undefined) banner.showOnMobile = showOnMobile;
+        if (active !== undefined) banner.active = active;
+        saveSettings(settings);
+        res.json({ success: true, message: 'Banner updated!' });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.delete('/api/admin/banners/:id', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.holidayBanners = (settings.holidayBanners || []).filter(b => b.id !== req.params.id);
+        saveSettings(settings);
+        res.json({ success: true, message: 'Banner deleted' });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
 
 // Start background refreshers
 updateIndexKeys(); // Load selected indices from settings first
 setInterval(refreshIndicesBackground, 2000);
 setInterval(refreshStocksBackground, 10000);
+setInterval(saveSignalHistory, 60000);
 // Initial refresh
 setTimeout(refreshIndicesBackground, 1000);
 setTimeout(refreshStocksBackground, 2000);
