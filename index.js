@@ -207,11 +207,38 @@ function saveStockTips(data) {
 
 function loadUsers() {
     try {
-        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+        if (!data.users || data.users.length === 0) {
+            data.users = [createDefaultAdmin()];
+            saveUsers(data);
+        }
+        return data;
     } catch (e) {
-        console.error('❌ Error reading users.json:', e.message);
-        return { users: [] };
+        console.log('📁 Creating default users.json with admin user...');
+        const defaultData = { users: [createDefaultAdmin()] };
+        saveUsers(defaultData);
+        return defaultData;
     }
+}
+
+function createDefaultAdmin() {
+    const bcrypt = require('bcryptjs');
+    return {
+        id: 'usr_admin_' + Date.now(),
+        name: 'Admin',
+        email: 'admin@bearfighter.com',
+        phone: '0000000000',
+        category: 'diamond',
+        status: 'active',
+        amount: 0,
+        paymentMethod: 'UPI',
+        paymentDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        password: bcrypt.hashSync(loadSettings().adminPassword || 'bearfighter@admin', 10),
+        isOwner: true,
+        message: '',
+        msgColor: '#22c55e'
+    };
 }
 
 function saveUsers(data) {
@@ -1167,17 +1194,22 @@ async function fetchUpstoxLTP(instrumentKeys) {
     }
 }
 
-// Fetch stock data using V2 API with symbol format
+// Fetch stock data using V3 API with ISIN keys
 async function fetchStockQuoteV2(symbols) {
-    if (!UPSTOX_ACCESS_TOKEN) return null;
+    const s = loadSettings();
+    const apiKey = s.upstoxApiKey || UPSTOX_API_KEY;
+    const accessToken = s.upstoxAccessToken || UPSTOX_ACCESS_TOKEN;
+    if (!apiKey || !accessToken) return null;
     
     try {
-        const symbolParam = symbols.map(s => s + ':NSE').join(',');
-        const url = 'https://api.upstox.com/v2/market-quote/quotes?symbol=' + symbolParam;
+        const isinKeys = symbols.map(s => STOCK_ISIN_KEYS[s]).filter(k => k);
+        if (isinKeys.length === 0) return null;
+        const url = 'https://api.upstox.com/v3/market-quote/ltp?instrument_key=' + isinKeys.join(',');
         const response = await axios.get(url, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer ' + UPSTOX_ACCESS_TOKEN
+                'Authorization': 'Bearer ' + accessToken,
+                'X-API-Key': apiKey
             },
             timeout: 15000
         });
@@ -1186,7 +1218,7 @@ async function fetchStockQuoteV2(symbols) {
             const result = {};
             Object.keys(response.data.data).forEach(key => {
                 const q = response.data.data[key];
-                const symbol = key.replace(':NSE', '').replace('NSE_EQ:', '');
+                const symbol = ISIN_TO_SYMBOL[key] || key.split(/[:|]/).pop();
                 if (symbols.includes(symbol)) {
                     const ltp = q.last_price || q.ltp || 0;
                     const cp = q.cp || q.close_price || ltp;
