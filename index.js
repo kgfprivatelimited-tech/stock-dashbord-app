@@ -9,6 +9,7 @@ const fs = require('fs');
 const moment = require('moment-timezone');
 const axios = require('axios');
 const compression = require('compression');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const app = express();
@@ -483,7 +484,7 @@ function checkMaintenance(req, res, next) {
 // ========================================
 app.post('/api/login', async (req, res) => {
     try {
-        const { username, password, location } = req.body;
+        const { username, password, location, device, platform, userAgent } = req.body;
         
         console.log('🔐 Login attempt:', username);
         
@@ -522,8 +523,19 @@ app.post('/api/login', async (req, res) => {
             return res.json({ success: false, message: 'Subscription expired. Contact admin.', blocked: true });
         }
         
-        // Simple password check
-        if (user.password !== password) {
+        // Password check (support both bcrypt and legacy plain text)
+        let pwMatch = false;
+        if (user.password.startsWith('$2')) {
+            pwMatch = bcrypt.compareSync(password, user.password);
+        } else {
+            pwMatch = user.password === password;
+            if (pwMatch) {
+                user.password = bcrypt.hashSync(password, 10);
+                saveUsers(data);
+                console.log('🔄 Migrated plain text password to bcrypt for:', username);
+            }
+        }
+        if (!pwMatch) {
             console.log('❌ Wrong password for:', username);
             logLogin(username, false);
             return res.json({ success: false, message: 'Invalid password' });
@@ -532,12 +544,15 @@ app.post('/api/login', async (req, res) => {
         console.log('✅ Login successful:', username);
         logLogin(username, true);
         
-        // Update last login and location
+        // Update last login, location, and device
         user.lastLogin = new Date().toISOString();
         if (location) {
             user.lastLocation = location;
             user.lastLocationTime = new Date().toISOString();
         }
+        if (device) user.lastDevice = device;
+        if (platform) user.lastPlatform = platform;
+        if (userAgent) user.lastUserAgent = userAgent;
         saveUsers(data);
         
         res.json({ 
@@ -589,6 +604,57 @@ app.get('/api/me', (req, res) => {
 });
 
 // ========================================
+// USER PASSWORD CHANGE (with admin approval)
+// ========================================
+app.post('/api/me/change-password', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.json({ success: false, message: 'All fields required' });
+    if (newPassword.length < 4) return res.json({ success: false, message: 'Min 4 characters' });
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    if (!bcrypt.compareSync(currentPassword, user.password)) {
+        return res.json({ success: false, message: 'Current password is wrong' });
+    }
+    user.pendingNewPassword = bcrypt.hashSync(newPassword, 10);
+    user.passwordChangeRequestedAt = new Date().toISOString();
+    user.passwordApproved = false;
+    saveUsers(data);
+    addActivity('Password Change Requested', user.username);
+    res.json({ success: true, message: 'Password change request sent. Awaiting admin approval.' });
+});
+
+// Admin: list pending password changes
+app.get('/api/admin/pending-password-changes', checkAdmin, (req, res) => {
+    const data = loadUsers();
+    const pending = data.users.filter(u => u.pendingNewPassword && !u.passwordApproved)
+        .map(u => ({ id: u.id, username: u.username, requestedAt: u.passwordChangeRequestedAt }));
+    res.json({ success: true, pending });
+});
+
+// Admin: approve/reject password change
+app.post('/api/admin/approve-password', checkAdmin, (req, res) => {
+    const { userId, approve } = req.body;
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    if (!user.pendingNewPassword) return res.json({ success: false, message: 'No pending request' });
+    if (approve) {
+        user.password = user.pendingNewPassword;
+        addActivity('Password Approved', user.username);
+    } else {
+        addActivity('Password Change Rejected', user.username);
+    }
+    delete user.pendingNewPassword;
+    delete user.passwordChangeRequestedAt;
+    delete user.passwordApproved;
+    saveUsers(data);
+    res.json({ success: true, message: approve ? 'Password approved and updated' : 'Password change rejected' });
+});
+
+// ========================================
 // ADMIN ROUTES
 // ========================================
 let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bearfighter@admin';
@@ -625,6 +691,9 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         lastLogin: u.lastLogin,
         lastLocation: u.lastLocation || null,
         lastLocationTime: u.lastLocationTime || null,
+        lastDevice: u.lastDevice || '',
+        lastPlatform: u.lastPlatform || '',
+        lastUserAgent: u.lastUserAgent || '',
         createdAt: u.createdAt,
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
@@ -657,7 +726,7 @@ app.post('/api/admin/approve', checkAdmin, (req, res) => {
             id: generateUserId(),
             username: username,
             email: email,
-            password: password,
+            password: bcrypt.hashSync(password, 10),
             fullName: fullName,
             approved: true,
             category: category || 'Silver',

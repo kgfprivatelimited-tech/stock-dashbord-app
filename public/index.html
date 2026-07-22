@@ -2015,13 +2015,28 @@ input[type="color"] {
       <div id="adminMktStatus" style="font-size:10px;text-align:center;margin-top:4px;"></div>
     </div>
     <div class="admin-nav-section">
-      <div class="admin-nav-label">Overview</div>
-      <div class="admin-nav-item active" onclick="showAdminSection('dashboard', this)">📊 Dashboard</div>
+      <div class="admin-nav-label">Dashboard</div>
+      <div class="admin-nav-item active" onclick="showAdminSection('dashboard', this)">📊 Overview</div>
     </div>
     <div class="admin-nav-section">
       <div class="admin-nav-label">Users</div>
       <div class="admin-nav-item" onclick="showAdminSection('createUser', this)">➕ Create User</div>
       <div class="admin-nav-item" onclick="showAdminSection('allUsers', this)">👥 All Users</div>
+    </div>
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Sent Messages</div>
+      <div class="admin-nav-item" onclick="showAdminSection('broadcast', this)">📢 Broadcast</div>
+      <div class="admin-nav-item" onclick="showAdminSection('scheduled', this)">⏰ Scheduled</div>
+      <div class="admin-nav-item" onclick="showAdminSection('reminders', this)">💳 Reminders</div>
+      <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
+    </div>
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Settings</div>
+      <div class="admin-nav-item" onclick="showAdminSection('dashSettings', this)">🎛️ Dashboard Settings</div>
+      <div class="admin-nav-item" onclick="showAdminSection('disclaimer', this)">⚙️ Disclaimer</div>
+      <div class="admin-nav-item" onclick="showAdminSection('maintenance', this)">🔧 Maintenance Mode</div>
+      <div class="admin-nav-item" onclick="showAdminSection('changePass', this)">🔐 Change Password</div>
+      <div class="admin-nav-item" onclick="showAdminSection('apiKeys', this)">🔑 API Keys</div>
     </div>
     <div class="admin-nav-section">
       <div class="admin-nav-label">Analytics</div>
@@ -2031,21 +2046,6 @@ input[type="color"] {
       <div class="admin-nav-label">Activity</div>
       <div class="admin-nav-item" onclick="showAdminSection('activity', this)">🕐 Recent Activity</div>
       <div class="admin-nav-item" onclick="showAdminSection('loginHist', this)">🔑 Login History</div>
-    </div>
-    <div class="admin-nav-section">
-      <div class="admin-nav-label">Settings</div>
-      <div class="admin-nav-item" onclick="showAdminSection('disclaimer', this)">⚙️ Disclaimer</div>
-      <div class="admin-nav-item" onclick="showAdminSection('dashSettings', this)">🎛️ Dashboard Settings</div>
-      <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
-      <div class="admin-nav-item" onclick="showAdminSection('maintenance', this)">🔧 Maintenance Mode</div>
-      <div class="admin-nav-item" onclick="showAdminSection('changePass', this)">🔐 Change Password</div>
-      <div class="admin-nav-item" onclick="showAdminSection('apiKeys', this)">🔑 API Keys</div>
-    </div>
-    <div class="admin-nav-section">
-      <div class="admin-nav-label">Sent Messages</div>
-      <div class="admin-nav-item" onclick="showAdminSection('broadcast', this)">📢 Broadcast</div>
-      <div class="admin-nav-item" onclick="showAdminSection('scheduled', this)">⏰ Scheduled</div>
-      <div class="admin-nav-item" onclick="showAdminSection('reminders', this)">💳 Reminders</div>
     </div>
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
@@ -2155,6 +2155,16 @@ input[type="color"] {
           </div>
           <div id="activityFeed">
             <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No activity yet</div>
+          </div>
+        </div>
+
+        <!-- Pending Password Changes -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">🔑 Pending Password Changes</div>
+          </div>
+          <div id="pendingPasswordList">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No pending requests</div>
           </div>
         </div>
 
@@ -2283,6 +2293,10 @@ input[type="color"] {
             <div style="font-size:12px;color:#22c55e;font-weight:700;margin-bottom:6px;">📍 Last Known Location</div>
             <a id="locationLink" href="#" target="_blank" style="font-size:11px;color:#3b82f6;text-decoration:none;">View on Google Maps</a>
             <div id="locationTime" style="font-size:10px;color:#71717a;margin-top:4px;"></div>
+          </div>
+          <div id="userDeviceDisplay" style="display:none;margin-top:8px;padding:10px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:8px;">
+            <div style="font-size:12px;color:#3b82f6;font-weight:700;margin-bottom:4px;">📱 Device Info</div>
+            <div id="userDeviceInfo" style="font-size:11px;color:#aaa;"></div>
           </div>
           <div style="margin-top:14px;padding:14px;background:rgba(245,158,11,0.06);border:1px solid #2a2a35;border-radius:8px;">
             <div style="font-size:13px;color:#f59e0b;font-weight:700;margin-bottom:10px;">📢 Message & Highlight</div>
@@ -2454,6 +2468,18 @@ input[type="color"] {
                     <div class="admin-form-group"><label class="admin-form-label">Message</label><input type="text" id="bannerMessage" class="admin-form-input" placeholder="Wishing you prosperity!"></div>
                 </div>
                 <div class="admin-form-row">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">📝 Title Settings</label>
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowTitle" checked style="accent-color:#f59e0b;"> Show Title</label>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Title Color</label><input type="color" id="bannerTitleColor" value="#ffffff" style="width:100%;height:30px;border:none;border-radius:4px;cursor:pointer;"></div>
+                            <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Title Size (px)</label><input type="number" id="bannerTitleSize" value="22" min="10" max="48" class="admin-form-input" style="height:30px;padding:4px 6px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-form-row">
                     <div class="admin-form-group"><label class="admin-form-label">Start Date</label><input type="date" id="bannerStartDate" class="admin-form-input"></div>
                     <div class="admin-form-group"><label class="admin-form-label">End Date</label><input type="date" id="bannerEndDate" class="admin-form-input"></div>
                 </div>
@@ -2466,7 +2492,7 @@ input[type="color"] {
                     <input type="text" id="bannerImageUrl" class="admin-form-input" placeholder="Image URL (https://...)" style="margin-bottom:6px;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
                         <label for="bannerImageFile" class="admin-btn admin-btn-secondary" style="padding:6px 12px;cursor:pointer;font-size:11px;margin:0;">📁 Upload File</label>
-                        <input type="file" id="bannerImageFile" accept="image/*" style="display:none;" onchange="previewBannerImage(this)">
+                        <input type="file" id="bannerImageFile" accept="image/*,image/gif,image/webp" style="display:none;" onchange="previewBannerImage(this)">
                         <span id="bannerImageFileName" style="font-size:10px;color:#71717a;"></span>
                     </div>
                     <div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;padding:6px 10px;font-size:10px;color:#71717a;margin-bottom:8px;">
@@ -2639,6 +2665,22 @@ input[type="color"] {
             <div class="admin-card-title">⏰ Scheduled Messages</div>
           </div>
           <p style="font-size:10px;color:#71717a;margin-bottom:8px;">Future mein message schedule karo.</p>
+          <div class="admin-form-group">
+            <label class="admin-form-label">👤 Select Users</label>
+            <div style="max-height:120px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:6px;">
+              <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;margin-bottom:4px;">
+                <input type="checkbox" id="schedAllUsers" onchange="toggleSchedAllUsers()" style="accent-color:#f59e0b;"> All Users
+              </label>
+              <div id="schedUserList"></div>
+            </div>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">📤 Send Via</label>
+            <div style="display:flex;gap:12px;">
+              <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="schedSendTelegram" style="accent-color:#0088cc;"> ✈️ Telegram</label>
+              <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="schedSendWhatsApp" style="accent-color:#25d366;"> 💬 WhatsApp</label>
+            </div>
+          </div>
           <textarea id="schedMessage" rows="2" class="admin-form-input" placeholder="Message..." style="resize:vertical;margin-bottom:6px;"></textarea>
           <input type="datetime-local" id="schedTime" class="admin-form-input" style="margin-bottom:8px;">
           <button class="admin-btn admin-btn-info" onclick="scheduleMessage()" style="width:100%;margin-bottom:8px;">⏰ Schedule</button>
@@ -2882,6 +2924,27 @@ input[type="color"] {
     </div>
 </div>
 
+    <!-- USER PASSWORD CHANGE -->
+    <div class="section" id="userChangePassSection" style="margin-bottom:20px;">
+        <div class="section-title">🔐 Change Password</div>
+        <div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px;max-width:400px;">
+            <div class="admin-form-group">
+                <label class="admin-form-label">Current Password</label>
+                <input type="password" id="userCurrentPass" class="admin-form-input" placeholder="Current password">
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">New Password</label>
+                <input type="password" id="userNewPass" class="admin-form-input" placeholder="New password (min 4 chars)">
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Confirm New Password</label>
+                <input type="password" id="userConfirmPass" class="admin-form-input" placeholder="Confirm new password">
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="userChangePassword()" style="width:100%;">🔒 Update Password</button>
+            <div id="userPassStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+    </div>
+
 <script>
 const API = '';
 let currentUser = null;
@@ -2933,11 +2996,22 @@ async function doLogin() {
     
     btn.textContent = 'LOGGING IN...';
     
+    // Capture device info
+    const ua = navigator.userAgent;
+    let device = 'Unknown';
+    if (/Mobi|Android/i.test(ua)) {
+        const mMatch = ua.match(/\(([^)]+)\)/);
+        device = mMatch ? mMatch[1].split(';')[0].trim() : 'Mobile';
+    } else if (/Windows/i.test(ua)) device = 'Windows PC';
+    else if (/Macintosh|Mac OS/i.test(ua)) device = 'Mac';
+    else if (/Linux/i.test(ua)) device = 'Linux PC';
+    const platform = navigator.platform || 'Unknown';
+
     try {
         const r = await fetch(API + '/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, location: userLocation })
+            body: JSON.stringify({ username, password, location: userLocation, device, platform, userAgent: ua })
         }).then(r => r.json());
         
         if (r.success) {
@@ -2966,6 +3040,33 @@ async function doLogin() {
     }
 }
 
+// User Password Change
+async function userChangePassword() {
+    const currentPass = document.getElementById('userCurrentPass').value;
+    const newPass = document.getElementById('userNewPass').value;
+    const confirmPass = document.getElementById('userConfirmPass').value;
+    const status = document.getElementById('userPassStatus');
+    if (!currentPass || !newPass) { status.innerHTML = '<span style="color:#ef4444;">All fields required</span>'; return; }
+    if (newPass.length < 4) { status.innerHTML = '<span style="color:#ef4444;">Min 4 characters</span>'; return; }
+    if (newPass !== confirmPass) { status.innerHTML = '<span style="color:#ef4444;">Passwords don\'t match</span>'; return; }
+    status.innerHTML = '<span style="color:#ffab00;">⏳ Updating...</span>';
+    try {
+        const r = await fetch(API + '/api/me/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass })
+        }).then(r => r.json());
+        if (r.success) {
+            status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
+            document.getElementById('userCurrentPass').value = '';
+            document.getElementById('userNewPass').value = '';
+            document.getElementById('userConfirmPass').value = '';
+        } else {
+            status.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>';
+        }
+    } catch (e) { status.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
 // Logout
 function doLogout() {
     stopAutoRefresh(); // Stop auto-refresh when logging out
@@ -2983,11 +3084,18 @@ function doLogout() {
 async function checkSession() {
     const userId = sessionStorage.getItem('userId');
     
-    // Show admin screen if on /admin path
-    if (window.location.pathname === '/admin') {
+    // Show admin screen if on /admin path or admin session persisted
+    if (window.location.pathname === '/admin' || localStorage.getItem('bf_admin') === '1') {
+        isAdmin = true;
         document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('adminLoginScreen').classList.add('show');
-        document.getElementById('adminPassword').focus();
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminLoginScreen').classList.remove('show');
+        loadAdminData();
+        loadDisclaimerSettings();
+        loadApiKeys();
+        updateAdminSidebarClock();
+        if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
         return;
     }
     
@@ -3222,6 +3330,7 @@ async function adminLogin() {
     }
     
     isAdmin = true;
+    localStorage.setItem('bf_admin', '1');
     document.getElementById('adminLoginScreen').classList.remove('show');
     document.getElementById('adminPassword').value = '';
     document.getElementById('loginScreen').style.display = 'none';
@@ -3236,6 +3345,7 @@ async function adminLogin() {
 
 function adminLogout() {
     isAdmin = false;
+    localStorage.removeItem('bf_admin');
     document.getElementById('adminLoginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
@@ -3263,19 +3373,17 @@ function updateAdminSidebarClock() {
 }
 
 function showAdminSection(section, navEl) {
-    document.querySelectorAll('.admin-left-panel > div[id^="section-"]').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('[id^="section-"]').forEach(el => { if (el.id !== 'section-dashboard') el.style.display = 'none'; });
+    document.getElementById('section-dashboard').style.display = 'none';
     const target = document.getElementById('section-' + section);
     if (target) target.style.display = 'block';
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
     if (navEl) navEl.classList.add('active');
-    if (section === 'dashboard') {
-        document.getElementById('section-dashboard').style.display = 'block';
-    }
     if (section === 'holidayBanners') loadBanners();
     if (section === 'maintenance') loadMaintenanceStatus();
     if (section === 'apiKeys') loadApiKeys();
     if (section === 'broadcast') renderBroadcastUsers();
-    if (section === 'scheduled') loadScheduledMessages();
+    if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
     if (section === 'reminders') loadReminderList();
 }
 
@@ -3302,10 +3410,44 @@ async function loadAdminData() {
             loadDashSettings();
             loadApiKeys();
             loadBanners();
+            loadPendingPasswords();
         }
     } catch (e) {
         customAlert('Failed to load users: ' + e.message, '❌');
     }
+}
+
+async function loadPendingPasswords() {
+    try {
+        const r = await fetch(API + '/api/admin/pending-password-changes', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const div = document.getElementById('pendingPasswordList');
+        if (!r.success || r.pending.length === 0) {
+            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No pending requests</div>';
+            return;
+        }
+        div.innerHTML = r.pending.map(p => {
+            const t = p.requestedAt ? new Date(p.requestedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">
+                <div><span style="color:#f59e0b;font-weight:600;font-size:12px;">${p.username}</span><br><span style="font-size:10px;color:#71717a;">${t}</span></div>
+                <div style="display:flex;gap:6px;">
+                    <button class="admin-btn admin-btn-primary" style="padding:4px 10px;font-size:10px;" onclick="approvePassword('${p.id}', true)">✅ Approve</button>
+                    <button class="admin-btn admin-btn-danger" style="padding:4px 10px;font-size:10px;" onclick="approvePassword('${p.id}', false)">❌ Reject</button>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) {}
+}
+
+async function approvePassword(userId, approve) {
+    try {
+        const r = await fetch(API + '/api/admin/approve-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ userId, approve })
+        }).then(r => r.json());
+        if (r.success) customAlert(r.message, approve ? '✅' : '❌');
+        loadPendingPasswords();
+    } catch (e) {}
 }
 
 function refreshAdminData() {
@@ -3658,24 +3800,51 @@ async function loadTipPerformance() {
 }
 
 // ═══════ 8. SCHEDULED MESSAGES ═══════
-async function scheduleMessage(allUsers) {
+function toggleSchedAllUsers() {
+    const all = document.getElementById('schedAllUsers').checked;
+    document.querySelectorAll('#schedUserList input[type="checkbox"]').forEach(cb => cb.checked = all);
+}
+
+function populateSchedUsers() {
+    fetch(API + '/api/admin/users', { headers: { 'admin-key': ADMIN_KEY } })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return;
+            document.getElementById('schedUserList').innerHTML = data.users.map(u =>
+                `<label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;margin-bottom:3px;">
+                    <input type="checkbox" class="sched-user-cb" data-username="${u.username}" style="accent-color:#f59e0b;"> ${u.username} (${u.category})
+                </label>`
+            ).join('');
+        }).catch(() => {});
+}
+
+async function scheduleMessage() {
     const msg = document.getElementById('schedMessage').value.trim();
     const time = document.getElementById('schedTime').value;
     const status = document.getElementById('schedStatus');
     if (!msg) { status.innerHTML = '<span style="color:#ff1744;">Message required</span>'; return; }
     if (!time) { status.innerHTML = '<span style="color:#ff1744;">Schedule time required</span>'; return; }
-    const usernames = allUsers === 'all' ? [] : [];
+    const allChecked = document.getElementById('schedAllUsers').checked;
+    const usernames = allChecked ? [] : Array.from(document.querySelectorAll('#schedUserList .sched-user-cb:checked')).map(cb => cb.dataset.username);
+    if (!allChecked && usernames.length === 0) { status.innerHTML = '<span style="color:#ff1744;">Select at least one user</span>'; return; }
+    const sendTelegram = document.getElementById('schedSendTelegram').checked;
+    const sendWhatsApp = document.getElementById('schedSendWhatsApp').checked;
     status.innerHTML = '<span style="color:#ffab00;">Scheduling...</span>';
     try {
         const r = await fetch(API + '/api/admin/schedule-message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ usernames, message: msg, scheduledAt: time })
+            body: JSON.stringify({ usernames, message: msg, scheduledAt: time, sendTelegram, sendWhatsApp })
         }).then(r => r.json());
         if (r.success) {
             status.innerHTML = '<span style="color:#00c853;">✅ Scheduled!</span>';
             document.getElementById('schedMessage').value = '';
+            document.getElementById('schedTime').value = '';
+            document.getElementById('schedAllUsers').checked = false;
+            document.querySelectorAll('#schedUserList .sched-user-cb').forEach(cb => cb.checked = false);
             loadScheduledMessages();
+        } else {
+            status.innerHTML = '<span style="color:#ff1744;">❌ ' + (r.message || 'Error') + '</span>';
         }
     } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Error</span>'; }
 }
@@ -3803,9 +3972,9 @@ window.renderUsers = function(users) {
             <div class="admin-user-cell">
                 <div class="admin-user-avatar">${initials}</div>
                 <div>
-                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}</div>
+                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
                     <div class="admin-user-detail" style="font-size:10px;color:#71717a;">${u.fullName || ''} | ${u.email || ''}</div>
-                    <div class="admin-user-detail" style="font-size:9px;color:#555;">${phone !== '-' ? '📱 ' + phone : ''}</div>
+                    <div class="admin-user-detail" style="font-size:9px;color:#555;">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
                 </div>
             </div>
             <div><span class="admin-badge ${catBadgeClass[cat] || 'admin-badge-silver'}">${cat}</span></div>
@@ -4195,6 +4364,20 @@ async function editUser(username) {
         }
     } else {
         locDiv.style.display = 'none';
+    }
+    
+    // Show device info
+    const devDiv = document.getElementById('userDeviceDisplay');
+    const devInfo = document.getElementById('userDeviceInfo');
+    if (user.lastDevice || user.lastPlatform) {
+        devDiv.style.display = 'block';
+        let info = '';
+        if (user.lastDevice) info += `<b>Device:</b> ${user.lastDevice}`;
+        if (user.lastPlatform) info += ` &nbsp;|&nbsp; <b>Platform:</b> ${user.lastPlatform}`;
+        if (user.lastUserAgent) info += `<br><b>UA:</b> <span style="font-size:9px;word-break:break-all;">${user.lastUserAgent.substring(0, 120)}...</span>`;
+        devInfo.innerHTML = info;
+    } else {
+        devDiv.style.display = 'none';
     }
     
     document.getElementById('editMsg').textContent = '';
@@ -4941,7 +5124,10 @@ async function saveBanner() {
         imageUrl: hasUpload ? previewImg : (imageUrlVal || ''),
         showOnDesktop: document.getElementById('bannerShowDesktop').checked,
         showOnMobile: document.getElementById('bannerShowMobile').checked,
-        position: document.getElementById('bannerPosition').value || 'afterIndices'
+        position: document.getElementById('bannerPosition').value || 'afterIndices',
+        showTitle: document.getElementById('bannerShowTitle').checked,
+        titleColor: document.getElementById('bannerTitleColor').value || '#ffffff',
+        titleSize: parseInt(document.getElementById('bannerTitleSize').value) || 22
     };
     const status = document.getElementById('bannerFormStatus');
     if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
@@ -4949,7 +5135,7 @@ async function saveBanner() {
     try {
         const url = editId ? API + '/api/admin/banners/' + editId : API + '/api/admin/banners';
         const r = await fetch(url, { method: editId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify(body) }).then(r => r.json());
-        if (r.success) { status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; cancelBannerForm(); loadBanners(); }
+        if (r.success) { status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; cancelBannerForm(); loadBanners(); loadHolidayBanners(); }
         else { status.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
     } catch (e) { status.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
 }
@@ -4969,6 +5155,9 @@ function editBanner(id) {
     document.getElementById('bannerShowDesktop').checked = b.showOnDesktop !== false;
     document.getElementById('bannerShowMobile').checked = b.showOnMobile !== false;
     document.getElementById('bannerPosition').value = b.position || 'afterIndices';
+    document.getElementById('bannerShowTitle').checked = b.showTitle !== false;
+    document.getElementById('bannerTitleColor').value = b.titleColor || '#ffffff';
+    document.getElementById('bannerTitleSize').value = b.titleSize || 22;
     if (b.imageUrl) {
         document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
         if (b.imageUrl.startsWith('data:')) {
@@ -5022,7 +5211,12 @@ async function loadHolidayBanners() {
         }
         const titleEl = document.getElementById('holidayBannerTitle');
         const msgEl = document.getElementById('holidayBannerMsg');
-        if (titleEl) titleEl.textContent = banner.title;
+        if (titleEl) {
+            titleEl.textContent = banner.title;
+            titleEl.style.display = banner.showTitle === false ? 'none' : 'block';
+            titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
+            titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+        }
         if (msgEl) msgEl.textContent = banner.message || '';
         const dismissBtn = document.getElementById('holidayBannerDismissBtn');
         if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
