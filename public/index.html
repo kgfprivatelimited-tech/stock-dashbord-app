@@ -708,7 +708,7 @@ header {
 }
 .admin-card:hover { border-color: rgba(245, 158, 11, 0.3); }
 .admin-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.admin-card-title { font-size: 15px; font-weight: 600; color: #fff; }
+.admin-card-title { font-size: 13px; font-weight: 600; color: #fff; }
 
 /* Admin Stats Grid - 5 cols */
 .admin-stats-grid {
@@ -795,8 +795,8 @@ header {
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 600; color: #fff;
 }
-.admin-user-name { font-weight: 500; color: #fff; font-size: 13px; }
-.admin-user-detail { font-size: 11px; color: #71717a; }
+.admin-user-name { font-weight: 500; color: #fff; font-size: 11px; }
+.admin-user-detail { font-size: 10px; color: #71717a; }
 
 /* Admin Badges */
 .admin-badge {
@@ -821,15 +821,15 @@ header {
 
 /* Admin Forms */
 .admin-form-group { margin-bottom: 16px; }
-.admin-form-label { display: block; font-size: 12px; color: #71717a; margin-bottom: 6px; font-weight: 500; }
+.admin-form-label { display: block; font-size: 11px; color: #71717a; margin-bottom: 4px; font-weight: 500; }
 .admin-form-input {
     width: 100%;
     background: #1a1a24;
     border: 1px solid #2a2a35;
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 8px 12px;
     color: #e4e4e7;
-    font-size: 13px;
+    font-size: 12px;
     font-family: inherit;
 }
 .admin-form-input:focus { outline: none; border-color: #f59e0b; }
@@ -2259,21 +2259,24 @@ input[type="color"] {
             <div class="admin-card-title">✏️ Edit User: <span id="editUsernameLabel"></span></div>
           </div>
           <!-- ═══ USER INFO PANEL ═══ -->
-          <div id="editUserInfoPanel" style="background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:14px;margin-bottom:14px;">
-            <div style="font-size:13px;color:#f59e0b;font-weight:700;margin-bottom:10px;">📋 User Info</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;">
-              <div><span style="color:#71717a;">👤 Username:</span> <span id="infoUsername" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📛 Full Name:</span> <span id="infoFullName" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📧 Email:</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">🔑 Password:</span> <span id="infoPassword" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📱 WhatsApp:</span> <span id="infoWhatsApp" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">✈️ Telegram:</span> <span id="infoTelegram" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">💳 Amount:</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">💰 Method:</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📅 Created:</span> <span id="infoCreated" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">⏰ Last Login:</span> <span id="infoLastLogin" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">🖥️ Device:</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📡 Platform:</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
+          <div id="editUserInfoPanel" style="background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:11px;color:#f59e0b;font-weight:700;margin-bottom:8px;">📋 User Info</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:10px;line-height:1.6;">
+              <div><span style="color:#71717a;">👤</span> <span id="infoUsername" style="color:#e4e4e7;font-weight:600;"></span></div>
+              <div><span style="color:#71717a;">📛</span> <span id="infoFullName" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📧</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">🔑</span> <span id="infoPassword" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">🏷️</span> <span id="infoCategory" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📅</span> <span id="infoExpiry" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">💳</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">💰</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📱</span> <span id="infoWhatsApp" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">✈️</span> <span id="infoTelegram" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">⏰</span> <span id="infoLastLogin" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📅</span> <span id="infoCreated" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">🖥️</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📡</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
+              <div style="grid-column:1/2;"><span style="color:#71717a;">📍</span> <span id="infoLocation" style="color:#e4e4e7;"></span></div>
             </div>
           </div>
           <!-- ═══ FORM ═══ -->
@@ -2502,6 +2505,10 @@ input[type="color"] {
                 <div class="admin-form-row">
                     <div class="admin-form-group">
                         <label class="admin-form-label">💬 Message Settings</label>
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+                            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="bannerShowMessage" checked style="accent-color:#f59e0b;"> Show Message</label>
+                            <div style="display:flex;align-items:center;gap:4px;"><label style="font-size:10px;color:#71717a;">Emoji:</label><input type="text" id="bannerEmoji" value="🎊" style="width:40px;height:28px;text-align:center;font-size:18px;background:#0f0f1a;border:1px solid #2a2a35;border-radius:4px;cursor:pointer;" maxlength="4" placeholder="🎊"></div>
+                        </div>
                         <div style="display:flex;gap:8px;">
                             <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Message Color</label><input type="color" id="bannerMsgColor" value="#ffffff" style="width:100%;height:30px;border:none;border-radius:4px;cursor:pointer;"></div>
                             <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Message Size (px)</label><input type="number" id="bannerMsgSize" value="13" min="8" max="24" class="admin-form-input" style="height:30px;padding:4px 6px;"></div>
@@ -4380,15 +4387,25 @@ async function editUser(username) {
     document.getElementById('infoUsername').textContent = user.username;
     document.getElementById('infoFullName').textContent = user.fullName || '-';
     document.getElementById('infoEmail').textContent = user.email || '-';
-    document.getElementById('infoPassword').innerHTML = '<span style="color:#22c55e;">✓ Set</span> <button onclick="resetUserPassword(\'' + user.username + '\')" style="background:none;border:none;color:#f59e0b;cursor:pointer;font-size:10px;padding:0;text-decoration:underline;">Reset</button>';
-    document.getElementById('infoWhatsApp').textContent = user.whatsappNumber || '-';
-    document.getElementById('infoTelegram').textContent = user.telegramChatId || '-';
+    document.getElementById('infoPassword').innerHTML = '<span style="color:#ef4444;">●●●●●●</span> <button onclick="resetUserPassword(\'' + user.username + '\')" style="background:none;border:none;color:#f59e0b;cursor:pointer;font-size:9px;padding:0;text-decoration:underline;">Reset</button>';
+    document.getElementById('infoCategory').textContent = user.category || 'Silver';
+    const expDate = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+    const daysL = user.daysLeft > 0 ? user.daysLeft : 0;
+    document.getElementById('infoExpiry').innerHTML = expDate + (daysL > 0 ? ' <span style="color:#22c55e;">(' + daysL + 'd)</span>' : ' <span style="color:#ef4444;">(Expired)</span>');
     document.getElementById('infoAmount').textContent = '₹' + (user.paymentAmount || 0).toLocaleString();
     document.getElementById('infoMethod').textContent = user.paymentMethod || '-';
+    document.getElementById('infoWhatsApp').textContent = user.whatsappNumber || '-';
+    document.getElementById('infoTelegram').textContent = user.telegramChatId || '-';
+    document.getElementById('infoLastLogin').textContent = user.lastLogin ? new Date(user.lastLogin).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Never';
     document.getElementById('infoCreated').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
-    document.getElementById('infoLastLogin').textContent = user.lastLogin ? new Date(user.lastLogin).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : 'Never';
     document.getElementById('infoDevice').textContent = user.lastDevice || '-';
     document.getElementById('infoPlatform').textContent = user.lastPlatform || '-';
+    // Location in info panel
+    if (user.lastLocation && user.lastLocation.lat && user.lastLocation.lng) {
+        document.getElementById('infoLocation').innerHTML = '<a href="https://www.google.com/maps?q=' + user.lastLocation.lat + ',' + user.lastLocation.lng + '" target="_blank" style="color:#3b82f6;text-decoration:none;">' + user.lastLocation.lat.toFixed(4) + ',' + user.lastLocation.lng.toFixed(4) + ' 📍</a>';
+    } else {
+        document.getElementById('infoLocation').textContent = 'Not available';
+    }
     document.getElementById('editFullName').value = user.fullName || user.username;
     document.getElementById('editCategory').value = user.category || 'Silver';
     document.getElementById('editPaymentAmount').value = user.paymentAmount || '';
@@ -5192,7 +5209,9 @@ async function saveBanner() {
         titleSize: parseInt(document.getElementById('bannerTitleSize').value) || 22,
         bannerHeight: parseInt(document.getElementById('bannerHeight').value) || 120,
         msgColor: document.getElementById('bannerMsgColor').value || '#ffffff',
-        msgSize: parseInt(document.getElementById('bannerMsgSize').value) || 13
+        msgSize: parseInt(document.getElementById('bannerMsgSize').value) || 13,
+        showMessage: document.getElementById('bannerShowMessage').checked,
+        emoji: document.getElementById('bannerEmoji').value || '🎊'
     };
     const status = document.getElementById('bannerFormStatus');
     if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
@@ -5227,6 +5246,8 @@ function editBanner(id) {
     document.getElementById('bannerHeightVal').textContent = (b.bannerHeight || 120) + 'px';
     document.getElementById('bannerMsgColor').value = b.msgColor || b.textColor || '#ffffff';
     document.getElementById('bannerMsgSize').value = b.msgSize || 13;
+    document.getElementById('bannerShowMessage').checked = b.showMessage !== false;
+    document.getElementById('bannerEmoji').value = b.emoji || '🎊';
     if (b.imageUrl) {
         document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
         if (b.imageUrl.startsWith('data:')) {
@@ -5296,9 +5317,18 @@ async function loadHolidayBanners() {
             }
         }
         if (msgEl) {
-            msgEl.textContent = banner.message || '';
-            msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
-            msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+            if (banner.showMessage === false) {
+                msgEl.style.display = 'none';
+            } else {
+                msgEl.style.display = 'block';
+                msgEl.textContent = banner.message || '';
+                msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
+                msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+            }
+        }
+        const emojiEl = document.getElementById('holidayBannerEmoji');
+        if (emojiEl) {
+            emojiEl.textContent = banner.emoji || '🎊';
         }
         const dismissBtn = document.getElementById('holidayBannerDismissBtn');
         if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
@@ -5564,7 +5594,7 @@ function stopAutoRefresh() {
 
 async function checkMessageUpdate() {
     const userId = sessionStorage.getItem('userId');
-    if (!userId) return;
+    if (!userId || !currentUser) return;
     try {
         const r = await fetch(API + '/api/me', {
             headers: { 'user-id': userId }
@@ -5581,6 +5611,8 @@ async function checkMessageUpdate() {
         currentUser.message = newMsg;
         currentUser.msgColor = newColor;
         currentUser.highlight = newHighlight;
+        currentUser.daysLeft = r.user.daysLeft;
+        currentUser.subscriptionExpiry = r.user.subscriptionExpiry;
 
         // Update banner if message changed
         if (newMsg !== oldMsg) {

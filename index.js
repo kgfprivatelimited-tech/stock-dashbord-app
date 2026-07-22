@@ -280,6 +280,17 @@ function loadSettings() {
         const file = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
         const merged = { ...DEFAULT_SETTINGS, ...file };
         if (!merged.holidayBanners) merged.holidayBanners = [];
+        merged.holidayBanners = merged.holidayBanners.map(b => ({
+            showTitle: true,
+            titleColor: '#ffffff',
+            titleSize: 22,
+            bannerHeight: 120,
+            msgColor: '#ffffff',
+            msgSize: 13,
+            showMessage: true,
+            emoji: '🎊',
+            ...b
+        }));
         return merged;
     } catch (e) {
         return { ...DEFAULT_SETTINGS };
@@ -1814,14 +1825,14 @@ app.post('/api/admin/schedule-message', checkAdmin, (req, res) => {
         const { usernames, message, msgColor, scheduledAt, sendTelegram, sendWhatsApp } = req.body;
         if (!message || !scheduledAt) return res.json({ success: false, message: 'Message and schedule time required' });
         const data = loadScheduledMsgs();
-        const schedDate = new Date(scheduledAt);
-        const istDate = moment(schedDate).tz('Asia/Kolkata');
+        const istDate = moment.tz(scheduledAt, 'Asia/Kolkata');
+        const utcDate = istDate.clone().utc();
         const msg = {
             id: 'sched_' + Date.now(),
             usernames: usernames || [],
             message: message.trim(),
             msgColor: msgColor || '#ff6b35',
-            scheduledAt: schedDate.toISOString(),
+            scheduledAt: utcDate.toISOString(),
             scheduledAtIST: istDate.format('DD-MMM-YYYY hh:mm A'),
             sendTelegram: sendTelegram || false,
             sendWhatsApp: sendWhatsApp || false,
@@ -1981,23 +1992,30 @@ setInterval(async () => {
 
 // Check scheduled messages every minute
 setInterval(async () => {
-    const now = new Date();
+    const now = moment().tz('Asia/Kolkata');
     const data = loadScheduledMsgs();
     let changed = false;
     for (const msg of data.messages) {
-        if (!msg.sent && new Date(msg.scheduledAt) <= now) {
-            msg.sent = true;
-            changed = true;
-            const usersData = loadUsers();
-            for (const u of usersData.users) {
-                if (msg.usernames.length === 0 || msg.usernames.includes(u.username)) {
-                    u.message = msg.message;
-                    u.msgColor = msg.msgColor || '#ff6b35';
-                    if (msg.sendTelegram && u.telegramChatId) await sendBroadcastToUser(msg.message, u);
+        if (!msg.sent) {
+            const schedUTC = new Date(msg.scheduledAt);
+            if (schedUTC <= now.toDate()) {
+                msg.sent = true;
+                changed = true;
+                console.log(`⏰ Sending scheduled msg: "${msg.message.substring(0,30)}..." to ${msg.usernames.length || 'ALL'} users`);
+                const usersData = loadUsers();
+                for (const u of usersData.users) {
+                    if (msg.usernames.length === 0 || msg.usernames.includes(u.username)) {
+                        u.message = msg.message;
+                        u.msgColor = msg.msgColor || '#ff6b35';
+                        if (msg.sendTelegram && u.telegramChatId) await sendBroadcastToUser(msg.message, u);
+                        if (msg.sendWhatsApp && u.whatsappNumber) {
+                            console.log(`💬 WhatsApp link for ${u.username}: ${u.whatsappNumber}`);
+                        }
+                    }
                 }
+                saveUsers(usersData);
+                logActivity('scheduled_sent', `Scheduled message delivered: "${msg.message.substring(0,40)}..."`);
             }
-            saveUsers(usersData);
-            logActivity('scheduled_sent', `Scheduled message delivered`);
         }
     }
     if (changed) saveScheduledMsgs(data);
@@ -2178,7 +2196,7 @@ app.get('/api/admin/banners', checkAdmin, (req, res) => {
 
 app.post('/api/admin/banners', checkAdmin, (req, res) => {
     try {
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji } = req.body;
         if (!title || !startDate || !endDate) {
             return res.json({ success: false, message: 'Title, start date, and end date required' });
         }
@@ -2197,6 +2215,8 @@ app.post('/api/admin/banners', checkAdmin, (req, res) => {
             position: position || 'afterIndices',
             active: true,
             showTitle: showTitle !== false,
+            showMessage: showMessage !== false,
+            emoji: emoji || '🎊',
             titleColor: titleColor || textColor || '#ffffff',
             titleSize: titleSize || 22,
             bannerHeight: bannerHeight || 120,
@@ -2215,7 +2235,7 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         const settings = loadSettings();
         const banner = (settings.holidayBanners || []).find(b => b.id === req.params.id);
         if (!banner) return res.json({ success: false, message: 'Banner not found' });
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji } = req.body;
         if (title !== undefined) banner.title = title.trim();
         if (message !== undefined) banner.message = message.trim();
         if (bgColor !== undefined) banner.bgColor = bgColor;
@@ -2233,6 +2253,8 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         if (bannerHeight !== undefined) banner.bannerHeight = bannerHeight;
         if (msgColor !== undefined) banner.msgColor = msgColor;
         if (msgSize !== undefined) banner.msgSize = msgSize;
+        if (showMessage !== undefined) banner.showMessage = showMessage;
+        if (emoji !== undefined) banner.emoji = emoji;
         saveSettings(settings);
         res.json({ success: true, message: 'Banner updated!' });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
