@@ -673,6 +673,7 @@ app.post('/api/admin/reset-password', checkAdmin, (req, res) => {
     const user = data.users.find(u => u.username === username);
     if (!user) return res.json({ success: false, message: 'User not found' });
     user.password = bcrypt.hashSync(newPassword, 10);
+    user.passwordPlain = newPassword;
     saveUsers(data);
     addActivity('Password Reset (Admin)', user.username);
     res.json({ success: true, message: `Password reset for ${username}. New password: ${newPassword}` });
@@ -721,7 +722,8 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         createdAt: u.createdAt,
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
-        highlight: u.highlight || false
+        highlight: u.highlight || false,
+        passwordPlain: u.passwordPlain || u.password || ''
     }));
     res.json({ success: true, users });
 });
@@ -751,6 +753,7 @@ app.post('/api/admin/approve', checkAdmin, (req, res) => {
             username: username,
             email: email,
             password: bcrypt.hashSync(password, 10),
+            passwordPlain: password,
             fullName: fullName,
             approved: true,
             category: category || 'Silver',

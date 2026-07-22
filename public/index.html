@@ -2355,6 +2355,7 @@ input[type="color"] {
           <div id="editMsg" style="margin-top:12px;font-size:12px;"></div>
         </div>
         </div>
+        </div><!-- /section-editUser -->
 
         <!-- ═══ REVENUE SECTION ═══ -->
         <div id="section-revenue" style="display:none;">
@@ -2850,6 +2851,7 @@ input[type="color"] {
             <span class="market-status" id="mkt-badge">--</span>
             <span id="countdown"></span>
             <div class="header-btns">
+                <a class="header-btn" onclick="showUserPasswordPopup()" title="Change Password" style="cursor:pointer;">⚙️</a>
                 <a class="header-btn" onclick="requestNotificationPermission()" title="Enable Notifications" style="cursor:pointer;">🔔</a>
                 <a class="header-btn btn-logout" onclick="doLogout()">Logout</a>
             </div>
@@ -2872,6 +2874,13 @@ input[type="color"] {
         <div id="indices-row">Loading...</div>
     </div>
     <hr class="divider" data-section="indices">
+
+    <!-- STOCK TIPS -->
+    <div class="section" id="stockTipsSection" style="display: none;">
+        <div class="section-title">📊 Stock Tips — By Vaibhav</div>
+        <div id="stockTipsGrid" class="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+    </div>
+    <hr class="divider" id="stockTipsDivider" style="display: none;">
 
     <!-- HOLIDAY FESTIVAL BANNER -->
     <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
@@ -2900,13 +2909,6 @@ input[type="color"] {
             <button class="msg-banner-close" onclick="dismissMessage()" title="Dismiss">✕</button>
         </div>
     </div>
-
-    <!-- STOCK TIPS -->
-    <div class="section" id="stockTipsSection" style="display: none;">
-        <div class="section-title">📊 Stock Tips — By Vaibhav</div>
-        <div id="stockTipsGrid" class="stock-cards"></div>
-    </div>
-    <hr class="divider" id="stockTipsDivider" style="display: none;">
 
     <!-- GAINERS / LOSERS -->
     <div class="section" data-section="gainersLosers">
@@ -2997,6 +2999,19 @@ input[type="color"] {
             <button class="admin-btn admin-btn-primary" onclick="userChangePassword()" style="width:100%;">🔒 Update Password</button>
             <div id="userPassStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
+    </div>
+
+    <!-- PASSWORD CHANGE POPUP -->
+    <div id="passwordChangePopup" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center;">
+      <div style="background:#1a1a24; border:1px solid #2a2a35; border-radius:14px; padding:20px; width:340px; max-width:90vw;">
+        <div style="font-size:14px; font-weight:700; color:#f59e0b; margin-bottom:14px; text-align:center;">🔐 Change Password</div>
+        <input type="password" id="popCurrentPass" class="admin-form-input" placeholder="Current Password" style="margin-bottom:10px;">
+        <input type="password" id="popNewPass" class="admin-form-input" placeholder="New Password (min 4 chars)" style="margin-bottom:10px;">
+        <input type="password" id="popConfirmPass" class="admin-form-input" placeholder="Confirm New Password" style="margin-bottom:14px;">
+        <button class="admin-btn admin-btn-primary" onclick="submitPasswordChange()" style="width:100%;">🔒 Update Password</button>
+        <button class="admin-btn admin-btn-secondary" onclick="closePasswordPopup()" style="width:100%; margin-top:8px;">✖ Cancel</button>
+        <div id="popPassStatus" style="font-size:11px; margin-top:8px; text-align:center;"></div>
+      </div>
     </div>
 
 <script>
@@ -3095,6 +3110,35 @@ async function doLogin() {
 }
 
 // User Password Change
+function showUserPasswordPopup() {
+    document.getElementById('passwordChangePopup').style.display = 'flex';
+    document.getElementById('popCurrentPass').value = '';
+    document.getElementById('popNewPass').value = '';
+    document.getElementById('popConfirmPass').value = '';
+    document.getElementById('popPassStatus').textContent = '';
+    document.getElementById('popCurrentPass').focus();
+}
+function closePasswordPopup() { document.getElementById('passwordChangePopup').style.display = 'none'; }
+async function submitPasswordChange() {
+    const cur = document.getElementById('popCurrentPass').value;
+    const nw = document.getElementById('popNewPass').value;
+    const cf = document.getElementById('popConfirmPass').value;
+    const st = document.getElementById('popPassStatus');
+    if (!cur || !nw) { st.innerHTML = '<span style="color:#ef4444;">All fields required</span>'; return; }
+    if (nw.length < 4) { st.innerHTML = '<span style="color:#ef4444;">Min 4 characters</span>'; return; }
+    if (nw !== cf) { st.innerHTML = '<span style="color:#ef4444;">Passwords don\'t match</span>'; return; }
+    st.innerHTML = '<span style="color:#ffab00;">⏳ Updating...</span>';
+    try {
+        const r = await fetch(API + '/api/me/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ currentPassword: cur, newPassword: nw })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; setTimeout(closePasswordPopup, 2000); }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>'; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
 async function userChangePassword() {
     const currentPass = document.getElementById('userCurrentPass').value;
     const newPass = document.getElementById('userNewPass').value;
@@ -4401,7 +4445,7 @@ async function editUser(username) {
     document.getElementById('infoUsername').textContent = user.username;
     document.getElementById('infoFullName').textContent = user.fullName || '-';
     document.getElementById('infoEmail').textContent = user.email || '-';
-    document.getElementById('infoPassword').textContent = user.passwordPlain || user.password || '(bcrypt hashed)';
+    document.getElementById('infoPassword').textContent = user.passwordPlain || '(encrypted)';
     document.getElementById('infoPassword').style.color = '#ef4444';
     document.getElementById('infoPassword').style.fontWeight = '600';
     document.getElementById('infoCategory').textContent = user.category || 'Silver';
@@ -5314,7 +5358,7 @@ async function loadHolidayBanners() {
         const banner = r.banners[0];
         if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) { wrap.style.display = 'none'; return; }
         wrap.style.display = 'block';
-        wrap.style.background = 'transparent';
+        wrap.style.background = banner.bgColor || '#ff6b35';
         wrap.style.color = banner.textColor || '#ffffff';
         const h = isMobile ? 180 : (banner.bannerHeight || 120);
         wrap.style.height = h + 'px';
@@ -5333,15 +5377,35 @@ async function loadHolidayBanners() {
             }
         }
         const titleEl = document.getElementById('holidayBannerTitle');
-        if (titleEl) titleEl.style.display = 'none';
+        if (titleEl) {
+            if (banner.showTitle === false) {
+                titleEl.style.display = 'none';
+            } else {
+                titleEl.style.display = 'block';
+                titleEl.textContent = banner.title;
+                titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
+                titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+            }
+        }
         const msgEl = document.getElementById('holidayBannerMsg');
-        if (msgEl) msgEl.style.display = 'none';
+        if (msgEl) {
+            if (banner.showMessage === false) {
+                msgEl.style.display = 'none';
+            } else {
+                msgEl.style.display = 'block';
+                msgEl.textContent = banner.message || '';
+                msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
+                msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+            }
+        }
         const emojiEl = document.getElementById('holidayBannerEmoji');
-        if (emojiEl) emojiEl.style.display = 'none';
+        if (emojiEl) {
+            emojiEl.textContent = banner.emoji || '🎊';
+        }
+        const inner = document.getElementById('holidayBannerInner');
+        if (inner) inner.style.display = 'flex';
         const dismissBtn = document.getElementById('holidayBannerDismissBtn');
         if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
-        const inner = document.getElementById('holidayBannerInner');
-        if (inner) inner.style.display = 'none';
         try { positionBanner(banner.position || 'afterDisclaimer'); } catch(e) {}
     } catch (e) {
         const wrap = document.getElementById('holidayBannerWrap');
