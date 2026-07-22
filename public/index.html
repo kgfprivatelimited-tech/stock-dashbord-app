@@ -1114,10 +1114,10 @@ header {
 }
 
 .user-message-banner {
-    background: rgba(255, 107, 53, 0.06);
+    background: rgba(255, 107, 53, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 107, 53, 0.15);
+    border: 1px solid rgba(255, 107, 53, 0.3);
     border-left: 4px solid #ff6b35;
     border-right: 4px solid #ff6b35;
     border-top: 3px solid #ff6b35;
@@ -1125,10 +1125,11 @@ header {
     overflow: hidden;
     position: relative;
     transition: all 0.4s ease;
-    max-height: 140px;
+    max-height: 200px;
     margin: 8px 12px 4px 12px;
     border-radius: 12px;
     animation: borderNeon 3s ease-in-out infinite;
+    z-index: 9999;
 }
 
 @keyframes borderNeon {
@@ -2257,6 +2258,25 @@ input[type="color"] {
           <div class="admin-card-header">
             <div class="admin-card-title">✏️ Edit User: <span id="editUsernameLabel"></span></div>
           </div>
+          <!-- ═══ USER INFO PANEL ═══ -->
+          <div id="editUserInfoPanel" style="background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:14px;margin-bottom:14px;">
+            <div style="font-size:13px;color:#f59e0b;font-weight:700;margin-bottom:10px;">📋 User Info</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;">
+              <div><span style="color:#71717a;">👤 Username:</span> <span id="infoUsername" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📛 Full Name:</span> <span id="infoFullName" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📧 Email:</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">🔑 Password:</span> <span id="infoPassword" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📱 WhatsApp:</span> <span id="infoWhatsApp" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">✈️ Telegram:</span> <span id="infoTelegram" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">💳 Amount:</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">💰 Method:</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📅 Created:</span> <span id="infoCreated" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">⏰ Last Login:</span> <span id="infoLastLogin" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">🖥️ Device:</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#71717a;">📡 Platform:</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
+            </div>
+          </div>
+          <!-- ═══ FORM ═══ -->
           <div class="admin-form-row">
             <div class="admin-form-group"><label class="admin-form-label">Full Name</label><input type="text" id="editFullName" class="admin-form-input" placeholder="Full Name" autocomplete="off"></div>
             <div class="admin-form-group"><label class="admin-form-label">Category</label>
@@ -2478,6 +2498,20 @@ input[type="color"] {
                             <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Title Size (px)</label><input type="number" id="bannerTitleSize" value="22" min="10" max="48" class="admin-form-input" style="height:30px;padding:4px 6px;"></div>
                         </div>
                     </div>
+                </div>
+                <div class="admin-form-row">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">💬 Message Settings</label>
+                        <div style="display:flex;gap:8px;">
+                            <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Message Color</label><input type="color" id="bannerMsgColor" value="#ffffff" style="width:100%;height:30px;border:none;border-radius:4px;cursor:pointer;"></div>
+                            <div style="flex:1;"><label style="font-size:10px;color:#71717a;">Message Size (px)</label><input type="number" id="bannerMsgSize" value="13" min="8" max="24" class="admin-form-input" style="height:30px;padding:4px 6px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">📐 Banner Height (px)</label>
+                    <input type="range" id="bannerHeight" min="60" max="400" value="120" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('bannerHeightVal').textContent=this.value+'px'">
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;"><span>60px (Compact)</span><span id="bannerHeightVal">120px</span><span>400px (Full)</span></div>
                 </div>
                 <div class="admin-form-row">
                     <div class="admin-form-group"><label class="admin-form-label">Start Date</label><input type="date" id="bannerStartDate" class="admin-form-input"></div>
@@ -2910,14 +2944,13 @@ input[type="color"] {
                         <th>Entry</th>
                         <th>Target</th>
                         <th>SL</th>
-                        <th>Strategy</th>
                         <th>Conf.</th>
                         <th>RSI</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="signals-body">
-                    <tr><td colspan="9" style="color:#333;padding:20px;text-align:center;">Loading signals...</td></tr>
+                    <tr><td colspan="8" style="color:#333;padding:20px;text-align:center;">Loading signals...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -3450,6 +3483,19 @@ async function approvePassword(userId, approve) {
     } catch (e) {}
 }
 
+async function resetUserPassword(username) {
+    const newPass = prompt('Enter new password for ' + username + ':');
+    if (!newPass || newPass.length < 4) { if (newPass !== null) customAlert('Min 4 characters required', '❌'); return; }
+    try {
+        const r = await fetch(API + '/api/admin/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ username, newPassword: newPass })
+        }).then(r => r.json());
+        customAlert(r.message, r.success ? '✅' : '❌');
+    } catch (e) { customAlert('Error resetting password', '❌'); }
+}
+
 function refreshAdminData() {
     document.getElementById('usersListContainer').innerHTML = '<div class="loading">Loading users...</div>';
     loadAdminData();
@@ -3858,11 +3904,14 @@ async function loadScheduledMessages() {
             return;
         }
         div.innerHTML = r.messages.slice(0, 10).map(m => {
-            const t = new Date(m.scheduledAt);
-            const timeStr = t.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const timeStr = m.scheduledAtIST || new Date(m.scheduledAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const via = [];
+            if (m.sendTelegram) via.push('✈️');
+            if (m.sendWhatsApp) via.push('💬');
+            const viaStr = via.length ? ' <span style="font-size:9px;color:#555;">(' + via.join('+') + ')</span>' : '';
             return `<div class="sched-item ${m.sent ? 'sent' : ''}">
                 <span class="sched-msg">${m.message.substring(0, 40)}${m.message.length > 40 ? '...' : ''}</span>
-                <span class="sched-time">${m.sent ? '✅ Sent' : '⏰ ' + timeStr}</span>
+                <span class="sched-time">${m.sent ? '✅ Sent' : '⏰ ' + timeStr + viaStr}</span>
                 ${!m.sent ? '<button onclick="deleteScheduled(\'' + m.id + '\')" style="background:none; border:none; color:#ff1744; cursor:pointer; font-size:12px;">✕</button>' : ''}
             </div>`;
         }).join('');
@@ -4327,6 +4376,19 @@ async function editUser(username) {
     
     editingUsername = username;
     document.getElementById('editUsernameLabel').textContent = username;
+    // Populate info panel
+    document.getElementById('infoUsername').textContent = user.username;
+    document.getElementById('infoFullName').textContent = user.fullName || '-';
+    document.getElementById('infoEmail').textContent = user.email || '-';
+    document.getElementById('infoPassword').innerHTML = '<span style="color:#22c55e;">✓ Set</span> <button onclick="resetUserPassword(\'' + user.username + '\')" style="background:none;border:none;color:#f59e0b;cursor:pointer;font-size:10px;padding:0;text-decoration:underline;">Reset</button>';
+    document.getElementById('infoWhatsApp').textContent = user.whatsappNumber || '-';
+    document.getElementById('infoTelegram').textContent = user.telegramChatId || '-';
+    document.getElementById('infoAmount').textContent = '₹' + (user.paymentAmount || 0).toLocaleString();
+    document.getElementById('infoMethod').textContent = user.paymentMethod || '-';
+    document.getElementById('infoCreated').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+    document.getElementById('infoLastLogin').textContent = user.lastLogin ? new Date(user.lastLogin).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : 'Never';
+    document.getElementById('infoDevice').textContent = user.lastDevice || '-';
+    document.getElementById('infoPlatform').textContent = user.lastPlatform || '-';
     document.getElementById('editFullName').value = user.fullName || user.username;
     document.getElementById('editCategory').value = user.category || 'Silver';
     document.getElementById('editPaymentAmount').value = user.paymentAmount || '';
@@ -5127,7 +5189,10 @@ async function saveBanner() {
         position: document.getElementById('bannerPosition').value || 'afterIndices',
         showTitle: document.getElementById('bannerShowTitle').checked,
         titleColor: document.getElementById('bannerTitleColor').value || '#ffffff',
-        titleSize: parseInt(document.getElementById('bannerTitleSize').value) || 22
+        titleSize: parseInt(document.getElementById('bannerTitleSize').value) || 22,
+        bannerHeight: parseInt(document.getElementById('bannerHeight').value) || 120,
+        msgColor: document.getElementById('bannerMsgColor').value || '#ffffff',
+        msgSize: parseInt(document.getElementById('bannerMsgSize').value) || 13
     };
     const status = document.getElementById('bannerFormStatus');
     if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
@@ -5158,6 +5223,10 @@ function editBanner(id) {
     document.getElementById('bannerShowTitle').checked = b.showTitle !== false;
     document.getElementById('bannerTitleColor').value = b.titleColor || '#ffffff';
     document.getElementById('bannerTitleSize').value = b.titleSize || 22;
+    document.getElementById('bannerHeight').value = b.bannerHeight || 120;
+    document.getElementById('bannerHeightVal').textContent = (b.bannerHeight || 120) + 'px';
+    document.getElementById('bannerMsgColor').value = b.msgColor || b.textColor || '#ffffff';
+    document.getElementById('bannerMsgSize').value = b.msgSize || 13;
     if (b.imageUrl) {
         document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
         if (b.imageUrl.startsWith('data:')) {
@@ -5199,11 +5268,16 @@ async function loadHolidayBanners() {
         wrap.style.display = 'block';
         wrap.style.background = banner.bgColor || '#ff6b35';
         wrap.style.color = banner.textColor || '#ffffff';
+        wrap.style.height = (banner.bannerHeight || 120) + 'px';
+        wrap.style.minHeight = (banner.bannerHeight || 120) + 'px';
+        wrap.style.maxHeight = '400px';
         const bannerImg = document.getElementById('holidayBannerImg');
         if (bannerImg) {
             if (banner.imageUrl) {
                 bannerImg.src = banner.imageUrl;
                 bannerImg.style.display = 'block';
+                bannerImg.style.height = (banner.bannerHeight || 120) + 'px';
+                bannerImg.style.objectFit = 'cover';
             } else {
                 bannerImg.style.display = 'none';
                 bannerImg.src = '';
@@ -5212,12 +5286,20 @@ async function loadHolidayBanners() {
         const titleEl = document.getElementById('holidayBannerTitle');
         const msgEl = document.getElementById('holidayBannerMsg');
         if (titleEl) {
-            titleEl.textContent = banner.title;
-            titleEl.style.display = banner.showTitle === false ? 'none' : 'block';
-            titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
-            titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+            if (banner.showTitle === false) {
+                titleEl.style.display = 'none';
+            } else {
+                titleEl.style.display = 'block';
+                titleEl.textContent = banner.title;
+                titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
+                titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+            }
         }
-        if (msgEl) msgEl.textContent = banner.message || '';
+        if (msgEl) {
+            msgEl.textContent = banner.message || '';
+            msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
+            msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+        }
         const dismissBtn = document.getElementById('holidayBannerDismissBtn');
         if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
         try { positionBanner(banner.position || 'afterIndices'); } catch(e) {}
@@ -5409,7 +5491,6 @@ async function loadSignals() {
                 '<td class="' + cls(d.signal === 'BUY' ? 1 : -1) + '">' + fmt2(d.entry) + '</td>' +
                 '<td class="tgt">' + fmt2(d.target) + '</td>' +
                 '<td class="sl-val">' + fmt2(d.sl) + '</td>' +
-                '<td style="font-size:10px;color:#888;">' + (d.strategy || '-') + '</td>' +
                 '<td><span style="color:' + confColor + ';font-weight:700;font-family:JetBrains Mono,monospace;">' + (d.confidence || '--') + '%</span></td>' +
                 '<td>' + rsiHtml + '</td>' +
                 '<td><span class="badge ' + (d.status === 'TARGET DONE' ? 'buy' : d.status === 'SL HIT' ? 'sell' : 'neutral') + '">' + d.status + '</span></td></tr>';
@@ -5526,8 +5607,8 @@ function updateMessageBanner() {
     const msgBanner = document.getElementById('userMessageBanner');
     const msgText = document.getElementById('userMessageText');
 
-    if (!currentUser.message || currentUser.message.trim() === '') {
-        msgBanner.style.display = 'none';
+    if (!currentUser || !currentUser.message || currentUser.message.trim() === '') {
+        if (msgBanner) msgBanner.style.display = 'none';
         return;
     }
 
@@ -5543,44 +5624,56 @@ function updateMessageBanner() {
     msgText.textContent = currentUser.message;
     msgBanner.style.display = 'block';
     msgBanner.style.borderBottomColor = mc;
+    msgBanner.style.borderLeftColor = mc;
+    msgBanner.style.borderRightColor = mc;
+    msgBanner.style.borderTopColor = mc;
     msgBanner.style.setProperty('--accent', mc);
+    msgBanner.style.background = `rgba(255,107,53,0.15)`;
+    msgBanner.style.boxShadow = `0 4px 20px ${mc}40`;
     msgBanner.querySelector('.msg-banner-icon-wrap').style.background = `${mc}22`;
     msgBanner.querySelector('.msg-banner-icon-wrap').style.borderColor = `${mc}55`;
     msgBanner.querySelector('.msg-banner-label').style.color = mc;
     msgBanner.querySelector('.msg-banner-glow').style.background = `radial-gradient(ellipse at 20% 50%, ${mc}18 0%, transparent 60%)`;
     msgBanner.setAttribute('data-dismiss-key', dismissedKey);
 
-    // Vibrate device
+    // Vibrate device (mobile only)
     if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200, 100, 300]);
+        navigator.vibrate([300, 100, 300, 100, 500]);
+        setTimeout(() => { navigator.vibrate([300, 100, 300]); }, 1500);
     }
 
     // Browser notification
-    if (Notification.permission === 'granted') {
+    if ('Notification' in window && Notification.permission === 'granted') {
         try {
             new Notification('BearFighter - New Message', {
                 body: currentUser.message,
-                icon: '🐻',
-                tag: 'broadcast-' + currentUser.id,
-                requireInteraction: true
+                icon: '/favicon.ico',
+                tag: 'broadcast-' + currentUser.id + '-' + Date.now(),
+                requireInteraction: true,
+                renotify: true
             });
         } catch(e) {}
     }
 
-    // Play alert sound
+    // Play alert sound (3 beeps)
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = 800;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.5);
+        [0, 0.2, 0.4].forEach(delay => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 880;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.15);
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + 0.15);
+        });
     } catch(e) {}
+
+    // Scroll to banner
+    setTimeout(() => { msgBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
 }
 
 /* ═══════ CUSTOM CONFIRM & ALERT MODAL ═══════ */

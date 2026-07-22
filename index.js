@@ -654,6 +654,19 @@ app.post('/api/admin/approve-password', checkAdmin, (req, res) => {
     res.json({ success: true, message: approve ? 'Password approved and updated' : 'Password change rejected' });
 });
 
+// Admin: reset user password directly
+app.post('/api/admin/reset-password', checkAdmin, (req, res) => {
+    const { username, newPassword } = req.body;
+    if (!username || !newPassword) return res.json({ success: false, message: 'Username and new password required' });
+    const data = loadUsers();
+    const user = data.users.find(u => u.username === username);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    user.password = bcrypt.hashSync(newPassword, 10);
+    saveUsers(data);
+    addActivity('Password Reset (Admin)', user.username);
+    res.json({ success: true, message: `Password reset for ${username}. New password: ${newPassword}` });
+});
+
 // ========================================
 // ADMIN ROUTES
 // ========================================
@@ -1798,23 +1811,29 @@ app.get('/api/admin/tip-performance', checkAdmin, (req, res) => {
 // 5. Scheduled Messages
 app.post('/api/admin/schedule-message', checkAdmin, (req, res) => {
     try {
-        const { usernames, message, msgColor, scheduledAt } = req.body;
+        const { usernames, message, msgColor, scheduledAt, sendTelegram, sendWhatsApp } = req.body;
         if (!message || !scheduledAt) return res.json({ success: false, message: 'Message and schedule time required' });
         const data = loadScheduledMsgs();
+        const schedDate = new Date(scheduledAt);
+        const istDate = moment(schedDate).tz('Asia/Kolkata');
         const msg = {
             id: 'sched_' + Date.now(),
             usernames: usernames || [],
             message: message.trim(),
             msgColor: msgColor || '#ff6b35',
-            scheduledAt: new Date(scheduledAt).toISOString(),
+            scheduledAt: schedDate.toISOString(),
+            scheduledAtIST: istDate.format('DD-MMM-YYYY hh:mm A'),
+            sendTelegram: sendTelegram || false,
+            sendWhatsApp: sendWhatsApp || false,
             sent: false,
             createdAt: new Date().toISOString()
         };
         data.messages.unshift(msg);
         saveScheduledMsgs(data);
-        logActivity('message_scheduled', `Scheduled for ${scheduledAt}`);
+        logActivity('message_scheduled', `Scheduled for ${istDate.format('DD-MMM-YYYY hh:mm A IST')}`);
         res.json({ success: true, message: 'Message scheduled!', schedule: msg });
     } catch (error) {
+        console.error('Schedule error:', error);
         res.json({ success: false, message: 'Server error' });
     }
 });
@@ -1961,11 +1980,11 @@ setInterval(async () => {
 }, 21600000); // Every 6 hours
 
 // Check scheduled messages every minute
-setInterval(() => {
+setInterval(async () => {
     const now = new Date();
     const data = loadScheduledMsgs();
     let changed = false;
-    data.messages.forEach(async msg => {
+    for (const msg of data.messages) {
         if (!msg.sent && new Date(msg.scheduledAt) <= now) {
             msg.sent = true;
             changed = true;
@@ -1973,14 +1992,14 @@ setInterval(() => {
             for (const u of usersData.users) {
                 if (msg.usernames.length === 0 || msg.usernames.includes(u.username)) {
                     u.message = msg.message;
-                    u.msgColor = msg.msgColor;
-                    if (u.telegramChatId) await sendBroadcastToUser(msg.message, u);
+                    u.msgColor = msg.msgColor || '#ff6b35';
+                    if (msg.sendTelegram && u.telegramChatId) await sendBroadcastToUser(msg.message, u);
                 }
             }
             saveUsers(usersData);
             logActivity('scheduled_sent', `Scheduled message delivered`);
         }
-    });
+    }
     if (changed) saveScheduledMsgs(data);
 }, 60000);
 
@@ -2159,7 +2178,7 @@ app.get('/api/admin/banners', checkAdmin, (req, res) => {
 
 app.post('/api/admin/banners', checkAdmin, (req, res) => {
     try {
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize } = req.body;
         if (!title || !startDate || !endDate) {
             return res.json({ success: false, message: 'Title, start date, and end date required' });
         }
@@ -2177,6 +2196,12 @@ app.post('/api/admin/banners', checkAdmin, (req, res) => {
             showOnMobile: showOnMobile !== false,
             position: position || 'afterIndices',
             active: true,
+            showTitle: showTitle !== false,
+            titleColor: titleColor || textColor || '#ffffff',
+            titleSize: titleSize || 22,
+            bannerHeight: bannerHeight || 120,
+            msgColor: msgColor || textColor || '#ffffff',
+            msgSize: msgSize || 13,
             createdAt: new Date().toISOString()
         };
         settings.holidayBanners.push(banner);
@@ -2190,7 +2215,7 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         const settings = loadSettings();
         const banner = (settings.holidayBanners || []).find(b => b.id === req.params.id);
         if (!banner) return res.json({ success: false, message: 'Banner not found' });
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize } = req.body;
         if (title !== undefined) banner.title = title.trim();
         if (message !== undefined) banner.message = message.trim();
         if (bgColor !== undefined) banner.bgColor = bgColor;
@@ -2202,6 +2227,12 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         if (showOnMobile !== undefined) banner.showOnMobile = showOnMobile;
         if (active !== undefined) banner.active = active;
         if (position !== undefined) banner.position = position;
+        if (showTitle !== undefined) banner.showTitle = showTitle;
+        if (titleColor !== undefined) banner.titleColor = titleColor;
+        if (titleSize !== undefined) banner.titleSize = titleSize;
+        if (bannerHeight !== undefined) banner.bannerHeight = bannerHeight;
+        if (msgColor !== undefined) banner.msgColor = msgColor;
+        if (msgSize !== undefined) banner.msgSize = msgSize;
         saveSettings(settings);
         res.json({ success: true, message: 'Banner updated!' });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
