@@ -3596,7 +3596,7 @@ window.renderUsers = function(users) {
     users.forEach(u => {
         let statusBadge = 'admin-badge-pending'; let statusText = 'Pending';
         if (u.approved) { if (u.active) { statusBadge = 'admin-badge-active'; statusText = 'Active'; } else { statusBadge = 'admin-badge-expired'; statusText = 'Expired'; } }
-        const initials = (u.fullName || u.username).substring(0, 2).toUpperCase();
+        const initials = (u.fullName || u.name || u.username || 'AD').substring(0, 2).toUpperCase();
         const cat = u.category || 'Silver';
         const daysLeft = u.daysLeft > 0 ? u.daysLeft : 0;
         const expDate = daysLeft > 0 ? new Date(Date.now() + daysLeft * 86400000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Expired';
