@@ -126,27 +126,28 @@ const DEFAULT_SETTINGS = {
 if (!fs.existsSync(SETTINGS_FILE)) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
     console.log('📁 Created settings.json');
-} else {
-    const existing = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-    if (!existing.holidayBanners || existing.holidayBanners.length === 0) {
-        existing.holidayBanners = [{
-            id: 'banner_demo_1',
-            title: 'Happy Diwali! 🪔',
-            message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
-            bgColor: '#ff6b00',
-            textColor: '#ffffff',
-            imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
-            startDate: '2026-01-01',
-            endDate: '2026-12-31',
-            showOnDesktop: true,
-            showOnMobile: true,
-            position: 'afterIndices',
-            active: true,
-            createdAt: new Date().toISOString()
-        }];
-        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(existing, null, 2));
-        console.log('📁 Seeded demo banner in settings.json');
-    }
+}
+
+// Seed demo banner if no banners exist
+const _settingsCheck = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+if (!_settingsCheck.holidayBanners || _settingsCheck.holidayBanners.length === 0) {
+    _settingsCheck.holidayBanners = [{
+        id: 'banner_demo_1',
+        title: 'Happy Diwali! 🪔',
+        message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
+        bgColor: '#ff6b00',
+        textColor: '#ffffff',
+        imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
+        startDate: '2026-01-01',
+        endDate: '2026-12-31',
+        showOnDesktop: true,
+        showOnMobile: true,
+        position: 'afterIndices',
+        active: true,
+        createdAt: new Date().toISOString()
+    }];
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_settingsCheck, null, 2));
+    console.log('📁 Seeded demo banner in settings.json');
 }
 
 // Initialize stocktips file

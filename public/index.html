@@ -2041,6 +2041,12 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('changePass', this)">🔐 Change Password</div>
       <div class="admin-nav-item" onclick="showAdminSection('apiKeys', this)">🔑 API Keys</div>
     </div>
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Sent Messages</div>
+      <div class="admin-nav-item" onclick="showAdminSection('broadcast', this)">📢 Broadcast</div>
+      <div class="admin-nav-item" onclick="showAdminSection('scheduled', this)">⏰ Scheduled</div>
+      <div class="admin-nav-item" onclick="showAdminSection('reminders', this)">💳 Reminders</div>
+    </div>
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
 
@@ -2577,6 +2583,100 @@ input[type="color"] {
 
       </div><!-- /admin-left-panel -->
 
+      <!-- ═══ BROADCAST SECTION ═══ -->
+      <div id="section-broadcast" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">📢 Broadcast Message</div>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Select Users</label>
+            <div style="display:flex;gap:4px;margin-bottom:6px;">
+              <button class="admin-btn admin-btn-success" onclick="selectAllBroadcast()" style="font-size:9px;padding:3px 8px;">All</button>
+              <button class="admin-btn admin-btn-danger" onclick="deselectAllBroadcast()" style="font-size:9px;padding:3px 8px;">None</button>
+            </div>
+            <input type="text" id="broadcastSearch" class="admin-form-input" placeholder="🔍 Search user..." style="margin-bottom:6px;" oninput="filterBroadcastUsers()">
+            <div id="broadcastUserList" style="max-height:160px;overflow-y:auto;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;padding:4px;margin-bottom:10px;"></div>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Quick Template</label>
+            <select id="broadcastTemplate" class="admin-form-select" onchange="applyBroadcastTemplate()">
+              <option value="">Custom Message</option>
+              <option value="buy">📈 BUY Signal</option>
+              <option value="sell">📉 SELL Signal</option>
+              <option value="target">🎯 Target Hit</option>
+              <option value="warning">⚠️ Market Warning</option>
+              <option value="update">📋 General Update</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Message</label>
+            <textarea id="broadcastMessage" rows="3" class="admin-form-input" placeholder="Type your message..." style="resize:vertical;"></textarea>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Banner Color</label>
+            <div class="admin-color-btns">
+              <div class="admin-color-btn" style="background:#22c55e;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#22c55e';"></div>
+              <div class="admin-color-btn" style="background:#ef4444;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#ef4444';"></div>
+              <div class="admin-color-btn selected" style="background:#f59e0b;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#f59e0b';"></div>
+              <div class="admin-color-btn" style="background:#3b82f6;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#3b82f6';"></div>
+            </div>
+          </div>
+          <button class="admin-btn admin-btn-primary" onclick="sendBroadcast()" style="width:100%;margin-bottom:6px;">📤 Send Broadcast</button>
+          <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+            <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="bcSendTelegram" style="accent-color:#3b82f6;"> ✈️ Telegram</label>
+            <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="bcSendWhatsApp" style="accent-color:#25d366;"> 💬 WhatsApp</label>
+          </div>
+          <button class="admin-btn admin-btn-danger" onclick="clearBroadcast()" style="width:100%;margin-bottom:6px;">🗑️ Clear Selected</button>
+          <div id="broadcastStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+      </div>
+
+      <!-- ═══ SCHEDULED MESSAGES SECTION ═══ -->
+      <div id="section-scheduled" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">⏰ Scheduled Messages</div>
+          </div>
+          <p style="font-size:10px;color:#71717a;margin-bottom:8px;">Future mein message schedule karo.</p>
+          <textarea id="schedMessage" rows="2" class="admin-form-input" placeholder="Message..." style="resize:vertical;margin-bottom:6px;"></textarea>
+          <input type="datetime-local" id="schedTime" class="admin-form-input" style="margin-bottom:8px;">
+          <button class="admin-btn admin-btn-info" onclick="scheduleMessage()" style="width:100%;margin-bottom:8px;">⏰ Schedule</button>
+          <div id="schedStatus" style="font-size:11px;margin-bottom:8px;text-align:center;"></div>
+          <div id="schedList"></div>
+        </div>
+      </div>
+
+      <!-- ═══ REMINDERS SECTION ═══ -->
+      <div id="section-reminders" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">💳 Payment Reminders</div>
+          </div>
+          <p style="font-size:11px;color:#71717a;margin-bottom:8px;">Expiring users ko reminder bhejo</p>
+          <div class="admin-form-group">
+            <label class="admin-form-label">📤 Send Via</label>
+            <div style="display:flex;gap:12px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendTelegram" checked style="accent-color:#3b82f6;"> ✈️ Telegram</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendWhatsApp" checked style="accent-color:#22c55e;"> 💬 WhatsApp</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSetDashMsg" checked style="accent-color:#f59e0b;"> 📢 Dashboard Msg</label>
+            </div>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">✏️ Custom Message</label>
+            <textarea id="reminderCustomMsg" rows="2" class="admin-form-input" style="resize:vertical;font-size:10px;">⚠️ Your Subscription Expires In {days} day time Renew Now Enjoy services Nonstop</textarea>
+            <div style="font-size:9px;color:#71717a;margin-top:3px;">Variables: <span style="color:#f59e0b;">{'{name}'}</span> = Name, <span style="color:#f59e0b;">{'{days}'}</span> = Days left</div>
+          </div>
+          <div id="reminderUserList" style="max-height:160px;overflow-y:auto;margin-bottom:8px;border:1px solid #2a2a35;border-radius:6px;padding:4px;"></div>
+          <div style="display:flex;gap:4px;margin-bottom:8px;">
+            <button class="admin-btn admin-btn-warning" onclick="selectAllReminders()" style="flex:1;font-size:10px;">Select All</button>
+            <button class="admin-btn admin-btn-info" onclick="deselectAllReminders()" style="flex:1;font-size:10px;">Deselect All</button>
+          </div>
+          <button class="admin-btn admin-btn-primary" onclick="sendReminderNow()" style="width:100%;">📤 Send Reminders</button>
+          <div id="reminderStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+      </div>
+
       <!-- ═══ RIGHT SIDEBAR ═══ -->
       <div class="admin-right-sidebar">
 
@@ -2623,94 +2723,6 @@ input[type="color"] {
           </div>
           <button class="admin-btn admin-btn-primary" onclick="addStockTip()" style="width:100%;">➕ Add Tip</button>
           <div id="stockTipsList" style="margin-top:12px;max-height:200px;overflow-y:auto;"></div>
-        </div>
-
-        <!-- Broadcast Message -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">📢 Broadcast Message</div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">Select Users</label>
-            <div style="display:flex;gap:4px;margin-bottom:6px;">
-              <button class="admin-btn admin-btn-success" onclick="selectAllBroadcast()" style="font-size:9px;padding:3px 8px;">All</button>
-              <button class="admin-btn admin-btn-danger" onclick="deselectAllBroadcast()" style="font-size:9px;padding:3px 8px;">None</button>
-            </div>
-            <input type="text" id="broadcastSearch" class="admin-form-input" placeholder="🔍 Search user..." style="margin-bottom:6px;" oninput="filterBroadcastUsers()">
-            <div id="broadcastUserList" style="max-height:160px;overflow-y:auto;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;padding:4px;margin-bottom:10px;"></div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">Quick Template</label>
-            <select id="broadcastTemplate" class="admin-form-select" onchange="applyBroadcastTemplate()">
-              <option value="">Custom Message</option>
-              <option value="buy">📈 BUY Signal</option>
-              <option value="sell">📉 SELL Signal</option>
-              <option value="target">🎯 Target Hit</option>
-              <option value="warning">⚠️ Market Warning</option>
-              <option value="update">📋 General Update</option>
-            </select>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">Message</label>
-            <textarea id="broadcastMessage" rows="3" class="admin-form-input" placeholder="Type your message..." style="resize:vertical;"></textarea>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">Banner Color</label>
-            <div class="admin-color-btns">
-              <div class="admin-color-btn" style="background:#22c55e;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#22c55e';"></div>
-              <div class="admin-color-btn" style="background:#ef4444;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#ef4444';"></div>
-              <div class="admin-color-btn selected" style="background:#f59e0b;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#f59e0b';"></div>
-              <div class="admin-color-btn" style="background:#3b82f6;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#3b82f6';"></div>
-            </div>
-          </div>
-          <button class="admin-btn admin-btn-primary" onclick="sendBroadcast()" style="width:100%;margin-bottom:6px;">📤 Send Broadcast</button>
-          <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-            <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="bcSendTelegram" style="accent-color:#3b82f6;"> ✈️ Telegram</label>
-            <label style="font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="bcSendWhatsApp" style="accent-color:#25d366;"> 💬 WhatsApp</label>
-          </div>
-          <button class="admin-btn admin-btn-danger" onclick="clearBroadcast()" style="width:100%;margin-bottom:6px;">🗑️ Clear Selected</button>
-          <div id="broadcastStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
-        </div>
-
-        <!-- Scheduled Messages -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">⏰ Scheduled Messages</div>
-          </div>
-          <p style="font-size:10px;color:#71717a;margin-bottom:8px;">Future mein message schedule karo.</p>
-          <textarea id="schedMessage" rows="2" class="admin-form-input" placeholder="Message..." style="resize:vertical;margin-bottom:6px;"></textarea>
-          <input type="datetime-local" id="schedTime" class="admin-form-input" style="margin-bottom:8px;">
-          <button class="admin-btn admin-btn-info" onclick="scheduleMessage()" style="width:100%;margin-bottom:8px;">⏰ Schedule</button>
-          <div id="schedStatus" style="font-size:11px;margin-bottom:8px;text-align:center;"></div>
-          <div id="schedList"></div>
-        </div>
-
-        <!-- Payment Reminders -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">⏰ Payment Reminders</div>
-          </div>
-          <p style="font-size:11px;color:#71717a;margin-bottom:8px;">Expiring users ko reminder bhejo</p>
-          <div class="admin-form-group">
-            <label class="admin-form-label">📤 Send Via</label>
-            <div style="display:flex;gap:12px;">
-              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendTelegram" checked style="accent-color:#3b82f6;"> ✈️ Telegram</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSendWhatsApp" checked style="accent-color:#22c55e;"> 💬 WhatsApp</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" id="reminderSetDashMsg" checked style="accent-color:#f59e0b;"> 📢 Dashboard Msg</label>
-            </div>
-          </div>
-          <div class="admin-form-group">
-            <label class="admin-form-label">✏️ Custom Message (Optional)</label>
-            <textarea id="reminderCustomMsg" rows="2" class="admin-form-input" placeholder="Custom message... (empty = default template)" style="resize:vertical;font-size:10px;"></textarea>
-            <div style="font-size:9px;color:#71717a;margin-top:3px;">Variables: <span style="color:#f59e0b;">{'{name}'}</span> = Name, <span style="color:#f59e0b;">{'{days}'}</span> = Days left</div>
-          </div>
-          <div id="reminderUserList" style="max-height:160px;overflow-y:auto;margin-bottom:8px;border:1px solid #2a2a35;border-radius:6px;padding:4px;"></div>
-          <div style="display:flex;gap:4px;margin-bottom:8px;">
-            <button class="admin-btn admin-btn-warning" onclick="selectAllReminders()" style="flex:1;font-size:10px;">Select All</button>
-            <button class="admin-btn admin-btn-info" onclick="deselectAllReminders()" style="flex:1;font-size:10px;">Deselect All</button>
-          </div>
-          <button class="admin-btn admin-btn-primary" onclick="sendReminderNow()" style="width:100%;">📤 Send Reminders</button>
-          <div id="reminderStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
 
       </div><!-- /admin-right-sidebar -->
@@ -3262,6 +3274,9 @@ function showAdminSection(section, navEl) {
     if (section === 'holidayBanners') loadBanners();
     if (section === 'maintenance') loadMaintenanceStatus();
     if (section === 'apiKeys') loadApiKeys();
+    if (section === 'broadcast') renderBroadcastUsers();
+    if (section === 'scheduled') loadScheduledMessages();
+    if (section === 'reminders') loadReminderList();
 }
 
 async function loadAdminData() {
@@ -4988,6 +5003,7 @@ async function loadHolidayBanners() {
         const isMobile = window.innerWidth <= 600 || /Mobi|Android/i.test(navigator.userAgent);
         const r = await fetch(API + '/api/banners?device=' + (isMobile ? 'mobile' : 'desktop')).then(r => r.json());
         const wrap = document.getElementById('holidayBannerWrap');
+        if (!wrap) return;
         if (!r.success || !r.banners || !r.banners.length) { wrap.style.display = 'none'; return; }
         const banner = r.banners[0];
         if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) { wrap.style.display = 'none'; return; }
@@ -4995,18 +5011,26 @@ async function loadHolidayBanners() {
         wrap.style.background = banner.bgColor || '#ff6b35';
         wrap.style.color = banner.textColor || '#ffffff';
         const bannerImg = document.getElementById('holidayBannerImg');
-        if (banner.imageUrl) {
-            bannerImg.src = banner.imageUrl;
-            bannerImg.style.display = 'block';
-        } else {
-            bannerImg.style.display = 'none';
-            bannerImg.src = '';
+        if (bannerImg) {
+            if (banner.imageUrl) {
+                bannerImg.src = banner.imageUrl;
+                bannerImg.style.display = 'block';
+            } else {
+                bannerImg.style.display = 'none';
+                bannerImg.src = '';
+            }
         }
-        document.getElementById('holidayBannerTitle').textContent = banner.title;
-        document.getElementById('holidayBannerMsg').textContent = banner.message || '';
-        document.getElementById('holidayBannerDismissBtn').dataset.bannerId = banner.id;
-        positionBanner(banner.position || 'afterIndices');
-    } catch (e) { document.getElementById('holidayBannerWrap').style.display = 'none'; }
+        const titleEl = document.getElementById('holidayBannerTitle');
+        const msgEl = document.getElementById('holidayBannerMsg');
+        if (titleEl) titleEl.textContent = banner.title;
+        if (msgEl) msgEl.textContent = banner.message || '';
+        const dismissBtn = document.getElementById('holidayBannerDismissBtn');
+        if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
+        try { positionBanner(banner.position || 'afterIndices'); } catch(e) {}
+    } catch (e) {
+        const wrap = document.getElementById('holidayBannerWrap');
+        if (wrap) wrap.style.display = 'none';
+    }
 }
 
 function positionBanner(pos) {
