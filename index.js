@@ -41,8 +41,8 @@ app.get('/api/settings', (req, res) => {
         disclaimerText: settings.disclaimerText,
         disclaimerBgColor: settings.disclaimerBgColor || '#ffeb3b',
         disclaimerTextColor: settings.disclaimerTextColor || '#000000',
-        disclaimerSpeed: settings.disclaimerSpeed || 25,
-        disclaimerFontSize: settings.disclaimerFontSize || 14,
+        disclaimerSpeed: settings.disclaimerSpeed || 8,
+        disclaimerFontSize: settings.disclaimerFontSize || 10,
         upstoxApiKey: settings.upstoxApiKey || '',
         upstoxAccessToken: settings.upstoxAccessToken || '',
         telegramBotToken: settings.telegramBotToken || '',
@@ -58,8 +58,8 @@ app.put('/api/admin/settings', checkAdmin, (req, res) => {
         if (disclaimerText !== undefined) settings.disclaimerText = disclaimerText;
         if (disclaimerBgColor !== undefined) settings.disclaimerBgColor = disclaimerBgColor;
         if (disclaimerTextColor !== undefined) settings.disclaimerTextColor = disclaimerTextColor;
-        if (disclaimerSpeed !== undefined) settings.disclaimerSpeed = parseInt(disclaimerSpeed) || 25;
-        if (disclaimerFontSize !== undefined) settings.disclaimerFontSize = parseInt(disclaimerFontSize) || 14;
+        if (disclaimerSpeed !== undefined) settings.disclaimerSpeed = parseInt(disclaimerSpeed) || 8;
+        if (disclaimerFontSize !== undefined) settings.disclaimerFontSize = parseInt(disclaimerFontSize) || 10;
         if (upstoxApiKey !== undefined) settings.upstoxApiKey = upstoxApiKey;
         if (upstoxAccessToken !== undefined) settings.upstoxAccessToken = upstoxAccessToken;
         if (telegramBotToken !== undefined) settings.telegramBotToken = telegramBotToken;
@@ -113,8 +113,8 @@ const DEFAULT_SETTINGS = {
     disclaimerText: '⚠️ I AM NOT SEBI REGISTERED - This is for educational purposes only. Not a financial advisor.',
     disclaimerBgColor: '#ffeb3b',
     disclaimerTextColor: '#000000',
-    disclaimerSpeed: 25,
-    disclaimerFontSize: 14,
+    disclaimerSpeed: 8,
+    disclaimerFontSize: 10,
     maintenanceMode: false,
     maintenanceMessage: 'We are currently performing scheduled maintenance. Please check back soon!',
     adminPassword: 'bearfighter@admin',
@@ -143,7 +143,7 @@ if (!_settingsCheck.holidayBanners || _settingsCheck.holidayBanners.length === 0
         endDate: '2026-12-31',
         showOnDesktop: true,
         showOnMobile: true,
-        position: 'afterIndices',
+        position: 'afterDisclaimer',
         active: true,
         createdAt: new Date().toISOString()
     }];
@@ -2212,7 +2212,7 @@ app.post('/api/admin/banners', checkAdmin, (req, res) => {
             startDate, endDate,
             showOnDesktop: showOnDesktop !== false,
             showOnMobile: showOnMobile !== false,
-            position: position || 'afterIndices',
+            position: position || 'afterDisclaimer',
             active: true,
             showTitle: showTitle !== false,
             showMessage: showMessage !== false,

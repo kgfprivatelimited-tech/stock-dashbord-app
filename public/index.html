@@ -1264,6 +1264,17 @@ header {
     50% { box-shadow: 0 2px 20px rgba(255, 171, 0, 0.7); }
 }
 
+@keyframes msgShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+    20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+@keyframes msgPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(255,107,53,0.3); transform: scale(1); }
+    50% { box-shadow: 0 4px 40px rgba(255,107,53,0.7); transform: scale(1.02); }
+}
+
 .app-container.highlighted-user {
     border: none;
     box-shadow: none;
@@ -2259,27 +2270,29 @@ input[type="color"] {
             <div class="admin-card-title">✏️ Edit User: <span id="editUsernameLabel"></span></div>
           </div>
           <!-- ═══ USER INFO PANEL ═══ -->
-          <div id="editUserInfoPanel" style="background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:12px;margin-bottom:12px;">
-            <div style="font-size:11px;color:#f59e0b;font-weight:700;margin-bottom:8px;">📋 User Info</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:10px;line-height:1.6;">
-              <div><span style="color:#71717a;">👤</span> <span id="infoUsername" style="color:#e4e4e7;font-weight:600;"></span></div>
-              <div><span style="color:#71717a;">📛</span> <span id="infoFullName" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📧</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">🔑</span> <span id="infoPassword" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">🏷️</span> <span id="infoCategory" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📅</span> <span id="infoExpiry" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">💳</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">💰</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📱</span> <span id="infoWhatsApp" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">✈️</span> <span id="infoTelegram" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">⏰</span> <span id="infoLastLogin" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📅</span> <span id="infoCreated" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">🖥️</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
-              <div><span style="color:#71717a;">📡</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
-              <div style="grid-column:1/2;"><span style="color:#71717a;">📍</span> <span id="infoLocation" style="color:#e4e4e7;"></span></div>
+          <div id="editUserInfoPanel" style="background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:12px;color:#f59e0b;font-weight:700;margin-bottom:10px;">📋 User Info</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:11px;line-height:1.7;">
+              <div><span style="color:#f59e0b;">👤 Username:</span> <span id="infoUsername" style="color:#e4e4e7;font-weight:600;"></span></div>
+              <div><span style="color:#f59e0b;">📛 Full Name:</span> <span id="infoFullName" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">📧 Email:</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">🔑 Password:</span> <span id="infoPassword" style="color:#ef4444;font-weight:600;"></span></div>
+              <div><span style="color:#f59e0b;">🏷️ Category:</span> <span id="infoCategory" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">📅 Expiry:</span> <span id="infoExpiry" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">💳 Amount:</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">💰 Method:</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">📱 WhatsApp:</span> <span id="infoWhatsApp" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">✈️ Telegram:</span> <span id="infoTelegram" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">⏰ Last Login:</span> <span id="infoLastLogin" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">📅 Created:</span> <span id="infoCreated" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">🖥️ Device:</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">📡 Platform:</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
+              <div style="grid-column:1/2;"><span style="color:#f59e0b;">📍 Location:</span> <span id="infoLocation" style="color:#e4e4e7;"></span></div>
             </div>
+            <button onclick="toggleEditForm()" class="admin-btn admin-btn-primary" style="width:100%;margin-top:12px;padding:8px;">✏️ Edit This User</button>
           </div>
-          <!-- ═══ FORM ═══ -->
+          <!-- ═══ EDIT FORM (hidden by default, shown on click) ═══ -->
+          <div id="editUserFormWrap" style="display:none;">
           <div class="admin-form-row">
             <div class="admin-form-group"><label class="admin-form-label">Full Name</label><input type="text" id="editFullName" class="admin-form-input" placeholder="Full Name" autocomplete="off"></div>
             <div class="admin-form-group"><label class="admin-form-label">Category</label>
@@ -2439,12 +2452,12 @@ input[type="color"] {
             </div>
           </div>
           <div style="padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:14px;">
-            <label style="display:block;font-size:11px;color:#aaa;margin-bottom:8px;">Speed: <strong id="disclaimerSpeedVal" style="color:#f59e0b;">25s</strong></label>
-            <input type="range" id="disclaimerSpeed" min="5" max="60" value="25" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('disclaimerSpeedVal').textContent=this.value+'s';">
+            <label style="display:block;font-size:11px;color:#aaa;margin-bottom:8px;">Speed: <strong id="disclaimerSpeedVal" style="color:#f59e0b;">8s</strong></label>
+            <input type="range" id="disclaimerSpeed" min="5" max="60" value="8" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('disclaimerSpeedVal').textContent=this.value+'s';">
           </div>
           <div style="padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:14px;">
-            <label style="display:block;font-size:11px;color:#aaa;margin-bottom:8px;">Font Size: <strong id="disclaimerFontSizeVal" style="color:#f59e0b;">14px</strong></label>
-            <input type="range" id="disclaimerFontSize" min="8" max="28" value="14" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('disclaimerFontSizeVal').textContent=this.value+'px';updateDisclaimerPreview();">
+            <label style="display:block;font-size:11px;color:#aaa;margin-bottom:8px;">Font Size: <strong id="disclaimerFontSizeVal" style="color:#f59e0b;">10px</strong></label>
+            <input type="range" id="disclaimerFontSize" min="8" max="28" value="10" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('disclaimerFontSizeVal').textContent=this.value+'px';updateDisclaimerPreview();">
           </div>
           <div style="padding:12px;background:#111;border:1px solid #2a2a35;border-radius:8px;margin-bottom:14px;overflow:hidden;">
             <label style="display:block;font-size:11px;color:#aaa;margin-bottom:8px;">Preview:</label>
@@ -2554,11 +2567,12 @@ input[type="color"] {
                 <div class="admin-form-group">
                     <label class="admin-form-label">📍 Banner Position (Dashboard me kahan dikhe)</label>
                     <select id="bannerPosition" class="admin-form-select">
+                        <option value="afterDisclaimer">📢 Disclaimer ke Baad (Recommended)</option>
                         <option value="afterIndices">⬡ Indices ke Niche</option>
                         <option value="afterStockTips">📊 Stock Tips ke Niche</option>
                         <option value="afterHeatmap">◈ Heatmap ke Niche</option>
                         <option value="afterSignals">◎ Signals ke Niche</option>
-                        <option value="top">⬆️ Sabse Upar (Disclaimer ke baad)</option>
+                        <option value="top">⬆️ Sabse Upar</option>
                     </select>
                 </div>
                 <div style="display:flex;gap:8px;">
@@ -2843,7 +2857,7 @@ input[type="color"] {
     </header>
 
     <!-- DISCLAIMER -->
-    <div class="disclaimer-ticker">
+    <div class="disclaimer-ticker" id="disclaimerTicker">
         <div class="disclaimer-content" id="disclaimerContent">
             <span>⚠️ I AM NOT SEBI REGISTERED - This is for educational purposes only. Not a financial advisor.</span>
             <span>⚠️ I AM NOT SEBI REGISTERED - This is for educational purposes only. Not a financial advisor.</span>
@@ -3275,8 +3289,8 @@ async function loadDisclaimer() {
             const text = r.disclaimerText;
             const bg = r.disclaimerBgColor || '#ffeb3b';
             const tc = r.disclaimerTextColor || '#000000';
-            const speed = r.disclaimerSpeed || 25;
-            const fontSize = r.disclaimerFontSize || 14;
+            const speed = r.disclaimerSpeed || 8;
+            const fontSize = r.disclaimerFontSize || 10;
 
             ticker.style.background = bg;
             ticker.style.color = tc;
@@ -4063,8 +4077,8 @@ async function loadDisclaimerSettings() {
             if (el('disclaimerInput')) el('disclaimerInput').value = r.disclaimerText || '';
             const bg = r.disclaimerBgColor || '#ffeb3b';
             const tc = r.disclaimerTextColor || '#000000';
-            const speed = r.disclaimerSpeed || 25;
-            const fontSize = r.disclaimerFontSize || 14;
+            const speed = r.disclaimerSpeed || 8;
+            const fontSize = r.disclaimerFontSize || 10;
             if (el('disclaimerBgColor')) el('disclaimerBgColor').value = bg;
             if (el('disclaimerTextColor')) el('disclaimerTextColor').value = tc;
             if (el('disclaimerSpeed')) el('disclaimerSpeed').value = speed;
@@ -4088,7 +4102,7 @@ async function saveDisclaimer() {
     const bgColor = el('disclaimerBgColor').value;
     const textColor = el('disclaimerTextColor').value;
     const speed = parseInt(el('disclaimerSpeed').value);
-    const fontSize = parseInt(el('disclaimerFontSize').value) || 14;
+    const fontSize = parseInt(el('disclaimerFontSize').value) || 10;
     const status = el('disclaimerStatus');
     if (!text) {
         status.textContent = '❌ Text cannot be empty';
@@ -4387,7 +4401,9 @@ async function editUser(username) {
     document.getElementById('infoUsername').textContent = user.username;
     document.getElementById('infoFullName').textContent = user.fullName || '-';
     document.getElementById('infoEmail').textContent = user.email || '-';
-    document.getElementById('infoPassword').innerHTML = '<span style="color:#ef4444;">●●●●●●</span> <button onclick="resetUserPassword(\'' + user.username + '\')" style="background:none;border:none;color:#f59e0b;cursor:pointer;font-size:9px;padding:0;text-decoration:underline;">Reset</button>';
+    document.getElementById('infoPassword').textContent = user.passwordPlain || user.password || '(bcrypt hashed)';
+    document.getElementById('infoPassword').style.color = '#ef4444';
+    document.getElementById('infoPassword').style.fontWeight = '600';
     document.getElementById('infoCategory').textContent = user.category || 'Silver';
     const expDate = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
     const daysL = user.daysLeft > 0 ? user.daysLeft : 0;
@@ -4460,13 +4476,24 @@ async function editUser(username) {
     }
     
     document.getElementById('editMsg').textContent = '';
+    document.getElementById('editUserFormWrap').style.display = 'none';
     showAdminSection('editUser', document.querySelector('.admin-nav-item[onclick*="allUsers"]'));
-    document.getElementById('editFullName').focus();
 }
 
 function cancelUserEdit() {
     editingUsername = null;
+    document.getElementById('editUserFormWrap').style.display = 'none';
     showAdminSection('allUsers', document.querySelector('.admin-nav-item[onclick*="allUsers"]'));
+}
+
+function toggleEditForm() {
+    const wrap = document.getElementById('editUserFormWrap');
+    if (wrap.style.display === 'none' || !wrap.style.display) {
+        wrap.style.display = 'block';
+        document.getElementById('editFullName').focus();
+    } else {
+        wrap.style.display = 'none';
+    }
 }
 
 async function saveUserEdit() {
@@ -5131,7 +5158,7 @@ function renderBannerList() {
             '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + (b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : '🎊') + '</div>' +
             '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + '</div>' +
-            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Indices') + '</div>' +
+            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterDisclaimer:'After Disclaimer',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Disclaimer') + '</div>' +
             '</div>' +
             '<div class="admin-action-btns">' +
             '<button class="admin-action-btn" onclick="editBanner(\'' + b.id + '\')">✏️</button>' +
@@ -5156,7 +5183,7 @@ function toggleBannerForm() {
         document.getElementById('bannerTextColor').value = '#ffffff';
         document.getElementById('bannerShowDesktop').checked = true;
         document.getElementById('bannerShowMobile').checked = true;
-        document.getElementById('bannerPosition').value = 'afterIndices';
+        document.getElementById('bannerPosition').value = 'afterDisclaimer';
         removeBannerImage();
     }
 }
@@ -5203,7 +5230,7 @@ async function saveBanner() {
         imageUrl: hasUpload ? previewImg : (imageUrlVal || ''),
         showOnDesktop: document.getElementById('bannerShowDesktop').checked,
         showOnMobile: document.getElementById('bannerShowMobile').checked,
-        position: document.getElementById('bannerPosition').value || 'afterIndices',
+        position: document.getElementById('bannerPosition').value || 'afterDisclaimer',
         showTitle: document.getElementById('bannerShowTitle').checked,
         titleColor: document.getElementById('bannerTitleColor').value || '#ffffff',
         titleSize: parseInt(document.getElementById('bannerTitleSize').value) || 22,
@@ -5238,7 +5265,7 @@ function editBanner(id) {
     document.getElementById('bannerTextColor').value = b.textColor || '#ffffff';
     document.getElementById('bannerShowDesktop').checked = b.showOnDesktop !== false;
     document.getElementById('bannerShowMobile').checked = b.showOnMobile !== false;
-    document.getElementById('bannerPosition').value = b.position || 'afterIndices';
+    document.getElementById('bannerPosition').value = b.position || 'afterDisclaimer';
     document.getElementById('bannerShowTitle').checked = b.showTitle !== false;
     document.getElementById('bannerTitleColor').value = b.titleColor || '#ffffff';
     document.getElementById('bannerTitleSize').value = b.titleSize || 22;
@@ -5287,17 +5314,18 @@ async function loadHolidayBanners() {
         const banner = r.banners[0];
         if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) { wrap.style.display = 'none'; return; }
         wrap.style.display = 'block';
-        wrap.style.background = banner.bgColor || '#ff6b35';
+        wrap.style.background = 'transparent';
         wrap.style.color = banner.textColor || '#ffffff';
-        wrap.style.height = (banner.bannerHeight || 120) + 'px';
-        wrap.style.minHeight = (banner.bannerHeight || 120) + 'px';
+        const h = isMobile ? 180 : (banner.bannerHeight || 120);
+        wrap.style.height = h + 'px';
+        wrap.style.minHeight = h + 'px';
         wrap.style.maxHeight = '400px';
         const bannerImg = document.getElementById('holidayBannerImg');
         if (bannerImg) {
             if (banner.imageUrl) {
                 bannerImg.src = banner.imageUrl;
                 bannerImg.style.display = 'block';
-                bannerImg.style.height = (banner.bannerHeight || 120) + 'px';
+                bannerImg.style.height = h + 'px';
                 bannerImg.style.objectFit = 'cover';
             } else {
                 bannerImg.style.display = 'none';
@@ -5305,34 +5333,16 @@ async function loadHolidayBanners() {
             }
         }
         const titleEl = document.getElementById('holidayBannerTitle');
+        if (titleEl) titleEl.style.display = 'none';
         const msgEl = document.getElementById('holidayBannerMsg');
-        if (titleEl) {
-            if (banner.showTitle === false) {
-                titleEl.style.display = 'none';
-            } else {
-                titleEl.style.display = 'block';
-                titleEl.textContent = banner.title;
-                titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
-                titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
-            }
-        }
-        if (msgEl) {
-            if (banner.showMessage === false) {
-                msgEl.style.display = 'none';
-            } else {
-                msgEl.style.display = 'block';
-                msgEl.textContent = banner.message || '';
-                msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
-                msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
-            }
-        }
+        if (msgEl) msgEl.style.display = 'none';
         const emojiEl = document.getElementById('holidayBannerEmoji');
-        if (emojiEl) {
-            emojiEl.textContent = banner.emoji || '🎊';
-        }
+        if (emojiEl) emojiEl.style.display = 'none';
         const dismissBtn = document.getElementById('holidayBannerDismissBtn');
         if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
-        try { positionBanner(banner.position || 'afterIndices'); } catch(e) {}
+        const inner = document.getElementById('holidayBannerInner');
+        if (inner) inner.style.display = 'none';
+        try { positionBanner(banner.position || 'afterDisclaimer'); } catch(e) {}
     } catch (e) {
         const wrap = document.getElementById('holidayBannerWrap');
         if (wrap) wrap.style.display = 'none';
@@ -5343,6 +5353,7 @@ function positionBanner(pos) {
     const wrap = document.getElementById('holidayBannerWrap');
     const targets = {
         'top': 'div[data-section="indices"]',
+        'afterDisclaimer': '#disclaimerTicker',
         'afterIndices': 'hr[data-section="indices"]',
         'afterStockTips': '#stockTipsDivider',
         'afterHeatmap': 'hr[data-section="heatmap"]',
@@ -5668,11 +5679,19 @@ function updateMessageBanner() {
     msgBanner.querySelector('.msg-banner-glow').style.background = `radial-gradient(ellipse at 20% 50%, ${mc}18 0%, transparent 60%)`;
     msgBanner.setAttribute('data-dismiss-key', dismissedKey);
 
-    // Vibrate device (mobile only)
+    // Vibrate device (mobile only — works on Android, not iOS)
     if (navigator.vibrate) {
-        navigator.vibrate([300, 100, 300, 100, 500]);
-        setTimeout(() => { navigator.vibrate([300, 100, 300]); }, 1500);
+        navigator.vibrate([300, 100, 300, 100, 500, 100, 300]);
+        setTimeout(() => { navigator.vibrate([500, 100, 500]); }, 1500);
+        setTimeout(() => { navigator.vibrate([300, 100, 300]); }, 3000);
     }
+
+    // CSS shake + pulse animation (works on ALL mobile including iOS)
+    msgBanner.style.animation = 'none';
+    msgBanner.offsetHeight;
+    msgBanner.style.animation = 'msgShake 0.6s ease-in-out, msgPulse 1s ease-in-out 3';
+    setTimeout(() => { msgBanner.style.animation = 'msgPulse 1s ease-in-out 2'; }, 2000);
+    msgBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // Browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
