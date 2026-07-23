@@ -2979,26 +2979,6 @@ input[type="color"] {
     </div>
     <hr class="divider" data-section="indices">
 
-    <!-- STOCK TIPS -->
-    <div class="section" id="stockTipsSection" style="display: none;">
-        <div class="section-title">📊 Stock Tips — By Vaibhav</div>
-        <div id="stockTipsGrid" class="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
-    </div>
-    <hr class="divider" id="stockTipsDivider" style="display: none;">
-
-    <!-- HOLIDAY FESTIVAL BANNER -->
-    <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
-        <img id="holidayBannerImg" style="display:none; width:100%; height:auto; max-height:200px; object-fit:cover;" alt="Banner">
-        <div id="holidayBannerInner" style="padding:16px 20px; display:flex; align-items:center; gap:14px;">
-            <div id="holidayBannerEmoji" style="font-size:36px; flex-shrink:0;">🎊</div>
-            <div style="flex:1; min-width:0;">
-                <div id="holidayBannerTitle" style="font-size:14px; font-weight:800; letter-spacing:0.5px;"></div>
-                <div id="holidayBannerMsg" style="font-size:11px; opacity:0.9; margin-top:3px;"></div>
-            </div>
-            <button onclick="dismissHolidayBanner(this.dataset.bannerId)" data-banner-id="" id="holidayBannerDismissBtn" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
-        </div>
-    </div>
-
     <!-- USER MESSAGE BANNER (from admin) -->
     <div class="user-message-banner" id="userMessageBanner" style="display: none;">
         <div class="msg-banner-glow"></div>
@@ -3013,6 +2993,26 @@ input[type="color"] {
             <button class="msg-banner-close" onclick="dismissMessage()" title="Dismiss">✕</button>
         </div>
     </div>
+
+    <!-- HOLIDAY FESTIVAL BANNER -->
+    <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
+        <img id="holidayBannerImg" style="display:none; width:100%; height:auto; max-height:200px; object-fit:cover;" alt="Banner">
+        <div id="holidayBannerInner" style="padding:16px 20px; display:flex; align-items:center; gap:14px;">
+            <div id="holidayBannerEmoji" style="font-size:36px; flex-shrink:0;">🎊</div>
+            <div style="flex:1; min-width:0;">
+                <div id="holidayBannerTitle" style="font-size:14px; font-weight:800; letter-spacing:0.5px;"></div>
+                <div id="holidayBannerMsg" style="font-size:11px; opacity:0.9; margin-top:3px;"></div>
+            </div>
+            <button onclick="dismissHolidayBanner(this.dataset.bannerId)" data-banner-id="" id="holidayBannerDismissBtn" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
+        </div>
+    </div>
+
+    <!-- STOCK TIPS -->
+    <div class="section" id="stockTipsSection" style="display: none;">
+        <div class="section-title">📊 Stock Tips — By Vaibhav</div>
+        <div id="stockTipsGrid" class="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+    </div>
+    <hr class="divider" id="stockTipsDivider" style="display: none;">
 
     <!-- GAINERS / LOSERS -->
     <div class="section" data-section="gainersLosers">
@@ -5269,11 +5269,20 @@ function renderNotifPanel() {
     if (_notifItems.length === 0) { body.innerHTML = '<div class="notif-empty">No notifications today</div>'; return; }
     body.innerHTML = _notifItems.map(n => `<div class="notif-item"><div class="notif-icon ${n.type}">${n.icon}</div><div class="notif-content"><div class="notif-title">${n.title}</div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('');
 }
-function toggleNotifPanel() {
+function toggleNotifPanel(e) {
+    if (e) e.stopPropagation();
     const panel = document.getElementById('notifPanel');
     panel.classList.toggle('show');
     if (panel.classList.contains('show')) renderNotifPanel();
 }
+document.addEventListener('click', function(e) {
+    const panel = document.getElementById('notifPanel');
+    if (!panel || !panel.classList.contains('show')) return;
+    if (panel.contains(e.target)) return;
+    const bell = e.target.closest('[onclick*="toggleNotifPanel"]');
+    if (bell) return;
+    panel.classList.remove('show');
+});
 function clearAllNotifs() {
     _notifItems = [];
     saveNotifState();
