@@ -1230,19 +1230,15 @@ function loadMarketCache() {
     return { indices: { data: null, timestamp: 0 }, stocks: { data: null, timestamp: 0, symbols: '' }, heatmap: { data: null, timestamp: 0 } };
 }
 
-let _marketCacheLastWrite = 0;
 function saveMarketCache(cache) {
-    const now = Date.now();
-    if (now - _marketCacheLastWrite < 300000) return; // Write at most every 5 min
-    _marketCacheLastWrite = now;
     try {
         fs.writeFileSync(MARKET_CACHE_FILE, JSON.stringify(cache));
     } catch(e) {}
 }
 
 let marketCache = loadMarketCache();
-const INDICES_CACHE_TTL = 30000;   // 30 seconds
-const STOCKS_CACHE_TTL = 30000;    // 30 seconds
+const INDICES_CACHE_TTL = 1000;   // 1 second
+const STOCKS_CACHE_TTL = 5000;    // 5 seconds
 
 // ========================================
 // REAL-TIME SIGNAL ENGINE
@@ -2295,9 +2291,9 @@ app.delete('/api/admin/banners/:id', checkAdmin, (req, res) => {
 
 // Start background refreshers
 updateIndexKeys(); // Load selected indices from settings first
-setInterval(refreshIndicesBackground, 30000);
-setInterval(refreshStocksBackground, 30000);
-setInterval(saveSignalHistory, 120000);
+setInterval(refreshIndicesBackground, 1000);
+setInterval(refreshStocksBackground, 5000);
+setInterval(saveSignalHistory, 60000);
 // Initial refresh
 setTimeout(refreshIndicesBackground, 2000);
 setTimeout(refreshStocksBackground, 5000);
@@ -2311,7 +2307,7 @@ app.listen(PORT, () => {
     console.log(`   By Vaibhav`);
     console.log(`🌐 Dashboard: http://localhost:${PORT}`);
     console.log(`🔐 Admin Password: ${ADMIN_PASSWORD}`);
-    console.log(`📊 Background refresher: 30s (indices + stocks)`);
+    console.log(`📊 Background refresher: 1s (indices), 5s (stocks)`);
     console.log(`\n📋 First time setup:`);
     console.log(`   1. Run: node create-user.js`);
     console.log(`   2. Login with username/password created`);

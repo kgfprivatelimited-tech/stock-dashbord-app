@@ -2986,26 +2986,6 @@ input[type="color"] {
     </div>
 </div>
 
-    <!-- USER PASSWORD CHANGE -->
-    <div class="section" id="userChangePassSection" style="margin-bottom:20px;">
-        <div class="section-title">🔐 Change Password</div>
-        <div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px;max-width:400px;">
-            <div class="admin-form-group">
-                <label class="admin-form-label">Current Password</label>
-                <input type="password" id="userCurrentPass" class="admin-form-input" placeholder="Current password">
-            </div>
-            <div class="admin-form-group">
-                <label class="admin-form-label">New Password</label>
-                <input type="password" id="userNewPass" class="admin-form-input" placeholder="New password (min 4 chars)">
-            </div>
-            <div class="admin-form-group">
-                <label class="admin-form-label">Confirm New Password</label>
-                <input type="password" id="userConfirmPass" class="admin-form-input" placeholder="Confirm new password">
-            </div>
-            <button class="admin-btn admin-btn-primary" onclick="userChangePassword()" style="width:100%;">🔒 Update Password</button>
-            <div id="userPassStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
-        </div>
-    </div>
 
     <!-- PASSWORD CHANGE POPUP -->
     <div id="passwordChangePopup" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center;">
@@ -5647,37 +5627,36 @@ function startAutoRefresh() {
     
     // Start new intervals only if user is logged in
     if (currentUser) {
-        // Indices + GL + Signals — every 30s (server caches data)
+        // Live data — every 1s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadIndices();
-        }, 30000));
+        }, 1000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) { loadGL(); loadFO(); loadFNOAll(); loadHeatmap(); }
-        }, 30000));
+        }, 1000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadSignals();
-        }, 30000));
+        }, 1000));
 
-        // Message + Tips — every 15s
+        // Message + Tips — every 1s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) checkMessageUpdate();
-        }, 15000));
+        }, 1000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDashboardStockTips();
-        }, 15000));
+        }, 1000));
         
-        // Dashboard settings every 60s
+        // Settings + Disclaimer — every 1m
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDashboardSettingsAndApply();
         }, 60000));
         
-        // Disclaimer every 30s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDisclaimer();
-        }, 30000));
+        }, 60000));
         
         // Listen for cross-tab localStorage changes for instant disclaimer update
         window.addEventListener('storage', (e) => {
