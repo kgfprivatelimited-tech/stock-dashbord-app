@@ -1381,22 +1381,18 @@ header {
     font-family: 'JetBrains Mono', monospace;
 }
 
-.idx-card { transition: border-color 0.3s; }
-.idx-blink-green { animation: blinkGreen 1s ease-in-out; }
-.idx-blink-red { animation: blinkRed 1s ease-in-out; }
+.idx-card { transition: all 0.3s; }
+.idx-blink-green { animation: blinkGreen 0.6s ease-in-out 3; }
+.idx-blink-red { animation: blinkRed 0.6s ease-in-out 3; }
 @keyframes blinkGreen {
-    0% { box-shadow: 0 0 0 rgba(34,197,94,0); }
-    25% { box-shadow: 0 0 20px rgba(34,197,94,0.7); border-color: #22c55e; }
-    50% { box-shadow: 0 0 6px rgba(34,197,94,0.3); }
-    75% { box-shadow: 0 0 14px rgba(34,197,94,0.5); border-color: #22c55e; }
-    100% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+    0%, 100% { background: #1a1a24; box-shadow: none; transform: scale(1); }
+    30% { background: rgba(34,197,94,0.3); box-shadow: 0 0 30px rgba(34,197,94,0.9); border-color: #22c55e; transform: scale(1.05); }
+    60% { background: rgba(34,197,94,0.1); box-shadow: 0 0 8px rgba(34,197,94,0.3); transform: scale(1.01); }
 }
 @keyframes blinkRed {
-    0% { box-shadow: 0 0 0 rgba(239,68,68,0); }
-    25% { box-shadow: 0 0 20px rgba(239,68,68,0.7); border-color: #ef4444; }
-    50% { box-shadow: 0 0 6px rgba(239,68,68,0.3); }
-    75% { box-shadow: 0 0 14px rgba(239,68,68,0.5); border-color: #ef4444; }
-    100% { box-shadow: 0 0 0 rgba(239,68,68,0); }
+    0%, 100% { background: #1a1a24; box-shadow: none; transform: scale(1); }
+    30% { background: rgba(239,68,68,0.3); box-shadow: 0 0 30px rgba(239,68,68,0.9); border-color: #ef4444; transform: scale(1.05); }
+    60% { background: rgba(239,68,68,0.1); box-shadow: 0 0 8px rgba(239,68,68,0.3); transform: scale(1.01); }
 }
 
 @media (max-width: 768px) {
@@ -2687,8 +2683,6 @@ input[type="color"] {
         </div>
         </div>
 
-      </div><!-- /admin-left-panel -->
-
       <!-- ═══ BROADCAST SECTION ═══ -->
       <div id="section-broadcast" style="display:none;">
         <div class="admin-card">
@@ -2798,6 +2792,8 @@ input[type="color"] {
           <div id="reminderStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
       </div>
+
+      </div><!-- /admin-left-panel -->
 
       <!-- ═══ RIGHT SIDEBAR ═══ -->
       <div class="admin-right-sidebar">
@@ -3199,7 +3195,8 @@ async function checkSession() {
             loadApiKeys();
             updateAdminSidebarClock();
             if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
-            if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(loadDashboardIndices, 30);
+            if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
+            if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 1000);
         } else {
             document.getElementById('adminLoginScreen').classList.add('show');
         }
@@ -3448,13 +3445,15 @@ async function adminLogin() {
     loadApiKeys();
     updateAdminSidebarClock();
     if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
-    if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(loadDashboardIndices, 30);
+    if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
+    if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 1000);
 }
 
 function adminLogout() {
     isAdmin = false;
     localStorage.removeItem('bf_admin');
     if (window._adminIndicesInterval) { clearInterval(window._adminIndicesInterval); window._adminIndicesInterval = null; }
+    if (window._adminFetchInterval) { clearInterval(window._adminFetchInterval); window._adminFetchInterval = null; }
     document.getElementById('adminLoginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
@@ -3649,6 +3648,39 @@ async function loadDashboardData() {
 
 let _lastIndicesJSON = '';
 let _prevIndicesPrices = {};
+let _adminIndicesCache = [];
+
+async function fetchAdminIndices() {
+    try {
+        const r = await fetch(API + '/api/admin/indices', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (r && r.length > 0) _adminIndicesCache = r;
+    } catch(e) {}
+}
+
+function renderAdminIndices() {
+    const r = _adminIndicesCache;
+    const grid = document.getElementById('dashIndicesGrid');
+    const status = document.getElementById('dashIndicesStatus');
+    if (!grid || !r || r.length === 0) return;
+    grid.innerHTML = r.map(d => {
+        const isUp = parseFloat(d.change) >= 0;
+        const color = isUp ? '#22c55e' : '#ef4444';
+        const ltp = parseFloat(d.ltp) || 0;
+        const change = parseFloat(d.change) || 0;
+        const pct = parseFloat(d.pct) || 0;
+        const prev = _prevIndicesPrices[d.name];
+        const changed = prev !== undefined && prev !== ltp;
+        const animClass = changed ? (isUp ? 'idx-blink-green' : 'idx-blink-red') : '';
+        _prevIndicesPrices[d.name] = ltp;
+        return `<div class="idx-card ${animClass}" style="width:100%;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
+            <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;">${d.name}</div>
+            <div style="font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+            <div style="font-size:12px;color:${color};margin-top:4px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
+        </div>`;
+    }).join('');
+    if (status) { status.textContent = 'Live'; status.style.color = '#22c55e'; }
+}
+
 async function loadDashboardIndices() {
     try {
         const r = await fetch(API + '/api/admin/indices', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
@@ -3662,22 +3694,10 @@ async function loadDashboardIndices() {
             grid.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Market Closed</div>';
             return;
         }
-        grid.innerHTML = r.map(d => {
-            const isUp = parseFloat(d.change) >= 0;
-            const color = isUp ? '#22c55e' : '#ef4444';
-            const ltp = parseFloat(d.ltp) || 0;
-            const change = parseFloat(d.change) || 0;
-            const pct = parseFloat(d.pct) || 0;
-            const prev = _prevIndicesPrices[d.name];
-            const changed = prev !== undefined && prev !== ltp;
-            const animClass = changed ? (isUp ? 'idx-blink-green' : 'idx-blink-red') : '';
-            _prevIndicesPrices[d.name] = ltp;
-            return `<div class="idx-card ${animClass}" style="width:100%;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
-                <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;">${d.name}</div>
-                <div style="font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-                <div style="font-size:12px;color:${color};margin-top:4px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
-            </div>`;
-        }).join('');
+        _adminIndicesCache = r;
+        renderAdminIndices();
+    } catch(e) {}
+}
         if (status) { status.textContent = 'Live'; status.style.color = '#22c55e'; }
     } catch(e) {
         const grid = document.getElementById('dashIndicesGrid');
