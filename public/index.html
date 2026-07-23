@@ -478,6 +478,41 @@ header {
     grid-template-columns: repeat(12, 1fr);
     gap: 4px;
 }
+#heatmap-grid .hm-cell { cursor: pointer; transition: transform 0.2s, filter 0.2s; }
+#heatmap-grid .hm-cell:hover { transform: translateY(-2px); filter: brightness(1.25); }
+.heatmap-sector-popup {
+    display: none;
+    position: fixed;
+    z-index: 10002;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    max-height: 390px;
+    overflow: hidden;
+    background: #12121a;
+    border: 1px solid #2a2a35;
+    border-radius: 12px;
+    box-shadow: 0 14px 45px rgba(0,0,0,0.7);
+}
+.heatmap-sector-popup.show { display: block; }
+.heatmap-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    color: #f59e0b;
+    font-size: 12px;
+    border-bottom: 1px solid #2a2a35;
+}
+.heatmap-popup-header button { background: transparent; border: 0; color: #71717a; cursor: pointer; font-size: 13px; }
+.heatmap-popup-header button:hover { color: #ef4444; }
+#heatmapPopupBody { max-height: 330px; overflow-y: auto; padding: 6px; }
+.heatmap-stock-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.heatmap-stock-symbol { color: #e4e4e7; font-size: 11px; font-weight: 700; }
+.heatmap-stock-price { color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; }
+.heatmap-stock-change { font-size: 10px; margin-left: 8px; }
+.heatmap-stock-change.up { color: #00c853; }
+.heatmap-stock-change.down { color: #ff1744; }
+.heatmap-popup-empty { color: #71717a; font-size: 11px; padding: 24px 10px; text-align: center; }
 
 .hm-cell {
     border-radius: 4px;
@@ -3033,6 +3068,10 @@ input[type="color"] {
     <div class="section" data-section="heatmap">
         <div class="section-title">◈ Sector Heatmap</div>
         <div id="heatmap-grid">Loading...</div>
+    </div>
+    <div class="heatmap-sector-popup" id="heatmapSectorPopup">
+        <div class="heatmap-popup-header"><strong id="heatmapPopupTitle">Sector Stocks</strong><button onclick="closeHeatmapPopup()" aria-label="Close">✕</button></div>
+        <div id="heatmapPopupBody"><div class="heatmap-popup-empty">Loading live prices...</div></div>
     </div>
     <hr class="divider" data-section="heatmap">
 
@@ -5764,6 +5803,46 @@ async function loadGL() {
     } catch (e) { console.error('G/L error:', e); }
 }
 
+function closeHeatmapPopup() {
+    const popup = document.getElementById('heatmapSectorPopup');
+    if (popup) popup.classList.remove('show');
+}
+async function openHeatmapSector(event, sector) {
+    if (event) event.stopPropagation();
+    const popup = document.getElementById('heatmapSectorPopup');
+    const body = document.getElementById('heatmapPopupBody');
+    const title = document.getElementById('heatmapPopupTitle');
+    if (!popup || !body || !title) return;
+    title.textContent = sector + ' Stocks';
+    body.innerHTML = '<div class="heatmap-popup-empty">Loading live prices...</div>';
+    popup.classList.add('show');
+    const cell = event && event.currentTarget;
+    const rect = cell ? cell.getBoundingClientRect() : null;
+    const width = 320;
+    let left = rect ? rect.left : (window.innerWidth - width) / 2;
+    let top = rect ? rect.bottom + 8 : 100;
+    if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
+    if (left < 12) left = 12;
+    if (top + 390 > window.innerHeight - 12) top = rect ? rect.top - 398 : 100;
+    if (top < 12) top = 12;
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    try {
+        const data = await fetch(API + '/api/heatmap/sector-stocks?sector=' + encodeURIComponent(sector), { headers: getAuthHeaders() }).then(r => r.json());
+        if (!data || !data.length) { body.innerHTML = '<div class="heatmap-popup-empty">Live data unavailable</div>'; return; }
+        body.innerHTML = data.map(s => {
+            const change = parseFloat(s.change) || 0;
+            const pct = parseFloat(s.pct) || 0;
+            const cls = change >= 0 ? 'up' : 'down';
+            return '<div class="heatmap-stock-row"><span class="heatmap-stock-symbol">' + s.symbol + '</span><span class="heatmap-stock-price">' + fmt(s.ltp) + '<span class="heatmap-stock-change ' + cls + '">' + sign(change) + fmt2(change) + ' (' + sign(pct) + fmt2(pct) + '%)</span></span></div>';
+        }).join('');
+    } catch (e) { body.innerHTML = '<div class="heatmap-popup-empty">Live data unavailable</div>'; }
+}
+document.addEventListener('click', function(event) {
+    const popup = document.getElementById('heatmapSectorPopup');
+    if (popup && popup.classList.contains('show') && !popup.contains(event.target) && !event.target.closest('.hm-cell')) closeHeatmapPopup();
+});
+
 let _lastHeatmapJSON = '';
 async function loadHeatmap() {
     try {
@@ -5777,7 +5856,7 @@ async function loadHeatmap() {
             return;
         }
         document.getElementById("heatmap-grid").innerHTML = data.map(d =>
-            '<div class="hm-cell" style="' + heatStyle(d.pct) + '">' +
+            '<div class="hm-cell" style="' + heatStyle(d.pct) + '" onclick="openHeatmapSector(event, ' + JSON.stringify(d.name) + ')">' +
             '<div class="hm-name">' + d.name + '</div>' +
             '<div class="hm-pct">' + sign(d.pct) + fmt2(d.pct) + '%</div></div>'
         ).join("");

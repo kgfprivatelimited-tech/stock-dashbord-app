@@ -1773,6 +1773,15 @@ app.get('/api/heatmap', checkUserAuth, async (req, res) => {
     res.json(await getHeatmapData());
 });
 
+app.get('/api/heatmap/sector-stocks', checkUserAuth, async (req, res) => {
+    const sector = String(req.query.sector || '').trim().toUpperCase();
+    const symbols = SECTOR_STOCKS[sector] || [];
+    if (!symbols.length) return res.json([]);
+    const data = await fetchStockQuote(symbols);
+    if (!data) return res.json([]);
+    res.json(symbols.filter(symbol => data[symbol]).map(symbol => data[symbol]));
+});
+
 app.get('/api/fo-stocks', checkUserAuth, async (req, res) => {
     const symbols = [...FO_GAINERS, ...FO_LOSERS];
     const data = await fetchStockQuote(symbols);
