@@ -3698,12 +3698,6 @@ async function loadDashboardIndices() {
         renderAdminIndices();
     } catch(e) {}
 }
-        if (status) { status.textContent = 'Live'; status.style.color = '#22c55e'; }
-    } catch(e) {
-        const grid = document.getElementById('dashIndicesGrid');
-        if (grid) grid.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">No data</div>';
-    }
-}
 
 // ═══════ PUSH NOTIFICATIONS ═══════
 function requestNotificationPermission() {
