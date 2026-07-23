@@ -3181,6 +3181,7 @@ async function checkSession() {
             loadApiKeys();
             updateAdminSidebarClock();
             if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
+            if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(loadDashboardIndices, 30);
         } else {
             document.getElementById('adminLoginScreen').classList.add('show');
         }
@@ -3429,11 +3430,13 @@ async function adminLogin() {
     loadApiKeys();
     updateAdminSidebarClock();
     if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
+    if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(loadDashboardIndices, 30);
 }
 
 function adminLogout() {
     isAdmin = false;
     localStorage.removeItem('bf_admin');
+    if (window._adminIndicesInterval) { clearInterval(window._adminIndicesInterval); window._adminIndicesInterval = null; }
     document.getElementById('adminLoginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';

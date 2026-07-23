@@ -240,16 +240,34 @@ function loadUsers() {
     try {
         const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
         if (!data.users || data.users.length === 0) {
-            data.users = [createDefaultAdmin()];
-            saveUsers(data);
+            console.log('⚠️ users.json empty, trying backup...');
+            return loadUsersFromBackup();
         }
+        // Save backup on every successful read
+        try { fs.writeFileSync(USERS_FILE + '.bak', JSON.stringify(data, null, 2)); } catch(e) {}
         return data;
     } catch (e) {
-        console.log('📁 Creating default users.json with admin user...');
-        const defaultData = { users: [createDefaultAdmin()] };
-        saveUsers(defaultData);
-        return defaultData;
+        console.log('📁 users.json corrupted, trying backup...');
+        return loadUsersFromBackup();
     }
+}
+
+function loadUsersFromBackup() {
+    try {
+        const bakPath = USERS_FILE + '.bak';
+        if (fs.existsSync(bakPath)) {
+            const data = JSON.parse(fs.readFileSync(bakPath, 'utf8'));
+            if (data.users && data.users.length > 0) {
+                console.log('✅ Restored from backup: ' + data.users.length + ' users');
+                saveUsers(data);
+                return data;
+            }
+        }
+    } catch (e) {}
+    console.log('📁 Creating default users.json with admin user...');
+    const defaultData = { users: [createDefaultAdmin()] };
+    saveUsers(defaultData);
+    return defaultData;
 }
 
 function createDefaultAdmin() {
@@ -279,7 +297,21 @@ function createDefaultAdmin() {
 }
 
 function saveUsers(data) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+    const tmpFile = USERS_FILE + '.tmp';
+    try {
+        fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2));
+        // Atomic rename — prevents corruption on crash
+        if (process.platform === 'win32') {
+            if (fs.existsSync(USERS_FILE)) fs.unlinkSync(USERS_FILE);
+        }
+        fs.renameSync(tmpFile, USERS_FILE);
+        // Also keep backup
+        fs.writeFileSync(USERS_FILE + '.bak', JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.error('❌ saveUsers failed:', e.message);
+        // Fallback: direct write
+        try { fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2)); } catch(e2) {}
+    }
 }
 
 function loadSettings() {
