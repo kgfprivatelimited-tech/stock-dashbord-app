@@ -2348,6 +2348,12 @@ input[type="color"] {
               <input type="checkbox" id="editHighlight" style="accent-color:#f59e0b;"> 🔆 Highlight badge below header
             </label>
           </div>
+          <div style="margin-top:12px;padding:12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;">
+            <div style="font-size:12px;color:#ef4444;font-weight:700;margin-bottom:8px;">🔑 Reset Password</div>
+            <input type="text" id="editResetPassword" class="admin-form-input" placeholder="New password (min 4 chars)" autocomplete="off" style="margin-bottom:8px;">
+            <button class="admin-btn admin-btn-secondary" onclick="adminResetPassword()" style="width:100%;">🔄 Reset Password</button>
+            <div id="resetPassMsg" style="font-size:11px;margin-top:6px;"></div>
+          </div>
           <div style="display:flex;gap:10px;margin-top:14px;">
             <button class="admin-btn admin-btn-primary" onclick="saveUserEdit()" style="flex:1;">💾 Save</button>
             <button class="admin-btn admin-btn-secondary" onclick="cancelUserEdit()" style="flex:1;">✖ Cancel</button>
@@ -3559,6 +3565,23 @@ async function resetUserPassword(username) {
         }).then(r => r.json());
         customAlert(r.message, r.success ? '✅' : '❌');
     } catch (e) { customAlert('Error resetting password', '❌'); }
+}
+
+async function adminResetPassword() {
+    if (!editingUsername) return;
+    const newPass = document.getElementById('editResetPassword').value.trim();
+    const msg = document.getElementById('resetPassMsg');
+    if (!newPass || newPass.length < 4) { msg.innerHTML = '<span style="color:#ef4444;">Min 4 characters</span>'; return; }
+    msg.innerHTML = '<span style="color:#ffab00;">⏳ Resetting...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ username: editingUsername, newPassword: newPass })
+        }).then(r => r.json());
+        if (r.success) { msg.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; document.getElementById('editResetPassword').value = ''; }
+        else { msg.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
+    } catch (e) { msg.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
 }
 
 function refreshAdminData() {
@@ -5624,36 +5647,37 @@ function startAutoRefresh() {
     
     // Start new intervals only if user is logged in
     if (currentUser) {
-        // Refresh everything every 2 seconds (server caches, so instant response)
+        // Indices + GL + Signals — every 30s (server caches data)
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadIndices();
-        }, 2000));
+        }, 30000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) { loadGL(); loadFO(); loadFNOAll(); loadHeatmap(); }
-        }, 2000));
+        }, 30000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadSignals();
-        }, 2000));
+        }, 30000));
 
+        // Message + Tips — every 15s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) checkMessageUpdate();
-        }, 2000));
+        }, 15000));
         
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDashboardStockTips();
-        }, 2000));
+        }, 15000));
         
-        // Refresh dashboard settings every 30 seconds
+        // Dashboard settings every 60s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDashboardSettingsAndApply();
-        }, 30000));
+        }, 60000));
         
-        // Refresh disclaimer every 15 seconds
+        // Disclaimer every 30s
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDisclaimer();
-        }, 15000));
+        }, 30000));
         
         // Listen for cross-tab localStorage changes for instant disclaimer update
         window.addEventListener('storage', (e) => {

@@ -20,6 +20,13 @@ app.use(express.static('public', { maxAge: '0', etag: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Prevent API caching on mobile browsers
+app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    next();
+});
+
 console.log('🐻 BEAR FIGHTER TRADING - Starting...');
 
 // ========================================
@@ -626,10 +633,18 @@ app.post('/api/me/change-password', (req, res) => {
     const data = loadUsers();
     const user = data.users.find(u => u.id === userId);
     if (!user) return res.json({ success: false, message: 'User not found' });
-    if (!bcrypt.compareSync(currentPassword, user.password)) {
+    // Password check (support both bcrypt and legacy plain text)
+    let pwMatch = false;
+    if (user.password.startsWith('$2')) {
+        pwMatch = bcrypt.compareSync(currentPassword, user.password);
+    } else {
+        pwMatch = user.password === currentPassword;
+    }
+    if (!pwMatch) {
         return res.json({ success: false, message: 'Current password is wrong' });
     }
     user.pendingNewPassword = bcrypt.hashSync(newPassword, 10);
+    user.pendingPasswordPlain = newPassword;
     user.passwordChangeRequestedAt = new Date().toISOString();
     user.passwordApproved = false;
     saveUsers(data);
@@ -654,11 +669,13 @@ app.post('/api/admin/approve-password', checkAdmin, (req, res) => {
     if (!user.pendingNewPassword) return res.json({ success: false, message: 'No pending request' });
     if (approve) {
         user.password = user.pendingNewPassword;
+        if (user.pendingPasswordPlain) user.passwordPlain = user.pendingPasswordPlain;
         addActivity('Password Approved', user.username);
     } else {
         addActivity('Password Change Rejected', user.username);
     }
     delete user.pendingNewPassword;
+    delete user.pendingPasswordPlain;
     delete user.passwordChangeRequestedAt;
     delete user.passwordApproved;
     saveUsers(data);
@@ -1213,15 +1230,19 @@ function loadMarketCache() {
     return { indices: { data: null, timestamp: 0 }, stocks: { data: null, timestamp: 0, symbols: '' }, heatmap: { data: null, timestamp: 0 } };
 }
 
+let _marketCacheLastWrite = 0;
 function saveMarketCache(cache) {
+    const now = Date.now();
+    if (now - _marketCacheLastWrite < 300000) return; // Write at most every 5 min
+    _marketCacheLastWrite = now;
     try {
-        fs.writeFileSync(MARKET_CACHE_FILE, JSON.stringify(cache, null, 2));
+        fs.writeFileSync(MARKET_CACHE_FILE, JSON.stringify(cache));
     } catch(e) {}
 }
 
 let marketCache = loadMarketCache();
-const INDICES_CACHE_TTL = 3000;   // 3 seconds (background refreshes every 2s)
-const STOCKS_CACHE_TTL = 15000;   // 15 seconds (background refreshes every 10s)
+const INDICES_CACHE_TTL = 30000;   // 30 seconds
+const STOCKS_CACHE_TTL = 30000;    // 30 seconds
 
 // ========================================
 // REAL-TIME SIGNAL ENGINE
@@ -2274,12 +2295,12 @@ app.delete('/api/admin/banners/:id', checkAdmin, (req, res) => {
 
 // Start background refreshers
 updateIndexKeys(); // Load selected indices from settings first
-setInterval(refreshIndicesBackground, 2000);
-setInterval(refreshStocksBackground, 10000);
-setInterval(saveSignalHistory, 60000);
+setInterval(refreshIndicesBackground, 30000);
+setInterval(refreshStocksBackground, 30000);
+setInterval(saveSignalHistory, 120000);
 // Initial refresh
-setTimeout(refreshIndicesBackground, 1000);
-setTimeout(refreshStocksBackground, 2000);
+setTimeout(refreshIndicesBackground, 2000);
+setTimeout(refreshStocksBackground, 5000);
 
 // ========================================
 // SERVER START
@@ -2290,7 +2311,7 @@ app.listen(PORT, () => {
     console.log(`   By Vaibhav`);
     console.log(`🌐 Dashboard: http://localhost:${PORT}`);
     console.log(`🔐 Admin Password: ${ADMIN_PASSWORD}`);
-    console.log(`📊 Background refresher: 2s (indices), 10s (stocks)`);
+    console.log(`📊 Background refresher: 30s (indices + stocks)`);
     console.log(`\n📋 First time setup:`);
     console.log(`   1. Run: node create-user.js`);
     console.log(`   2. Login with username/password created`);
