@@ -2101,7 +2101,8 @@ const DEFAULT_DASHBOARD_SETTINGS = {
         foStocks: false,
         fnoGainersLosers: false,
         signals: true
-    }
+    },
+    bgColor: '#0a0a0a'
 };
 
 function loadDashboardSettings() {
@@ -2117,7 +2118,8 @@ function loadDashboardSettings() {
         }
         return {
             selectedIndices: settings.selectedIndices || DEFAULT_DASHBOARD_SETTINGS.selectedIndices,
-            sections: settings.dashboardSections || DEFAULT_DASHBOARD_SETTINGS.sections
+            sections: settings.dashboardSections || DEFAULT_DASHBOARD_SETTINGS.sections,
+            bgColor: settings.dashBgColor || DEFAULT_DASHBOARD_SETTINGS.bgColor
         };
     } catch (e) {
         return DEFAULT_DASHBOARD_SETTINGS;
@@ -2136,20 +2138,24 @@ app.get('/api/admin/dashboard-settings', checkAdmin, (req, res) => {
         success: true,
         availableIndices: AVAILABLE_INDICES,
         selectedIndices: settings.selectedIndices,
-        sections: settings.sections
+        sections: settings.sections,
+        bgColor: settings.bgColor
     });
 });
 
 // Admin: update dashboard settings
 app.put('/api/admin/dashboard-settings', checkAdmin, (req, res) => {
     try {
-        const { selectedIndices, sections } = req.body;
+        const { selectedIndices, sections, bgColor } = req.body;
         const settings = loadSettings();
         if (selectedIndices && Array.isArray(selectedIndices)) {
             settings.selectedIndices = selectedIndices.slice(0, 4);
         }
         if (sections && typeof sections === 'object') {
             settings.dashboardSections = { ...DEFAULT_DASHBOARD_SETTINGS.sections, ...sections };
+        }
+        if (bgColor) {
+            settings.dashBgColor = bgColor;
         }
         saveSettings(settings);
         // Update live INDEX_KEYS from settings

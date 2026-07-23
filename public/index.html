@@ -2570,6 +2570,13 @@ input[type="color"] {
             <div style="font-size:12px;font-weight:600;color:#f59e0b;margin-bottom:8px;">⬡ Indices (max 4)</div>
             <div id="dashIndexCheckboxes"></div>
           </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:#f59e0b;margin-bottom:8px;">🎨 Dashboard Background Color</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="color" id="dashBgColor" value="#0a0a0a" style="width:50px;height:36px;border:1px solid #2a2a35;border-radius:6px;background:none;cursor:pointer;">
+                <input type="text" id="dashBgColorText" value="#0a0a0a" style="flex:1;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;padding:8px 12px;color:#e4e4e7;font-size:12px;" onchange="document.getElementById('dashBgColor').value=this.value;">
+            </div>
+          </div>
           <button class="admin-btn admin-btn-info" onclick="saveDashboardSettings()" style="width:100%;">💾 Save Settings</button>
           <div id="dashSettingsStatus" style="font-size:11px;text-align:center;margin-top:8px;"></div>
         </div>
@@ -3357,8 +3364,9 @@ function showDashboard() {
     }
     
     loadDisclaimer();
-    loadAll();
     loadNotifState();
+    loadAll();
+    if (currentUser.message && currentUser.message.trim()) checkNotifsForBroadcast(currentUser.message.trim());
     renderNotifBadge();
     startAutoRefresh();
     startCountdownTimer();
@@ -5277,7 +5285,13 @@ function checkNotifsForBroadcast(msg) {
     addNotif('broadcast', 'bc_' + msg.substring(0, 30), '📢 Broadcast Message', msg.length > 60 ? msg.substring(0, 60) + '...' : msg, '📢');
 }
 function checkNotifsForTips(tips) {
-    tips.forEach(t => { if (t.createdAt && t.active) { addNotif('tip', 'tip_' + t.id, '📊 Stock Tip: ' + t.symbol, t.action + ' ' + t.symbol + (t.entry ? ' @ ' + t.entry : '') + (t.target ? ' → ' + t.target : ''), '📊'); } });
+    const today = getTodayKey();
+    tips.forEach(t => {
+        if (t.createdAt && t.active) {
+            const tipDate = t.createdAt.split('T')[0];
+            if (tipDate === today) addNotif('tip', 'tip_' + t.id, '📊 Stock Tip: ' + t.symbol, t.action + ' ' + t.symbol + (t.entry ? ' @ ' + t.entry : '') + (t.target ? ' → ' + t.target : ''), '📊');
+        }
+    });
 }
 
 async function loadDashboardSettingsAndApply() {
@@ -5285,6 +5299,10 @@ async function loadDashboardSettingsAndApply() {
         const r = await fetch(API + '/api/dashboard-settings').then(r => r.json());
         dashboardSettings = r;
         applyDashboardSections();
+        const bg = r.bgColor || '#0a0a0a';
+        document.body.style.background = bg;
+        const appC = document.getElementById('appContainer');
+        if (appC) appC.style.background = bg;
     } catch (e) {}
 }
 
@@ -5327,6 +5345,12 @@ async function loadDashSettings() {
                 ${idx.name}
             </label>`;
         }).join('');
+        
+        const bgColor = r.bgColor || '#0a0a0a';
+        const bgInput = document.getElementById('dashBgColor');
+        const bgTextInput = document.getElementById('dashBgColorText');
+        if (bgInput) bgInput.value = bgColor;
+        if (bgTextInput) bgTextInput.value = bgColor;
     } catch (e) {}
 }
 
@@ -5353,7 +5377,7 @@ async function saveDashboardSettings() {
         const r = await fetch(API + '/api/admin/dashboard-settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ selectedIndices, sections })
+            body: JSON.stringify({ selectedIndices, sections, bgColor: document.getElementById('dashBgColor').value })
         }).then(r => r.json());
         if (r.success) {
             status.innerHTML = '<span style="color:#00c853;">✅ Saved!</span>';
