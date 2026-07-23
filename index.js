@@ -1269,7 +1269,7 @@ function saveMarketCache(cache) {
 }
 
 let marketCache = loadMarketCache();
-const INDICES_CACHE_TTL = 1000;   // 1 second
+const INDICES_CACHE_TTL = 1000;   // 1 second (server background refreshes every 1s)
 const STOCKS_CACHE_TTL = 5000;    // 5 seconds
 
 // ========================================
@@ -1697,12 +1697,12 @@ app.get('/api/indices', checkUserAuth, async (req, res) => {
 
 // Admin indices endpoint
 app.get('/api/admin/indices', checkAdmin, async (req, res) => {
+    if (marketCache.indices.data && marketCache.indices.data.length > 0) {
+        return res.json(marketCache.indices.data);
+    }
     const liveData = await fetchIndicesData();
     if (liveData && liveData.length > 0) {
         return res.json(liveData);
-    }
-    if (marketCache.indices.data && marketCache.indices.data.length > 0) {
-        return res.json(marketCache.indices.data);
     }
     res.json([]);
 });
