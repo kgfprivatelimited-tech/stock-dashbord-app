@@ -281,6 +281,59 @@ header {
     color: var(--accent);
 }
 
+/* ═══════ NOTIFICATION PANEL ═══════ */
+.notif-panel {
+    display: none;
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    width: 340px;
+    max-width: calc(100vw - 24px);
+    max-height: 480px;
+    background: #12121a;
+    border: 1px solid #2a2a35;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    z-index: 10001;
+    overflow: hidden;
+    flex-direction: column;
+}
+.notif-panel.show { display: flex; }
+.notif-panel-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #2a2a35;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.notif-panel-title { font-size: 12px; font-weight: 700; color: #fff; }
+.notif-panel-clear { font-size: 10px; color: #71717a; cursor: pointer; }
+.notif-panel-clear:hover { color: #ef4444; }
+.notif-panel-body { overflow-y: auto; flex: 1; }
+.notif-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.notif-icon.broadcast { background: rgba(255,107,53,0.15); }
+.notif-icon.tip { background: rgba(34,197,94,0.15); }
+.notif-icon.msg { background: rgba(59,130,246,0.15); }
+.notif-content { flex: 1; min-width: 0; }
+.notif-title { font-size: 11px; font-weight: 600; color: #e4e4e7; margin-bottom: 2px; }
+.notif-text { font-size: 10px; color: #71717a; word-break: break-word; }
+.notif-time { font-size: 9px; color: #555; margin-top: 3px; }
+.notif-empty { padding: 30px 14px; text-align: center; color: #71717a; font-size: 11px; }
+
 .btn-admin:hover {
     background: var(--accent);
     color: white;
@@ -1402,6 +1455,19 @@ header {
 }
 @media (max-width: 480px) {
     #dashIndicesGrid { grid-template-columns: 1fr !important; }
+}
+
+/* ═══════ NOTIFICATION PANEL MOBILE ═══════ */
+@media (max-width: 600px) {
+    .notif-panel { width: calc(100vw - 16px); right: 8px; top: 54px; max-height: 400px; }
+    .notif-panel-header { padding: 10px 12px; }
+    .notif-panel-title { font-size: 11px; }
+    .notif-panel-clear { font-size: 9px; }
+    .notif-item { padding: 8px 12px; }
+    .notif-icon { width: 28px; height: 28px; font-size: 12px; }
+    .notif-title { font-size: 10px; }
+    .notif-text { font-size: 9px; }
+    .notif-time { font-size: 8px; }
 }
 
 /* ═══════ FULL MOBILE RESPONSIVE ═══════ */
@@ -2872,11 +2938,22 @@ input[type="color"] {
             <span id="countdown"></span>
             <div class="header-btns">
                 <a class="header-btn" onclick="showUserPasswordPopup()" title="Change Password" style="cursor:pointer;">⚙️</a>
-                <a class="header-btn" onclick="requestNotificationPermission()" title="Enable Notifications" style="cursor:pointer;">🔔</a>
+                <a class="header-btn" onclick="toggleNotifPanel()" title="Notifications" style="cursor:pointer;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px;">0</span></a>
                 <a class="header-btn btn-logout" onclick="doLogout()">Logout</a>
             </div>
         </div>
     </header>
+
+    <!-- NOTIFICATION PANEL -->
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-panel-header">
+            <div class="notif-panel-title">🔔 Notifications</div>
+            <div class="notif-panel-clear" onclick="clearAllNotifs()">Clear All</div>
+        </div>
+        <div class="notif-panel-body" id="notifPanelBody">
+            <div class="notif-empty">No notifications</div>
+        </div>
+    </div>
 
     <!-- DISCLAIMER -->
     <div class="disclaimer-ticker" id="disclaimerTicker">
@@ -3281,6 +3358,8 @@ function showDashboard() {
     
     loadDisclaimer();
     loadAll();
+    loadNotifState();
+    renderNotifBadge();
     startAutoRefresh();
     startCountdownTimer();
 }
@@ -5101,10 +5180,9 @@ async function loadDashboardStockTips() {
                 <div style="margin-top:4px; font-size:9px; color:#ff6b35; font-weight:600;">By Vaibhav</div>
             </div>`;
         }).join('');
+        if (typeof checkNotifsForTips === 'function') checkNotifsForTips(data.filter(t => t.active));
     } catch (e) {}
 }
-
-/* ═══════ DASHBOARD DATA ═══════ */
 
 function dismissMessage() {
     const banner = document.getElementById('userMessageBanner');
@@ -5141,6 +5219,66 @@ function loadAll() {
 
 // ═══════ DASHBOARD SETTINGS ═══════
 let dashboardSettings = { sections: {}, selectedIndices: [] };
+
+// ═══════ NOTIFICATION SYSTEM ═══════
+let _notifItems = [];
+let _seenNotifIds = {};
+function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+function loadNotifState() {
+    const today = getTodayKey();
+    const stored = localStorage.getItem('bf_notif_' + currentUser.id);
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed.date !== today) { _notifItems = []; _seenNotifIds = {}; saveNotifState(); return; }
+            _notifItems = parsed.items || [];
+            _seenNotifIds = parsed.seen || {};
+        } catch(e) { _notifItems = []; _seenNotifIds = {}; }
+    }
+}
+function saveNotifState() {
+    if (!currentUser) return;
+    localStorage.setItem('bf_notif_' + currentUser.id, JSON.stringify({ date: getTodayKey(), items: _notifItems, seen: _seenNotifIds }));
+}
+function addNotif(type, id, title, text, icon) {
+    if (_seenNotifIds[id]) return;
+    _seenNotifIds[id] = true;
+    _notifItems.unshift({ id, type, title, text, icon, time: new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) });
+    saveNotifState();
+    renderNotifBadge();
+    renderNotifPanel();
+}
+function renderNotifBadge() {
+    const badge = document.getElementById('notifBadge');
+    const count = _notifItems.length;
+    if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.style.display = 'flex';
+    } else { badge.style.display = 'none'; }
+}
+function renderNotifPanel() {
+    const body = document.getElementById('notifPanelBody');
+    if (_notifItems.length === 0) { body.innerHTML = '<div class="notif-empty">No notifications today</div>'; return; }
+    body.innerHTML = _notifItems.map(n => `<div class="notif-item"><div class="notif-icon ${n.type}">${n.icon}</div><div class="notif-content"><div class="notif-title">${n.title}</div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('');
+}
+function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) renderNotifPanel();
+}
+function clearAllNotifs() {
+    _notifItems = [];
+    saveNotifState();
+    renderNotifBadge();
+    renderNotifPanel();
+}
+function checkNotifsForBroadcast(msg) {
+    if (!msg || !msg.trim()) return;
+    addNotif('broadcast', 'bc_' + msg.substring(0, 30), '📢 Broadcast Message', msg.length > 60 ? msg.substring(0, 60) + '...' : msg, '📢');
+}
+function checkNotifsForTips(tips) {
+    tips.forEach(t => { if (t.createdAt && t.active) { addNotif('tip', 'tip_' + t.id, '📊 Stock Tip: ' + t.symbol, t.action + ' ' + t.symbol + (t.entry ? ' @ ' + t.entry : '') + (t.target ? ' → ' + t.target : ''), '📊'); } });
+}
 
 async function loadDashboardSettingsAndApply() {
     try {
@@ -5773,6 +5911,7 @@ async function checkMessageUpdate() {
         if (newMsg !== oldMsg) {
             updateMessageBanner();
             loadDashboardStockTips();
+            if (newMsg && newMsg.trim()) checkNotifsForBroadcast(newMsg.trim());
         } else if (newMsg && newMsg.trim() !== '') {
             const banner = document.getElementById('userMessageBanner');
             if (banner && banner.style.display === 'none') {

@@ -150,7 +150,15 @@ if (!_settingsCheck.holidayBanners || _settingsCheck.holidayBanners.length === 0
         endDate: '2026-12-31',
         showOnDesktop: true,
         showOnMobile: true,
-        position: 'afterDisclaimer',
+        position: 'afterIndices',
+        showTitle: true,
+        titleColor: '#ffffff',
+        titleSize: 22,
+        bannerHeight: 120,
+        msgColor: '#ffffff',
+        msgSize: 13,
+        showMessage: true,
+        emoji: '🎊',
         active: true,
         createdAt: new Date().toISOString()
     }];
