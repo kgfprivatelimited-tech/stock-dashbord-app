@@ -3168,18 +3168,22 @@ function doLogout() {
 async function checkSession() {
     const userId = sessionStorage.getItem('userId');
     
-    // Show admin screen if on /admin path or admin session persisted
-    if (window.location.pathname === '/admin' || localStorage.getItem('bf_admin') === '1') {
+    // Show admin login screen if on /admin path, restore session if persisted
+    if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') {
         isAdmin = true;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('adminLoginScreen').classList.remove('show');
-        loadAdminData();
-        loadDisclaimerSettings();
-        loadApiKeys();
-        updateAdminSidebarClock();
-        if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
+        if (localStorage.getItem('bf_admin') === '1') {
+            document.getElementById('adminLoginScreen').classList.remove('show');
+            loadAdminData();
+            loadDisclaimerSettings();
+            loadApiKeys();
+            updateAdminSidebarClock();
+            if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
+        } else {
+            document.getElementById('adminLoginScreen').classList.add('show');
+        }
         return;
     }
     
