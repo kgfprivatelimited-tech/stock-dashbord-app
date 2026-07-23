@@ -1381,6 +1381,24 @@ header {
     font-family: 'JetBrains Mono', monospace;
 }
 
+.idx-card { transition: border-color 0.3s; }
+.idx-blink-green { animation: blinkGreen 1s ease-in-out; }
+.idx-blink-red { animation: blinkRed 1s ease-in-out; }
+@keyframes blinkGreen {
+    0% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+    25% { box-shadow: 0 0 20px rgba(34,197,94,0.7); border-color: #22c55e; }
+    50% { box-shadow: 0 0 6px rgba(34,197,94,0.3); }
+    75% { box-shadow: 0 0 14px rgba(34,197,94,0.5); border-color: #22c55e; }
+    100% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+}
+@keyframes blinkRed {
+    0% { box-shadow: 0 0 0 rgba(239,68,68,0); }
+    25% { box-shadow: 0 0 20px rgba(239,68,68,0.7); border-color: #ef4444; }
+    50% { box-shadow: 0 0 6px rgba(239,68,68,0.3); }
+    75% { box-shadow: 0 0 14px rgba(239,68,68,0.5); border-color: #ef4444; }
+    100% { box-shadow: 0 0 0 rgba(239,68,68,0); }
+}
+
 @media (max-width: 768px) {
     .dash-overview { grid-template-columns: repeat(2, 1fr); }
     .dash-row-2 { grid-template-columns: 1fr; }
@@ -3629,12 +3647,17 @@ async function loadDashboardData() {
     }
 }
 
+let _lastIndicesJSON = '';
+let _prevIndicesPrices = {};
 async function loadDashboardIndices() {
     try {
         const r = await fetch(API + '/api/admin/indices', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         const grid = document.getElementById('dashIndicesGrid');
         const status = document.getElementById('dashIndicesStatus');
         if (!grid) return;
+        const fresh = JSON.stringify(r);
+        if (fresh === _lastIndicesJSON) return;
+        _lastIndicesJSON = fresh;
         if (!r || r.length === 0 || r.error) {
             grid.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Market Closed</div>';
             return;
@@ -3645,7 +3668,11 @@ async function loadDashboardIndices() {
             const ltp = parseFloat(d.ltp) || 0;
             const change = parseFloat(d.change) || 0;
             const pct = parseFloat(d.pct) || 0;
-            return `<div style="width:100%;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
+            const prev = _prevIndicesPrices[d.name];
+            const changed = prev !== undefined && prev !== ltp;
+            const animClass = changed ? (isUp ? 'idx-blink-green' : 'idx-blink-red') : '';
+            _prevIndicesPrices[d.name] = ltp;
+            return `<div class="idx-card ${animClass}" style="width:100%;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
                 <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;">${d.name}</div>
                 <div style="font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                 <div style="font-size:12px;color:${color};margin-top:4px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
@@ -5503,20 +5530,29 @@ function heatStyle(pct) {
 }
 
 /* ── DATA LOADERS ── */
+let _lastUserIndicesJSON = '';
+let _prevUserPrices = {};
 async function loadIndices() {
     try {
         const data = await fetch(API + "/api/indices", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastUserIndicesJSON) return;
+        _lastUserIndicesJSON = fresh;
         if (!data || data.length === 0) {
             document.getElementById("indices-row").innerHTML = '<div style="color:#555;text-align:center;font-size:11px;padding:12px;">Market Closed — No Data</div>';
             return;
         }
-        document.getElementById("indices-row").innerHTML = data.map(d =>
-            '<div class="index-card ' + (d.change >= 0 ? 'up' : 'dn') + '">' +
+        document.getElementById("indices-row").innerHTML = data.map(d => {
+            const prev = _prevUserPrices[d.name];
+            const changed = prev !== undefined && prev !== d.ltp;
+            const anim = changed ? 'idx-blink-' + (d.change >= 0 ? 'green' : 'red') : '';
+            _prevUserPrices[d.name] = d.ltp;
+            return '<div class="index-card ' + (d.change >= 0 ? 'up' : 'dn') + ' ' + anim + '">' +
             '<div class="iname">' + d.name + '</div>' +
             '<div class="iltp">' + fmt(d.ltp) + '</div>' +
-            '<div class="ichg ' + cls(d.change) + '">' + sign(d.change) + fmt2(d.change) + ' &nbsp; ' + sign(d.pct) + fmt2(d.pct) + '%</div></div>'
-        ).join("");
+            '<div class="ichg ' + cls(d.change) + '">' + sign(d.change) + fmt2(d.change) + ' &nbsp; ' + sign(d.pct) + fmt2(d.pct) + '%</div></div>';
+        }).join("");
     } catch (e) { console.error('Indices error:', e); }
 }
 
@@ -5530,19 +5566,27 @@ function renderCards(items, isUp) {
     ).join("");
 }
 
+let _lastGLJSON = '';
 async function loadGL() {
     try {
         const data = await fetch(API + "/api/gainers-losers", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastGLJSON) return;
+        _lastGLJSON = fresh;
         document.getElementById("gainers-cards").innerHTML = renderCards(data.gainers, true);
         document.getElementById("losers-cards").innerHTML = renderCards(data.losers, false);
     } catch (e) { console.error('G/L error:', e); }
 }
 
+let _lastHeatmapJSON = '';
 async function loadHeatmap() {
     try {
         const data = await fetch(API + "/api/heatmap", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastHeatmapJSON) return;
+        _lastHeatmapJSON = fresh;
         if (!data || data.length === 0) {
             document.getElementById("heatmap-grid").innerHTML = '<div style="color:#444;padding:12px;text-align:center;font-size:11px;">No data — Market Closed</div>';
             return;
@@ -5555,19 +5599,27 @@ async function loadHeatmap() {
     } catch (e) { console.error('Heatmap error:', e); }
 }
 
+let _lastFOJSON = '';
 async function loadFO() {
     try {
         const data = await fetch(API + "/api/fo-stocks", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastFOJSON) return;
+        _lastFOJSON = fresh;
         document.getElementById("fo-gainers").innerHTML = renderCards(data.gainers, true);
         document.getElementById("fo-losers").innerHTML = renderCards(data.losers, false);
     } catch (e) { console.error('FO error:', e); }
 }
 
+let _lastFNOJSON = '';
 async function loadFNOAll() {
     try {
         const data = await fetch(API + "/api/fno-all", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastFNOJSON) return;
+        _lastFNOJSON = fresh;
         if (!data || data.length === 0) {
             document.getElementById("fno-all-cards").innerHTML = '<div style="color:#444;padding:12px;text-align:center;font-size:11px;">No live data — Market Closed</div>';
             return;
@@ -5583,10 +5635,14 @@ async function loadFNOAll() {
     } catch (e) { console.error('F&O All error:', e); }
 }
 
+let _lastSignalsJSON = '';
 async function loadSignals() {
     try {
         const data = await fetch(API + "/api/signals", { headers: getAuthHeaders() }).then(r => r.json());
         if (data.error) { handleAuthError(data); return; }
+        const fresh = JSON.stringify(data);
+        if (fresh === _lastSignalsJSON) return;
+        _lastSignalsJSON = fresh;
         if (!data || !data.length) {
             document.getElementById("signals-body").innerHTML =
                 '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">Analyzing market data... Signals appear once enough data is collected.</td></tr>';
