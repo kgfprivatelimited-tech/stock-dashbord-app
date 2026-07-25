@@ -11,7 +11,10 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0a' width='100' height='100' rx='20'/><text x='50' y='68' font-size='55' text-anchor='middle'>🐻</text></svg>">
 <title>🐻 BEARFIGHTER TRADING</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -478,6 +481,13 @@ header {
     grid-template-columns: repeat(12, 1fr);
     gap: 4px;
 }
+#stockTipsGrid {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+#stockTipsGrid .stock-card { flex: 1 1 200px; min-width: 200px; max-width: 300px; border-radius: 6px; }
 #heatmap-grid .hm-cell { cursor: pointer; transition: transform 0.2s, filter 0.2s; }
 #heatmap-grid .hm-cell:hover { transform: translateY(-2px); filter: brightness(1.25); }
 .heatmap-sector-popup {
@@ -1483,6 +1493,10 @@ header {
     60% { background: rgba(239,68,68,0.1); box-shadow: 0 0 8px rgba(239,68,68,0.3); transform: scale(1.01); }
 }
 
+@keyframes bdayPulse { 0%,100% { box-shadow: 0 0 15px rgba(245,158,11,0.3); } 50% { box-shadow: 0 0 35px rgba(245,158,11,0.6); } }
+@keyframes bdayBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes bdaySpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 @media (max-width: 768px) {
     .dash-overview { grid-template-columns: repeat(2, 1fr); }
     .dash-row-2 { grid-template-columns: 1fr; }
@@ -1581,10 +1595,16 @@ header {
 
     /* STOCK CARDS */
     .stock-cards { gap: 4px; }
-    .stock-card {
-        flex: 1 1 calc(33% - 4px);
-        padding: 6px 4px;
-        font-size: 9px;
+    #stockTipsGrid {
+        flex-wrap: wrap;
+    }
+    #stockTipsGrid .stock-card {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 0;
+        max-width: none;
+    }
+    #stockTipsGrid .stock-card:last-child:nth-child(odd) {
+        flex: 1 1 100%;
     }
     .stock-card .sc-sym { font-size: 9px; }
     .stock-card .sc-ltp { font-size: 11px; }
@@ -1834,7 +1854,8 @@ header {
 
 @media (max-width: 380px) {
     #indices-row { grid-template-columns: repeat(2, 1fr); }
-    .stock-card { flex: 1 1 calc(50% - 4px); }
+    #stockTipsGrid .stock-card { flex: 1 1 100%; min-width: 0; }
+    #stockTipsGrid .stock-card:last-child:nth-child(odd) { flex: 1 1 100%; }
     .admin-stats-grid { grid-template-columns: 1fr; }
 }
 
@@ -2090,7 +2111,7 @@ input[type="color"] {
         
         <div class="login-hint">
             Don't have an account? <br>
-            Contact admin for approval: <a href="#" onclick="alert('Contact: vaibhav (admin)'); return false;">Get Access</a>
+            <a href="/register" style="color:#f59e0b;font-weight:700;text-decoration:none;font-size:13px;">Get Access →</a>
         </div>
     </div>
 </div>
@@ -2102,9 +2123,13 @@ input[type="color"] {
         <style>@keyframes gearSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
         <h1 style="color: var(--accent); font-size: 28px; font-weight: 900; letter-spacing: 3px; margin-bottom: 8px;">MAINTENANCE MODE</h1>
         <div style="width: 60px; height: 3px; background: var(--accent); margin: 0 auto 20px; border-radius: 2px;"></div>
-        <p id="maintenancePageMsg" style="color: var(--text-dim); font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+        <p id="maintenancePageMsg" style="color: var(--text-dim); font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
             We are currently performing scheduled maintenance. Please check back soon!
         </p>
+        <div id="maintenanceCountdown" style="display:none;padding:16px 24px;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.25);border-radius:12px;margin-bottom:20px;">
+            <div style="font-size:11px;color:#71717a;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">⏰ Time Remaining</div>
+            <div id="maintenanceCountdownTimer" style="font-size:32px;font-weight:900;color:#ff6b35;font-family:'JetBrains Mono',monospace;letter-spacing:2px;">00:00:00</div>
+        </div>
         <div style="padding: 12px 20px; background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2); border-radius: 8px; display: inline-block;">
             <span style="color: var(--accent); font-size: 12px; font-weight: 600;">🐻 BearFighter Trading</span>
         </div>
@@ -2194,7 +2219,7 @@ input[type="color"] {
         </div>
 
         <!-- Stats -->
-        <div class="admin-stats-grid" id="dashStats">
+        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(7, 1fr);">
           <div class="admin-stat-card">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
@@ -2215,6 +2240,14 @@ input[type="color"] {
             <div class="admin-stat-label">Expiring Soon</div>
             <div class="admin-stat-value" style="color: #eab308;" id="dashExpiringSoon">0</div>
           </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">🟢 Online</div>
+            <div class="admin-stat-value" style="color: #00e676;" id="dashOnlineCount">0</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-label">🎂 Birthdays</div>
+            <div class="admin-stat-value" style="color: #f59e0b;" id="dashBirthdayCount">0</div>
+          </div>
         </div>
 
         <!-- ═══ DASHBOARD SECTION ═══ -->
@@ -2228,60 +2261,6 @@ input[type="color"] {
           </div>
           <div id="dashIndicesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;">
             <div style="color:#71717a;font-size:11px;text-align:center;padding:12px;grid-column:1/-1;">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Revenue Chart -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">📈 Revenue Chart - Last 6 Months</div>
-            <div style="text-align:right;">
-              <div style="font-size:12px;color:#71717a;">Total</div>
-              <div style="font-family:'JetBrains Mono';font-size:20px;font-weight:700;color:#f59e0b;" id="revTotal">₹0</div>
-            </div>
-          </div>
-          <div class="admin-chart-container" id="revenueBars"></div>
-          <div style="text-align:center;margin-top:28px;font-size:11px;color:#71717a;">
-            This Month: <strong id="revMonth" style="color:#f59e0b;">₹0</strong>
-          </div>
-        </div>
-
-        <!-- Tip Performance -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🎯 Tip Performance</div>
-          </div>
-          <div class="admin-stats-grid" style="grid-template-columns:repeat(5,1fr);">
-            <div class="admin-stat-card" style="text-align:center;">
-              <div class="admin-stat-label">Total Tips</div>
-              <div class="admin-stat-value" id="tpTotal">0</div>
-            </div>
-            <div class="admin-stat-card" style="text-align:center;">
-              <div class="admin-stat-label">Target Hit</div>
-              <div class="admin-stat-value" style="color:#22c55e;" id="tpTarget">0</div>
-            </div>
-            <div class="admin-stat-card" style="text-align:center;">
-              <div class="admin-stat-label">SL Hit</div>
-              <div class="admin-stat-value" style="color:#ef4444;" id="tpSL">0</div>
-            </div>
-            <div class="admin-stat-card" style="text-align:center;">
-              <div class="admin-stat-label">Active</div>
-              <div class="admin-stat-value" style="color:#3b82f6;" id="tpActive">0</div>
-            </div>
-            <div class="admin-stat-card" style="text-align:center;">
-              <div class="admin-stat-label">Win Rate</div>
-              <div class="admin-stat-value" style="color:#f59e0b;" id="tpWinRate">0%</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🕐 Recent Activity</div>
-          </div>
-          <div id="activityFeed">
-            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No activity yet</div>
           </div>
         </div>
 
@@ -2305,6 +2284,27 @@ input[type="color"] {
           </div>
         </div>
 
+        <!-- Today's Birthdays (compact) -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">🎂 Today's Birthdays</div>
+          </div>
+          <div id="adminBirthdayFeed">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Pending Registration Requests -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">📋 Registration Requests</div>
+            <div style="font-size:10px;color:#71717a;cursor:pointer;" onclick="loadRegisterRequests()">🔄 Refresh</div>
+          </div>
+          <div id="registerRequestsFeed">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Loading...</div>
+          </div>
+        </div>
+
         </div><!-- /section-dashboard -->
 
         <!-- ═══ CREATE USER SECTION ═══ -->
@@ -2323,6 +2323,9 @@ input[type="color"] {
           </div>
           <div class="admin-form-row">
             <div class="admin-form-group"><label class="admin-form-label">Full Name</label><input type="text" id="newFullName" class="admin-form-input" placeholder="Full Name" autocomplete="off"></div>
+            <div class="admin-form-group"><label class="admin-form-label">Date of Birth</label><input type="date" id="newDob" class="admin-form-input"></div>
+          </div>
+          <div class="admin-form-row">
             <div class="admin-form-group"><label class="admin-form-label">Category</label>
               <select id="newCategory" class="admin-form-select">
                 <option value="Silver">🥈 Silver</option>
@@ -2393,6 +2396,7 @@ input[type="color"] {
               <div><span style="color:#f59e0b;">📧 Email:</span> <span id="infoEmail" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">🔑 Password:</span> <span id="infoPassword" style="color:#ef4444;font-weight:600;"></span></div>
               <div><span style="color:#f59e0b;">🏷️ Category:</span> <span id="infoCategory" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">🎂 DOB:</span> <span id="infoDob" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">📅 Expiry:</span> <span id="infoExpiry" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">💳 Amount:</span> <span id="infoAmount" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">💰 Method:</span> <span id="infoMethod" style="color:#e4e4e7;"></span></div>
@@ -2408,8 +2412,13 @@ input[type="color"] {
           </div>
           <!-- ═══ EDIT FORM (hidden by default, shown on click) ═══ -->
           <div id="editUserFormWrap" style="display:none;">
-          <div class="admin-form-row">
+            <div class="admin-form-row">
+            <div class="admin-form-group"><label class="admin-form-label">Username</label><input type="text" id="editUsername" class="admin-form-input" placeholder="Username" autocomplete="off"></div>
             <div class="admin-form-group"><label class="admin-form-label">Full Name</label><input type="text" id="editFullName" class="admin-form-input" placeholder="Full Name" autocomplete="off"></div>
+          </div>
+          <div class="admin-form-row">
+            <div class="admin-form-group"><label class="admin-form-label">Date of Birth</label>
+            <input type="date" id="editDob" class="admin-form-input"></div>
             <div class="admin-form-group"><label class="admin-form-label">Category</label>
               <select id="editCategory" class="admin-form-select">
                 <option value="Silver">🥈 Silver</option>
@@ -2731,6 +2740,35 @@ input[type="color"] {
             <button class="admin-btn admin-btn-danger" onclick="saveMaintenanceMsg()" style="width:100%;margin-top:8px;">💾 Save Message</button>
             <div id="maintenanceStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
+
+        <div class="admin-card" style="margin-top:12px;">
+            <div class="admin-card-header">
+                <div class="admin-card-title">⏰ Schedule Maintenance</div>
+            </div>
+            <div id="scheduleStatus" style="font-size:11px;margin-bottom:10px;padding:8px;border-radius:8px;display:none;"></div>
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Start (IST)</label>
+                    <input type="datetime-local" id="mntScheduleStart" class="admin-form-input">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">End (IST)</label>
+                    <input type="datetime-local" id="mntScheduleEnd" class="admin-form-input">
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Message Template</label>
+                <textarea id="mntScheduleMsg" rows="3" class="admin-form-input" placeholder="🔧 BearFighter Trading System is under scheduled maintenance from {start} to {end}. We will be back soon!" style="resize:vertical;"></textarea>
+                <p style="font-size:10px;color:#555;margin-top:4px;">Variables: {'{start}'} = start time, {'{end}'} = end time (auto-filled)</p>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;color:#e4e4e7;cursor:pointer;">
+                <input type="checkbox" id="mntNotifyUsers" style="accent-color:#f59e0b;" checked> Send notification to all users
+            </label>
+            <div style="display:flex;gap:8px;">
+                <button class="admin-btn admin-btn-primary" onclick="saveMaintenanceSchedule()" style="flex:1;">📅 Schedule</button>
+                <button class="admin-btn admin-btn-danger" onclick="cancelMaintenanceSchedule()" style="flex:1;">❌ Cancel Schedule</button>
+            </div>
+        </div>
         </div>
 
         <!-- ═══ CHANGE PASSWORD ═══ -->
@@ -2786,6 +2824,13 @@ input[type="color"] {
                     <button class="admin-btn admin-btn-secondary" onclick="toggleKeyVisibility('settingsTelegramChatId', this)" style="padding:8px 12px;">👁️</button>
                 </div>
             </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">📱 Admin Personal Telegram ID</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="text" id="settingsAdminPersonalTgId" class="admin-form-input" placeholder="Your personal Telegram Chat ID for payment screenshots" style="flex:1;">
+                </div>
+                <div style="font-size:10px;color:#888;margin-top:4px;">Payment screenshots yahan ayenge. Empty rakhne pe upar wala Chat ID use hoga.</div>
+            </div>
             <button class="admin-btn admin-btn-primary" onclick="saveApiKeys()" style="width:100%;margin-top:8px;">💾 Save API Keys</button>
             <div id="apiKeyStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
@@ -2793,6 +2838,80 @@ input[type="color"] {
 
       <!-- ═══ BROADCAST SECTION ═══ -->
       <div id="section-broadcast" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">📱 Header Links & Tip Settings</div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Stock Tips SEBI Disclaimer Text</label>
+                <textarea id="setSebiText" class="admin-form-input" rows="2" placeholder="I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY" style="resize:vertical;font-size:11px;"></textarea>
+            </div>
+            <div class="admin-form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#e4e4e7;margin-bottom:8px;">
+                    <input type="checkbox" id="setShowTipSebi" style="accent-color:#f59e0b;width:16px;height:16px;"> Show SEBI disclaimer on stock tips
+                </label>
+            </div>
+            <div class="admin-form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#e4e4e7;margin-bottom:4px;">
+                    <input type="checkbox" id="setShowHdrTelegram" style="accent-color:#3b82f6;width:16px;height:16px;"> Show Telegram icon in header
+                </label>
+                <input type="text" id="setHdrTelegramLink" class="admin-form-input" placeholder="https://t.me/yourchannel" style="margin-top:4px;">
+            </div>
+            <div class="admin-form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#e4e4e7;margin-bottom:4px;">
+                    <input type="checkbox" id="setShowHdrWhatsApp" style="accent-color:#22c55e;width:16px;height:16px;"> Show WhatsApp icon in header
+                </label>
+                <input type="text" id="setHdrWhatsAppLink" class="admin-form-input" placeholder="https://wa.me/919999999999" style="margin-top:4px;">
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveHeaderLinks()" style="width:100%;margin-top:4px;">💾 Save Header & Tip Settings</button>
+            <div id="headerLinksStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🎂 Birthday Custom Message</div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:11px;color:#aaa;display:block;margin-bottom:4px;">Birthday wish message (title ke niche dikhega):</label>
+                <textarea id="birthdayCustomMsg" class="admin-form-input" rows="3" placeholder="Happy Birthday! 🎉 Wishing you a wonderful year ahead filled with success, happiness and profits! 📈🎂" style="width:100%;font-size:12px;"></textarea>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveBirthdayCustomMsg()" style="width:100%;">💾 Save Birthday Message</button>
+            <div id="bdayTemplateStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">💳 UPI Payment Settings</div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">UPI ID</label>
+                <input type="text" id="adminUpiId" class="admin-form-input" placeholder="e.g. yourname@upi">
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">QR Code Image (URL or upload)</label>
+                <div style="display:flex;gap:6px;">
+                    <input type="text" id="adminUpiQrUrl" class="admin-form-input" placeholder="https://... or upload below" style="flex:1;">
+                    <label style="padding:8px 12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;cursor:pointer;font-size:11px;color:#aaa;">📎 <input type="file" id="adminUpiQrFile" accept="image/*" style="display:none;" onchange="previewUpiQr(this)"></label>
+                </div>
+                <div id="adminUpiQrPreview" style="margin-top:8px;text-align:center;"></div>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveUpiSettings()" style="width:100%;">💾 Save UPI Settings</button>
+            <div id="upiSettingsStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">📋 Subscription Plans</div>
+            </div>
+            <div id="plansList"></div>
+            <div class="admin-form-row" style="margin-top:10px;">
+                <div class="admin-form-group"><label class="admin-form-label">Plan Name</label><input type="text" id="newPlanName" class="admin-form-input" placeholder="e.g. Monthly"></div>
+                <div class="admin-form-group"><label class="admin-form-label">Days</label><input type="number" id="newPlanDays" class="admin-form-input" placeholder="30" min="1"></div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Price (₹)</label>
+                <input type="number" id="newPlanPrice" class="admin-form-input" placeholder="0" min="0">
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="addPlan()" style="width:100%;">➕ Add Plan</button>
+            <div id="plansStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
         <div class="admin-card">
           <div class="admin-card-header">
             <div class="admin-card-title">📢 Broadcast Message</div>
@@ -2980,6 +3099,8 @@ input[type="color"] {
             <span id="countdown"></span>
             <div class="header-btns">
                 <a class="header-btn" onclick="showUserPasswordPopup()" title="Change Password" style="cursor:pointer;">⚙️</a>
+                <a class="header-btn" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.053 5.56-5.022c.242-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/></svg></a>
+                <a class="header-btn" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.8 13.7c-.24.68-1.41 1.32-1.94 1.37-.5.05-1.14.07-1.84-.18-.42-.15-.97-.35-1.67-.7-2.95-1.45-4.87-4.15-5.02-4.36-.15-.2-1.22-1.62-1.22-3.1 0-1.48.78-2.2 1.05-2.5.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.56.82 1.92.89 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.17-.29.38-.41.51-.14.14-.28.3-.12.59.17.29.74 1.22 1.58 1.98 1.1.97 2.02 1.27 2.31 1.41.3.14.47.12.64-.07.17-.19.74-.86.94-1.16.2-.29.39-.24.66-.15.27.1 1.71.81 2 .96.29.15.48.22.55.34.07.12.07.68-.17 1.36z"/></svg></a>
                 <a class="header-btn" onclick="toggleNotifPanel()" title="Notifications" style="cursor:pointer;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px;">0</span></a>
                 <a class="header-btn btn-logout" onclick="doLogout()">Logout</a>
             </div>
@@ -3007,6 +3128,18 @@ input[type="color"] {
         </div>
     </div>
 
+    <!-- BIRTHDAY BANNER -->
+    <div id="birthdayBanner" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative; background:linear-gradient(135deg,#1a0a2e,#2a0a1a,#1a0a2e); border:1px solid rgba(245,158,11,0.4); animation:bdayPulse 2s ease-in-out infinite;">
+        <div style="padding:14px 18px; display:flex; align-items:center; gap:14px;">
+            <div style="font-size:36px; animation:bdayBounce 1.5s ease-in-out infinite;">🎂</div>
+            <div style="flex:1;">
+                <div id="bdayTitle" style="font-size:15px; font-weight:800; color:#f59e0b; letter-spacing:0.5px;">Happy Birthday!</div>
+                <div id="bdayMsg" style="font-size:11px; color:#f7c59f; margin-top:3px;"></div>
+            </div>
+            <div style="font-size:28px; animation:bdaySpin 3s linear infinite;">🎉</div>
+        </div>
+    </div>
+
     <!-- INDICES -->
     <div class="section" data-section="indices">
         <div class="section-title">⬡ Indices</div>
@@ -3017,6 +3150,7 @@ input[type="color"] {
     <!-- USER MESSAGE BANNER (from admin) -->
     <div class="user-message-banner" id="userMessageBanner" style="display: none;">
         <div class="msg-banner-glow"></div>
+        <button class="msg-banner-close" onclick="dismissMessage()" title="Dismiss" style="position:absolute; top:8px; right:8px; z-index:10;">✕</button>
         <div class="msg-banner-inner">
             <div class="msg-banner-icon-wrap">
                 <span class="msg-banner-icon">📢</span>
@@ -3025,7 +3159,6 @@ input[type="color"] {
                 <div class="msg-banner-label">By Vaibhav</div>
                 <div class="msg-banner-text" id="userMessageText"></div>
             </div>
-            <button class="msg-banner-close" onclick="dismissMessage()" title="Dismiss">✕</button>
         </div>
     </div>
 
@@ -3045,7 +3178,7 @@ input[type="color"] {
     <!-- STOCK TIPS -->
     <div class="section" id="stockTipsSection" style="display: none;">
         <div class="section-title">📊 Stock Tips — By Vaibhav</div>
-        <div id="stockTipsGrid" class="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+        <div id="stockTipsGrid" class="stock-cards"></div>
     </div>
     <hr class="divider" id="stockTipsDivider" style="display: none;">
 
@@ -3220,6 +3353,11 @@ async function doLogin() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('maintenancePageMsg').textContent = r.message || 'We are currently performing scheduled maintenance.';
             document.getElementById('maintenancePage').style.display = 'flex';
+            if (r.endsAt) { startMaintenanceCountdown(r.endsAt); } else { document.getElementById('maintenanceCountdown').style.display = 'none'; }
+        } else if (r.pending) {
+            err.innerHTML = '<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:20px;margin-bottom:6px;">⏳</div><div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:4px;">Approval Pending</div><div style="font-size:11px;color:#aaa;line-height:1.5;white-space:pre-line;">' + (r.message || 'Your request is under review. Admin will notify you once approved.') + '</div></div>';
+            btn.disabled = false;
+            btn.textContent = 'LOGIN';
         } else {
             err.textContent = r.message || 'Login failed';
             btn.disabled = false;
@@ -3257,7 +3395,7 @@ async function submitPasswordChange() {
             headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
             body: JSON.stringify({ currentPassword: cur, newPassword: nw })
         }).then(r => r.json());
-        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; setTimeout(closePasswordPopup, 2000); }
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; setTimeout(() => { closePasswordPopup(); doLogout(); }, 1500); }
         else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>'; }
     } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
 }
@@ -3278,10 +3416,11 @@ async function userChangePassword() {
             body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass })
         }).then(r => r.json());
         if (r.success) {
-            status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
+            status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + ' — Logging out...</span>';
             document.getElementById('userCurrentPass').value = '';
             document.getElementById('userNewPass').value = '';
             document.getElementById('userConfirmPass').value = '';
+            setTimeout(() => { doLogout(); }, 1500);
         } else {
             status.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>';
         }
@@ -3333,6 +3472,7 @@ async function checkSession() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('maintenancePageMsg').textContent = m.message || 'We are currently performing scheduled maintenance.';
             document.getElementById('maintenancePage').style.display = 'flex';
+            if (m.endsAt) { startMaintenanceCountdown(m.endsAt); } else { document.getElementById('maintenanceCountdown').style.display = 'none'; }
             return;
         }
     } catch (e) {}
@@ -3485,6 +3625,13 @@ async function loadDisclaimer() {
             content.offsetHeight;
             content.style.animation = `scroll-left ${speed}s linear infinite`;
         }
+
+        if (r.showHeaderTelegram) { document.getElementById('hdrTelegram').style.display = 'inline-block'; } else { document.getElementById('hdrTelegram').style.display = 'none'; }
+        if (r.showHeaderWhatsApp) { document.getElementById('hdrWhatsApp').style.display = 'inline-block'; } else { document.getElementById('hdrWhatsApp').style.display = 'none'; }
+        window._hdrTelegramLink = r.headerTelegramLink || '';
+        window._hdrWhatsAppLink = r.headerWhatsAppLink || '';
+        window._showTipSebiText = r.showTipSebiText !== false;
+        window._sebiDisclaimerText = r.sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY';
     } catch (e) {}
 }
 
@@ -3616,7 +3763,7 @@ function showAdminSection(section, navEl) {
     if (section === 'holidayBanners') loadBanners();
     if (section === 'maintenance') loadMaintenanceStatus();
     if (section === 'apiKeys') loadApiKeys();
-    if (section === 'broadcast') renderBroadcastUsers();
+    if (section === 'broadcast') { renderBroadcastUsers(); loadApiKeys(); loadPlansAdmin(); }
     if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
     if (section === 'reminders') loadReminderList();
 }
@@ -3645,6 +3792,9 @@ async function loadAdminData() {
             loadApiKeys();
             loadBanners();
             loadPendingPasswords();
+            loadAdminBirthdays();
+            loadOnlineUsers();
+            loadRegisterRequests();
         }
     } catch (e) {
         customAlert('Failed to load users: ' + e.message, '❌');
@@ -3681,6 +3831,115 @@ async function approvePassword(userId, approve) {
         }).then(r => r.json());
         if (r.success) customAlert(r.message, approve ? '✅' : '❌');
         loadPendingPasswords();
+    } catch (e) {}
+}
+
+async function loadRegisterRequests() {
+    try {
+        const r = await fetch(API + '/api/admin/register-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const div = document.getElementById('registerRequestsFeed');
+        if (!div) return;
+        if (!r.success || r.requests.length === 0) {
+            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No requests</div>';
+            return;
+        }
+        const pending = r.requests.filter(q => q.status === 'pending');
+        const processed = r.requests.filter(q => q.status !== 'pending').slice(0, 10);
+        let html = '';
+        if (pending.length > 0) {
+            html += '<div style="font-size:10px;color:#f59e0b;font-weight:700;margin-bottom:8px;">⏳ PENDING (' + pending.length + ')</div>';
+            html += pending.map(q => {
+                const t = new Date(q.createdAt).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+                const payBadge = q.payment ? '<span style="color:#22c55e;font-size:9px;">💳 Txn: ' + q.payment.transactionId + '</span>' : '<span style="color:#ff1744;font-size:9px;">❌ Payment pending</span>';
+                const waText = q.whatsapp ? '💬 WA: +91' + q.whatsapp : '';
+                return `<div style="padding:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.25);border-radius:8px;margin-bottom:6px;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;">
+                        <div>
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;">${q.fullName}</div>
+                            <div style="font-size:10px;color:#71717a;">@${q.username} • ${q.email}</div>
+                            <div style="font-size:10px;color:#71717a;">📱 +91${q.phone || 'N/A'} ${waText}</div>
+                            <div style="font-size:10px;color:#71717a;">🎂 ${q.dob || 'N/A'} • 📋 ${q.plan || 'Standard'}</div>
+                            <div style="margin-top:3px;">${payBadge}</div>
+                            <div style="font-size:9px;color:#555;margin-top:2px;">Source: ${q.source || 'N/A'} • ${t}</div>
+                        </div>
+                    </div>
+                    ${q.payment && q.payment.screenshot ? '<div style="margin-top:6px;"><img src="' + q.payment.screenshot + '" style="max-width:120px;max-height:80px;border-radius:6px;border:1px solid #2a2a35;cursor:pointer;" onclick="window.open(this.src)"></div>' : ''}
+                    <div style="display:flex;gap:6px;margin-top:8px;">
+                        <input type="number" id="regDays_${q.id}" value="30" min="1" style="width:70px;padding:4px 8px;background:#0f0f1a;border:1px solid #2a2a35;border-radius:6px;color:#e0e0e0;font-size:10px;" placeholder="Days">
+                        <button class="admin-btn admin-btn-primary" style="padding:4px 10px;font-size:10px;" onclick="approveRegRequest('${q.id}')">✅ Approve</button>
+                        <button class="admin-btn admin-btn-danger" style="padding:4px 10px;font-size:10px;" onclick="rejectRegRequest('${q.id}')">❌ Reject</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        if (processed.length > 0) {
+            html += '<div style="font-size:10px;color:#71717a;font-weight:700;margin-top:12px;margin-bottom:8px;">📜 PROCESSED</div>';
+            html += processed.map(q => {
+                const icon = q.status === 'approved' ? '✅' : '❌';
+                const color = q.status === 'approved' ? '#22c55e' : '#ff1744';
+                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;">
+                    <span style="color:#e4e4e7;">${q.fullName} <span style="color:#555;">@${q.username}</span></span>
+                    <span style="color:${color};font-weight:600;">${icon} ${q.status}</span>
+                </div>`;
+            }).join('');
+        }
+        div.innerHTML = html;
+    } catch (e) {}
+}
+
+async function approveRegRequest(id) {
+    const daysEl = document.getElementById('regDays_' + id);
+    const days = daysEl ? daysEl.value : 30;
+    try {
+        const r = await fetch(API + '/api/admin/approve-register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ requestId: id, days: parseInt(days) || 30 })
+        }).then(r => r.json());
+        if (r.success) { customAlert(r.message, '✅'); loadRegisterRequests(); loadAdminData(); }
+        else customAlert(r.message, '❌');
+    } catch (e) { customAlert('Server error', '❌'); }
+}
+
+async function rejectRegRequest(id) {
+    try {
+        const r = await fetch(API + '/api/admin/reject-register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ requestId: id })
+        }).then(r => r.json());
+        if (r.success) { customAlert(r.message, '❌'); loadRegisterRequests(); }
+        else customAlert(r.message, '❌');
+    } catch (e) { customAlert('Server error', '❌'); }
+}
+
+async function loadAdminBirthdays() {
+    try {
+        const r = await fetch(API + '/api/admin/birthdays', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const countEl = document.getElementById('dashBirthdayCount');
+        const div = document.getElementById('adminBirthdayFeed');
+        if (countEl) countEl.textContent = r.success ? r.birthdays.length : 0;
+        if (!div) return;
+        if (!r.success || r.birthdays.length === 0) {
+            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Aaj kisi ka birthday nahi hai</div>';
+            return;
+        }
+        div.innerHTML = r.birthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;margin-bottom:6px;">
+            <div style="font-size:20px;">🎂</div>
+            <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:#f59e0b;">${b.fullName || b.username}</div>
+                <div style="font-size:9px;color:#71717a;">${b.age} saal • <span class="admin-badge admin-badge-${(b.category||'silver').toLowerCase()}">${b.category||'Silver'}</span></div>
+            </div>
+            <div style="font-size:16px;">🎉</div>
+        </div>`).join('');
+    } catch (e) {}
+}
+
+async function loadOnlineUsers() {
+    try {
+        const r = await fetch(API + '/api/admin/online-users', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const countEl = document.getElementById('dashOnlineCount');
+        if (countEl && r.success) countEl.textContent = r.onlineCount || 0;
     } catch (e) {}
 }
 
@@ -3831,6 +4090,10 @@ function requestNotificationPermission() {
         Notification.requestPermission();
     }
 }
+function openHeaderLink(type) {
+    const link = type === 'telegram' ? window._hdrTelegramLink : window._hdrWhatsAppLink;
+    if (link) window.open(link, '_blank');
+}
 
 function sendBrowserNotification(title, body, tag) {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -3921,6 +4184,20 @@ async function loadApiKeys() {
             if (el('settingsUpstoxToken')) el('settingsUpstoxToken').value = r.upstoxAccessToken || '';
             if (el('settingsTelegramToken')) el('settingsTelegramToken').value = r.telegramBotToken || '';
             if (el('settingsTelegramChatId')) el('settingsTelegramChatId').value = r.telegramChatId || '';
+            if (el('settingsAdminPersonalTgId')) el('settingsAdminPersonalTgId').value = r.adminPersonalTelegramId || '';
+            if (el('setShowTipSebi')) el('setShowTipSebi').checked = r.showTipSebiText !== false;
+            if (el('setSebiText')) el('setSebiText').value = r.sebiDisclaimerText || '';
+            if (el('setShowHdrTelegram')) el('setShowHdrTelegram').checked = r.showHeaderTelegram === true;
+            if (el('setShowHdrWhatsApp')) el('setShowHdrWhatsApp').checked = r.showHeaderWhatsApp === true;
+            if (el('setHdrTelegramLink')) el('setHdrTelegramLink').value = r.headerTelegramLink || '';
+            if (el('setHdrWhatsAppLink')) el('setHdrWhatsAppLink').value = r.headerWhatsAppLink || '';
+            // Birthday custom message
+            if (r.birthdayWishes && r.birthdayWishes[1]) {
+                if (el('birthdayCustomMsg')) el('birthdayCustomMsg').value = r.birthdayWishes[1];
+            }
+            // UPI settings
+            if (el('adminUpiId')) el('adminUpiId').value = r.upiPaymentId || '';
+            if (el('adminUpiQrUrl') && r.upiQrImage && !r.upiQrImage.startsWith('data:')) el('adminUpiQrUrl').value = r.upiQrImage || '';
         }
     } catch (e) {}
 }
@@ -3937,7 +4214,8 @@ async function saveApiKeys() {
                 upstoxApiKey: el('settingsUpstoxKey').value.trim(),
                 upstoxAccessToken: el('settingsUpstoxToken').value.trim(),
                 telegramBotToken: el('settingsTelegramToken').value.trim(),
-                telegramChatId: el('settingsTelegramChatId').value.trim()
+                telegramChatId: el('settingsTelegramChatId').value.trim(),
+                adminPersonalTelegramId: el('settingsAdminPersonalTgId').value.trim()
             })
         }).then(r => r.json());
         if (r.success) {
@@ -3947,6 +4225,121 @@ async function saveApiKeys() {
             status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
         }
     } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+async function saveHeaderLinks() {
+    const el = (id) => document.getElementById(id);
+    const status = el('headerLinksStatus');
+    if (status) status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({
+                showTipSebiText: el('setShowTipSebi').checked,
+                sebiDisclaimerText: el('setSebiText').value.trim() || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY',
+                showHeaderTelegram: el('setShowHdrTelegram').checked,
+                showHeaderWhatsApp: el('setShowHdrWhatsApp').checked,
+                headerTelegramLink: el('setHdrTelegramLink').value.trim(),
+                headerWhatsAppLink: el('setHdrWhatsAppLink').value.trim()
+            })
+        }).then(r => r.json());
+        if (r.success) {
+            if (status) status.innerHTML = '<span style="color:#00c853;">✅ Saved!</span>';
+            loadDisclaimer();
+            setTimeout(() => { if (status) status.innerHTML = ''; }, 3000);
+        } else {
+            if (status) status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        }
+    } catch (e) { if (status) status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+async function saveBirthdayCustomMsg() {
+    const msg = document.getElementById('birthdayCustomMsg').value.trim();
+    if (!msg) return;
+    const status = document.getElementById('bdayTemplateStatus');
+    status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ birthdayWishes: { 1: msg } })
+        }).then(r => r.json());
+        if (r.success) {
+            status.innerHTML = '<span style="color:#00c853;">✅ Birthday message saved!</span>';
+            setTimeout(() => { status.innerHTML = ''; }, 3000);
+        } else {
+            status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        }
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+function previewUpiQr(input) {
+    const preview = document.getElementById('adminUpiQrPreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:140px;border-radius:8px;margin-top:4px;">';
+            window._upiQrBase64 = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+async function saveUpiSettings() {
+    const status = document.getElementById('upiSettingsStatus');
+    status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    const upiId = document.getElementById('adminUpiId').value.trim();
+    const upiQrUrl = document.getElementById('adminUpiQrUrl').value.trim();
+    const payload = {};
+    if (upiId) payload.upiPaymentId = upiId;
+    if (window._upiQrBase64) payload.upiQrImage = window._upiQrBase64;
+    else if (upiQrUrl) payload.upiQrImage = upiQrUrl;
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify(payload)
+        }).then(r => r.json());
+        if (r.success) { status.innerHTML = '<span style="color:#00c853;">✅ UPI settings saved!</span>'; setTimeout(() => { status.innerHTML = ''; }, 3000); }
+        else status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+let adminPlans = [];
+async function loadPlansAdmin() {
+    try {
+        const r = await fetch(API + '/api/settings').then(r => r.json());
+        adminPlans = r.plans || [];
+        const el = document.getElementById('plansList');
+        if (!el) return;
+        if (adminPlans.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:8px;">No plans yet</div>'; return; }
+        el.innerHTML = adminPlans.map((p, i) => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:12px;">' +
+            '<div><strong style="color:#e4e4e7;">' + p.name + '</strong> <span style="color:#71717a;">— ' + p.days + ' days</span> <span style="color:#22c55e;">₹' + (p.price || 0) + '</span></div>' +
+            '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="removePlan(' + i + ')">🗑️</button></div>').join('');
+    } catch (e) {}
+}
+
+async function addPlan() {
+    const name = document.getElementById('newPlanName').value.trim();
+    const days = parseInt(document.getElementById('newPlanDays').value) || 30;
+    const price = parseInt(document.getElementById('newPlanPrice').value) || 0;
+    if (!name) return;
+    adminPlans.push({ id: name.toLowerCase().replace(/\s+/g, '_'), name, days, price });
+    try {
+        await fetch(API + '/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify({ plans: adminPlans }) }).then(r => r.json());
+        document.getElementById('newPlanName').value = '';
+        document.getElementById('newPlanDays').value = '';
+        document.getElementById('newPlanPrice').value = '';
+        loadPlansAdmin();
+    } catch (e) {}
+}
+
+async function removePlan(idx) {
+    adminPlans.splice(idx, 1);
+    try {
+        await fetch(API + '/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify({ plans: adminPlans }) }).then(r => r.json());
+        loadPlansAdmin();
+    } catch (e) {}
 }
 
 function toggleKeyVisibility(inputId, btn) {
@@ -4013,17 +4406,28 @@ async function loadRevenueChart() {
             });
         }
         const maxRev = Math.max(...months.map(m => m.revenue), 1);
-        const container = document.getElementById('revenueBars');
-        container.innerHTML = months.map(m => {
+        const chartHtml = months.map(m => {
             const h = Math.max((m.revenue / maxRev) * 100, 4);
             const color = m.month === now.getMonth() ? 'var(--accent)' : '#2196f3';
             return `<div class="rev-bar" style="height:${h}%; background:${color};">
-                <span class="rev-bar-val">₹${m.revenue.toLocaleString()}</span>
+                <span class="rev-bar-val">\u20B9${m.revenue.toLocaleString()}</span>
                 <span class="rev-bar-label">${m.label}</span>
             </div>`;
         }).join('');
-        document.getElementById('revTotal').textContent = '₹' + r.stats.totalRevenue.toLocaleString();
-        document.getElementById('revMonth').textContent = '₹' + r.stats.monthlyRevenue.toLocaleString();
+        const overviewContainer = document.getElementById('revenueBars');
+        const pageContainer = document.getElementById('revenueBarsPage');
+        if (overviewContainer) overviewContainer.innerHTML = chartHtml;
+        if (pageContainer) pageContainer.innerHTML = chartHtml;
+        const revTotalEl = document.getElementById('revTotal');
+        const revMonthEl = document.getElementById('revMonth');
+        const revTotalPageEl = document.getElementById('revTotalPage');
+        const revMonthPageEl = document.getElementById('revMonthPage');
+        const totalText = '\u20B9' + r.stats.totalRevenue.toLocaleString();
+        const monthText = '\u20B9' + r.stats.monthlyRevenue.toLocaleString();
+        if (revTotalEl) revTotalEl.textContent = totalText;
+        if (revMonthEl) revMonthEl.textContent = monthText;
+        if (revTotalPageEl) revTotalPageEl.textContent = totalText;
+        if (revMonthPageEl) revMonthPageEl.textContent = monthText;
     } catch (e) { console.error('Revenue chart error:', e); }
 }
 
@@ -4032,19 +4436,24 @@ async function loadLoginHistory() {
     try {
         const r = await fetch(API + '/api/admin/login-history', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         const div = document.getElementById('loginHistoryFeed');
-        if (!r.success || r.logins.length === 0) {
+        if (!r.success || r.users.length === 0) {
             div.innerHTML = '<div style="color: var(--text-mute); font-size: 11px; text-align: center; padding: 10px;">No logins yet</div>';
             return;
         }
-        div.innerHTML = r.logins.map(l => {
-            const t = new Date(l.timestamp);
-            const timeStr = t.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            const dateStr = t.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-            return `<div class="login-item">
-                <div class="login-dot ${l.success ? 'success' : 'failed'}"></div>
-                <span class="login-user">${l.username}</span>
-                <span style="font-size:10px; color:${l.success ? '#00c853' : '#ff1744'};">${l.success ? '✓ OK' : '✗ Fail'}</span>
-                <span class="login-time">${dateStr} ${timeStr}</span>
+        div.innerHTML = r.users.map(u => {
+            const lastT = u.lastLogin ? new Date(u.lastLogin).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true }) : 'Never';
+            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid rgba(255,255,255,0.04);border-radius:6px;margin-bottom:4px;background:${u.online ? 'rgba(0,200,83,0.06)' : 'transparent'};">
+                <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                    <span style="width:7px;height:7px;border-radius:50%;background:${u.online ? '#22c55e' : '#555'};flex-shrink:0;"></span>
+                    <div style="min-width:0;">
+                        <div style="font-size:12px;font-weight:600;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.fullName || u.username}</div>
+                        <div style="font-size:9px;color:#71717a;">Last: ${lastT}</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;font-size:10px;font-family:'JetBrains Mono',monospace;">
+                    <span style="color:#3b82f6;">${u.todayCount}x today</span>
+                    <span style="color:${u.lastSuccess ? '#22c55e' : '#ff1744'};">${u.lastSuccess ? '✓ OK' : '✗ Fail'}</span>
+                </div>
             </div>`;
         }).join('');
     } catch (e) {}
@@ -4467,6 +4876,7 @@ async function approveUser() {
     const paymentMethod = document.getElementById('newPaymentMethod').value.trim();
     const telegramChatId = document.getElementById('newTelegramChatId').value.trim();
     const whatsappNumber = document.getElementById('newWhatsappNumber').value.trim();
+    const dob = document.getElementById('newDob') ? document.getElementById('newDob').value : '';
     const msg = document.getElementById('approveMsg');
     
     if (!username || !email || !password || !fullName) {
@@ -4499,7 +4909,8 @@ async function approveUser() {
                 paymentId,
                 paymentMethod,
                 telegramChatId,
-                whatsappNumber
+                whatsappNumber,
+                dob
             })
         }).then(r => r.json());
         
@@ -4618,6 +5029,7 @@ async function editUser(username) {
     
     editingUsername = username;
     document.getElementById('editUsernameLabel').textContent = username;
+    document.getElementById('editUsername').value = user.username || '';
     // Populate info panel
     document.getElementById('infoUsername').textContent = user.username;
     document.getElementById('infoFullName').textContent = user.fullName || '-';
@@ -4626,10 +5038,11 @@ async function editUser(username) {
     document.getElementById('infoPassword').style.color = '#ef4444';
     document.getElementById('infoPassword').style.fontWeight = '600';
     document.getElementById('infoCategory').textContent = user.category || 'Silver';
+    document.getElementById('infoDob').textContent = user.dob || '-';
     const expDate = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
     const daysL = user.daysLeft > 0 ? user.daysLeft : 0;
     document.getElementById('infoExpiry').innerHTML = expDate + (daysL > 0 ? ' <span style="color:#22c55e;">(' + daysL + 'd)</span>' : ' <span style="color:#ef4444;">(Expired)</span>');
-    document.getElementById('infoAmount').textContent = '₹' + (user.paymentAmount || 0).toLocaleString();
+    document.getElementById('infoAmount').textContent = '\u20B9' + (user.paymentAmount || 0).toLocaleString();
     document.getElementById('infoMethod').textContent = user.paymentMethod || '-';
     document.getElementById('infoWhatsApp').textContent = user.whatsappNumber || '-';
     document.getElementById('infoTelegram').textContent = user.telegramChatId || '-';
@@ -4637,7 +5050,6 @@ async function editUser(username) {
     document.getElementById('infoCreated').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '-';
     document.getElementById('infoDevice').textContent = user.lastDevice || '-';
     document.getElementById('infoPlatform').textContent = user.lastPlatform || '-';
-    // Location in info panel
     if (user.lastLocation && user.lastLocation.lat && user.lastLocation.lng) {
         document.getElementById('infoLocation').innerHTML = '<a href="https://www.google.com/maps?q=' + user.lastLocation.lat + ',' + user.lastLocation.lng + '" target="_blank" style="color:#3b82f6;text-decoration:none;">' + user.lastLocation.lat.toFixed(4) + ',' + user.lastLocation.lng.toFixed(4) + ' 📍</a>';
     } else {
@@ -4645,6 +5057,7 @@ async function editUser(username) {
     }
     document.getElementById('editFullName').value = user.fullName || user.username;
     document.getElementById('editCategory').value = user.category || 'Silver';
+    document.getElementById('editDob').value = user.dob || '';
     document.getElementById('editPaymentAmount').value = user.paymentAmount || '';
     document.getElementById('editPaymentId').value = user.paymentId || '';
     const pm = user.paymentMethod || '';
@@ -4749,7 +5162,9 @@ async function saveUserEdit() {
                 'admin-key': ADMIN_KEY
             },
             body: JSON.stringify({
+                newUsername: document.getElementById('editUsername').value.trim(),
                 fullName,
+                dob: document.getElementById('editDob').value,
                 category,
                 paymentAmount,
                 paymentId,
@@ -4982,7 +5397,12 @@ async function loadMaintenanceStatus() {
         const msg = document.getElementById('maintenanceMsg');
         if (r.maintenance) { toggle.classList.add('active'); } else { toggle.classList.remove('active'); }
         if (label) { label.textContent = r.maintenance ? 'ON' : 'OFF'; label.style.color = r.maintenance ? '#ff1744' : '#00c853'; }
-        if (r.message && msg) msg.value = r.message;
+        if (r.message && msg && !msg.value) msg.value = r.message;
+        const st = document.getElementById('scheduleStatus');
+        if (st && r.scheduled) {
+            st.style.display='block'; st.style.background='rgba(245,158,11,0.1)'; st.style.color='#f59e0b';
+            st.textContent='📅 Schedule active — Auto ON/OFF running. Ends: ' + (r.endsAt ? new Date(r.endsAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'}) : '-');
+        }
     } catch (e) {}
 }
 
@@ -5027,6 +5447,66 @@ async function saveMaintenanceMsg() {
     } catch (e) {
         status.innerHTML = '<span style="color:#ff1744;">❌ Error</span>';
     }
+}
+
+async function saveMaintenanceSchedule() {
+    const start = document.getElementById('mntScheduleStart').value;
+    const end = document.getElementById('mntScheduleEnd').value;
+    const msg = document.getElementById('mntScheduleMsg').value;
+    const notify = document.getElementById('mntNotifyUsers').checked;
+    const st = document.getElementById('scheduleStatus');
+    if (!start || !end) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='⚠️ Start and End time required!'; return; }
+    if (new Date(end) <= new Date(start)) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='⚠️ End time must be after start!'; return; }
+    st.style.display='block'; st.style.background='rgba(245,158,11,0.1)'; st.style.color='#f59e0b'; st.textContent='⏳ Scheduling...';
+    try {
+        const r = await fetch(API + '/api/admin/maintenance/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ scheduleStart: start, scheduleEnd: end, messageTemplate: msg, notifyUsers: notify })
+        }).then(r => r.json());
+        if (r.success) {
+            st.style.background='rgba(34,197,94,0.1)'; st.style.color='#22c55e';
+            st.textContent='✅ Scheduled! Maintenance will auto ON at start time.';
+        } else {
+            st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='❌ ' + (r.message || 'Error');
+        }
+    } catch (e) {
+        st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='❌ Server error';
+    }
+}
+
+async function cancelMaintenanceSchedule() {
+    if (!await customConfirm('Scheduled maintenance cancel karna hai?', '⚠️', 'Cancel Schedule')) return;
+    const st = document.getElementById('scheduleStatus');
+    try {
+        const r = await fetch(API + '/api/admin/maintenance/cancel-schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        if (r.success) {
+            st.style.display='block'; st.style.background='rgba(34,197,94,0.1)'; st.style.color='#22c55e'; st.textContent='✅ Schedule cancelled. Maintenance OFF.';
+            document.getElementById('mntScheduleStart').value = '';
+            document.getElementById('mntScheduleEnd').value = '';
+            document.getElementById('mntScheduleMsg').value = '';
+        }
+    } catch (e) {}
+}
+
+let _mntCountdownInterval = null;
+function startMaintenanceCountdown(endsAt) {
+    const el = document.getElementById('maintenanceCountdown');
+    const timer = document.getElementById('maintenanceCountdownTimer');
+    if (!el || !timer) return;
+    el.style.display = 'block';
+    if (_mntCountdownInterval) clearInterval(_mntCountdownInterval);
+    _mntCountdownInterval = setInterval(() => {
+        const diff = new Date(endsAt).getTime() - Date.now();
+        if (diff <= 0) { clearInterval(_mntCountdownInterval); timer.textContent = '00:00:00'; el.querySelector('div').textContent = '✅ MAINTENANCE COMPLETE — Reloading...'; setTimeout(() => location.reload(), 3000); return; }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        timer.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }, 1000);
 }
 
 /* ═══════ STOCK TIPS ═══════ */
@@ -5206,12 +5686,12 @@ async function loadDashboardStockTips() {
                 : isSL ? 'border-color: #ff1744; box-shadow: 0 0 12px rgba(255,23,68,0.3);' 
                 : isTrending ? 'border-color: #ff6b35; box-shadow: 0 0 12px rgba(255,107,53,0.3);' 
                 : '';
-            const statusBadge = isDone ? '<div style="position:absolute; top:6px; right:6px; font-size:9px; background:#00c853; color:#000; padding:2px 6px; border-radius:3px; font-weight:700;">✅ TARGET DONE</div>' 
+            const statusBadge = isDone ? '<div style="position:absolute; top:6px; right:6px; font-size:9px; background:#00c853; color:#000; padding:2px 6px; border-radius:3px; font-weight:700;">✅ DONE</div>' 
                 : isSL ? '<div style="position:absolute; top:6px; right:6px; font-size:9px; background:#ff1744; color:#fff; padding:2px 6px; border-radius:3px; font-weight:700;">❌ SL HIT</div>' 
                 : isTrending ? '<div style="position:absolute; top:6px; right:6px; font-size:9px; background:linear-gradient(135deg,#ff6b35,#f59e0b); color:#000; padding:2px 6px; border-radius:3px; font-weight:700;">🔥 TRENDING</div>' 
                 : '';
             const statusBadgeInline = isDone ? '✅ DONE' : isSL ? '❌ SL HIT' : isTrending ? '🔥 TRENDING' : '';
-            return `<div class="stock-card ${cls}" style="flex: 1 1 140px; text-align: left; padding: 10px 12px; position: relative; ${statusStyle} ${isDone || isSL ? 'opacity:0.7;' : ''}">
+            return `<div class="stock-card ${cls}" style="text-align: left; padding: 10px 12px; position: relative; ${statusStyle} ${isDone || isSL ? 'opacity:0.7;' : ''}">
                 ${statusBadge}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: ${color};">${t.action}</span>
@@ -5219,12 +5699,14 @@ async function loadDashboardStockTips() {
                 </div>
                 <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 4px;">${t.symbol}</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; font-size: 10px;">
-                    <div><span style="color:#888;">Entry:</span> <span style="color:#ffffff; font-weight:700;">${t.entry || '-'}</span></div>
-                    <div><span style="color:#888;">TGT:</span> <span style="color:#00e676; font-weight:700;">${t.target || '-'}</span></div>
+                    <div><span style="color:#888;">Entry:</span> <span style="color:#00e676; font-weight:700;">${t.entry || '-'}</span></div>
+                    <div><span style="color:#888;">TGT:</span> <span style="color:#42a5f5; font-weight:700;">${t.target || '-'}</span></div>
                     <div><span style="color:#888;">SL:</span> <span style="color:#ff5252; font-weight:700;">${t.sl || '-'}</span></div>
                 </div>
                 ${t.note ? `<div style="margin-top:4px; font-size:9px; color:#888;">${t.note}</div>` : ''}
                 <div style="margin-top:4px; font-size:9px; color:#ff6b35; font-weight:600;">By Vaibhav</div>
+                <div style="margin-top:2px; font-size:8px; color:#555;">${formatTipTime(t.createdAt)}${t.updatedAt ? ' · ✏️ ' + formatTipTime(t.updatedAt) : ''}</div>
+                ${window._showTipSebiText !== false ? '<div style="margin-top:2px; font-size:7px; color:#555; line-height:1;">' + (window._sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY') + '</div>' : ''}
             </div>`;
         }).join('');
         if (typeof checkNotifsForTips === 'function') checkNotifsForTips(data.filter(t => t.active));
@@ -5744,6 +6226,19 @@ const cls = v => v >= 0 ? "up" : "dn";
 const fmt = v => v !== undefined && v !== null && v !== 0 ? (v.toLocaleString ? v.toLocaleString("en-IN") : v) : (v === 0 ? "0.00" : "--");
 const fmt2 = v => v !== undefined && v !== null ? (typeof v.toFixed === "function" ? v.toFixed(2) : v) : "--";
 
+function formatTipTime(isoStr) {
+    if (!isoStr) return '';
+    const d = new Date(isoStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const mon = String(d.getMonth() + 1).padStart(2, '0');
+    const yr = String(d.getFullYear()).slice(-2);
+    const hr = d.getHours();
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hr >= 12 ? 'PM' : 'AM';
+    const h12 = hr % 12 || 12;
+    return `${day}-${mon}-${yr} ${h12}:${min} ${ampm}`;
+}
+
 function heatStyle(pct) {
     if (pct >= 2) return "background:#00c85335;border-color:#00c85366;color:#00e676";
     if (pct >= 1) return "background:#00c85322;border-color:#00c85344;color:#69f0ae";
@@ -5855,11 +6350,12 @@ async function loadHeatmap() {
             document.getElementById("heatmap-grid").innerHTML = '<div style="color:#444;padding:12px;text-align:center;font-size:11px;">No data — Market Closed</div>';
             return;
         }
-        document.getElementById("heatmap-grid").innerHTML = data.map(d =>
-            '<div class="hm-cell" style="' + heatStyle(d.pct) + '" onclick="openHeatmapSector(event, ' + JSON.stringify(d.name) + ')">' +
+        document.getElementById("heatmap-grid").innerHTML = data.map(d => {
+            const sectorEsc = d.name.replace(/'/g, "\\'");
+            return '<div class="hm-cell" style="' + heatStyle(d.pct) + '" onclick="openHeatmapSector(event, \'' + sectorEsc + '\')">' +
             '<div class="hm-name">' + d.name + '</div>' +
-            '<div class="hm-pct">' + sign(d.pct) + fmt2(d.pct) + '%</div></div>'
-        ).join("");
+            '<div class="hm-pct">' + sign(d.pct) + fmt2(d.pct) + '%</div></div>';
+        }).join("");
     } catch (e) { console.error('Heatmap error:', e); }
 }
 
@@ -6018,6 +6514,22 @@ async function checkMessageUpdate() {
         currentUser.highlight = newHighlight;
         currentUser.daysLeft = r.user.daysLeft;
         currentUser.subscriptionExpiry = r.user.subscriptionExpiry;
+        currentUser.fullName = r.user.fullName || '';
+        currentUser.dob = r.user.dob || '';
+        currentUser.isBirthday = r.user.isBirthday || false;
+        currentUser.userAge = r.user.userAge || null;
+        currentUser.birthdayWish = r.user.birthdayWish || '';
+
+        // Birthday banner
+        const bdayBanner = document.getElementById('birthdayBanner');
+        if (r.user.isBirthday) {
+            const name = r.user.fullName || r.user.username;
+            document.getElementById('bdayTitle').textContent = `🎂 Happy Birthday ${name}`;
+            document.getElementById('bdayMsg').textContent = r.user.birthdayWish || 'Happy Birthday! 🎉';
+            if (bdayBanner) bdayBanner.style.display = 'block';
+        } else {
+            if (bdayBanner) bdayBanner.style.display = 'none';
+        }
 
         // Update banner if message changed
         if (newMsg !== oldMsg) {

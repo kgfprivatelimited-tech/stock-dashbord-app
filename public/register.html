@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ff6b35">
+<title>🐻 BearFighter — Get Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#e0e0e0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.reg-card { width:100%; max-width:440px; background:#12121a; border:1px solid #2a2a35; border-radius:16px; padding:32px 28px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+.reg-header { text-align:center; margin-bottom:28px; }
+.reg-logo { font-size:40px; margin-bottom:8px; }
+.reg-title { font-size:20px; font-weight:800; color:#ff6b35; letter-spacing:0.5px; }
+.reg-sub { font-size:11px; color:#71717a; margin-top:4px; }
+.form-group { margin-bottom:14px; }
+.form-label { display:block; font-size:11px; color:#aaa; margin-bottom:5px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.form-input { width:100%; padding:11px 14px; background:#0f0f1a; border:1px solid #2a2a35; border-radius:10px; color:#e0e0e0; font-size:13px; font-family:'Inter',sans-serif; transition:border-color 0.3s; outline:none; }
+.form-input:focus { border-color:#ff6b35; box-shadow:0 0 0 2px rgba(255,107,53,0.15); }
+.form-input::placeholder { color:#555; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.phone-wrap { display:flex; gap:0; }
+.phone-prefix { padding:11px 10px; background:#1a1a24; border:1px solid #2a2a35; border-right:none; border-radius:10px 0 0 10px; color:#f59e0b; font-size:13px; font-weight:700; white-space:nowrap; display:flex; align-items:center; }
+.phone-wrap .form-input { border-radius:0 10px 10px 0; }
+.check-label { display:flex; align-items:center; gap:8px; font-size:12px; color:#e4e4e7; cursor:pointer; margin-top:6px; }
+.check-label input[type="checkbox"] { accent-color:#25d366; width:16px; height:16px; }
+.submit-btn { width:100%; padding:14px; background:linear-gradient(135deg,#ff6b35,#ff9a56); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; letter-spacing:0.5px; margin-top:8px; }
+.submit-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(255,107,53,0.3); }
+.submit-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.status-msg { text-align:center; font-size:12px; margin-top:12px; min-height:20px; }
+.login-link { text-align:center; margin-top:20px; font-size:12px; color:#71717a; }
+.login-link a { color:#ff6b35; text-decoration:none; font-weight:600; }
+.login-link a:hover { text-decoration:underline; }
+.upi-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; display:none; align-items:center; justify-content:center; padding:20px; }
+.upi-modal { background:#12121a; border:1px solid #2a2a35; border-radius:16px; padding:28px 24px; width:100%; max-width:420px; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.6); }
+.upi-title { font-size:18px; font-weight:800; color:#f59e0b; margin-bottom:6px; }
+.upi-sub { font-size:11px; color:#71717a; margin-bottom:16px; }
+.upi-qr { width:220px; height:220px; background:#fff; border-radius:12px; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.upi-qr img { width:100%; height:100%; object-fit:contain; }
+.upi-id-text { font-size:14px; font-weight:700; color:#22c55e; font-family:'JetBrains Mono',monospace; background:#0f0f1a; padding:8px 14px; border-radius:8px; border:1px solid #2a2a35; margin-bottom:14px; cursor:pointer; word-break:break-all; }
+.upi-id-text:hover { border-color:#22c55e; }
+.upi-copy-hint { font-size:9px; color:#555; margin-top:-10px; margin-bottom:14px; }
+.upi-divider { border:none; border-top:1px solid #2a2a35; margin:14px 0; }
+.upi-form-label { display:block; font-size:11px; color:#aaa; margin-bottom:5px; font-weight:600; text-align:left; text-transform:uppercase; letter-spacing:0.5px; }
+.upi-form-input { width:100%; padding:11px 14px; background:#0f0f1a; border:1px solid #2a2a35; border-radius:10px; color:#e0e0e0; font-size:13px; font-family:'Inter',sans-serif; outline:none; margin-bottom:10px; }
+.upi-form-input:focus { border-color:#f59e0b; }
+.upi-file-input { width:100%; padding:10px; background:#0f0f1a; border:1px dashed #2a2a35; border-radius:10px; color:#aaa; font-size:11px; cursor:pointer; text-align:center; margin-bottom:10px; transition:border-color 0.3s; }
+.upi-file-input:hover { border-color:#f59e0b; }
+.upi-file-input input { display:none; }
+.upi-preview { max-width:200px; max-height:150px; border-radius:8px; margin:0 auto 10px; display:none; object-fit:contain; }
+.upi-submit-btn { width:100%; padding:13px; background:linear-gradient(135deg,#f59e0b,#f97316); color:#000; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; }
+.upi-submit-btn:hover { transform:translateY(-1px); }
+.upi-submit-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.upi-success { display:none; text-align:center; padding:30px 10px; }
+.upi-success-icon { font-size:48px; margin-bottom:12px; }
+.upi-success-title { font-size:18px; font-weight:800; color:#22c55e; margin-bottom:6px; }
+.upi-success-msg { font-size:12px; color:#aaa; line-height:1.6; }
+.upi-close-btn { margin-top:16px; padding:10px 24px; background:#2a2a35; color:#e0e0e0; border:none; border-radius:8px; font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; }
+@media(max-width:480px) {
+    .reg-card { padding:24px 20px; }
+    .form-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="reg-card" id="regCard">
+    <div class="reg-header">
+        <div class="reg-logo">🐻</div>
+        <div class="reg-title">BearFighter Trading</div>
+        <div class="reg-sub">Request access to live market dashboard</div>
+    </div>
+
+    <form id="regForm" onsubmit="submitRegistration(event)">
+        <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="regFullName" class="form-input" placeholder="e.g. Vaibhav Kumar" required autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Date of Birth *</label>
+            <input type="date" id="regDob" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Mobile Number *</label>
+            <div class="phone-wrap">
+                <span class="phone-prefix">+91</span>
+                <input type="tel" id="regPhone" class="form-input" placeholder="99999 99999" maxlength="10" pattern="[0-9]{10}" required autocomplete="off">
+            </div>
+            <label class="check-label">
+                <input type="checkbox" id="regWhatsApp"> Same number on WhatsApp
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="you@email.com" required autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Choose Username *</label>
+            <input type="text" id="regUsername" class="form-input" placeholder="e.g. vaibhav123" required autocomplete="off">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Password *</label>
+                <input type="password" id="regPassword" class="form-input" placeholder="Min 6 characters" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password *</label>
+                <input type="password" id="regConfirm" class="form-input" placeholder="Re-enter" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Subscription Plan *</label>
+            <select id="regPlan" class="form-input" required style="cursor:pointer;">
+                <option value="">Select a plan</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Telegram Chat ID (Optional)</label>
+            <input type="text" id="regTelegram" class="form-input" placeholder="Your Telegram Chat ID" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label class="form-label">How did you hear about us?</label>
+            <select id="regSource" class="form-input" style="cursor:pointer;">
+                <option value="">Select</option>
+                <option value="telegram">Telegram</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="friend">Friend / Referral</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <button type="submit" class="submit-btn" id="regSubmitBtn">🚀 Submit Request</button>
+        <div class="status-msg" id="regStatus"></div>
+    </form>
+
+    <div class="login-link">
+        Already have an account? <a href="/">Login →</a>
+    </div>
+</div>
+
+<!-- UPI PAYMENT MODAL -->
+<div class="upi-overlay" id="upiOverlay">
+    <div class="upi-modal" id="upiModal">
+        <!-- PAYMENT FORM -->
+        <div id="upiPaymentForm">
+            <div class="upi-title">💳 Complete Payment</div>
+            <div class="upi-sub">Scan QR or copy UPI ID to pay</div>
+            <div class="upi-qr" id="upiQrWrap">
+                <img id="upiQrImg" src="" alt="QR Code" style="display:none;">
+                <span id="upiQrPlaceholder" style="color:#555;font-size:11px;">QR Code will appear here</span>
+            </div>
+            <div class="upi-id-text" id="upiIdDisplay" onclick="copyUpiId()" title="Click to copy">UPI ID</div>
+            <div class="upi-copy-hint">Tap UPI ID to copy</div>
+            <hr class="upi-divider">
+            <label class="upi-form-label">Transaction ID *</label>
+            <input type="text" id="upiTnxId" class="upi-form-input" placeholder="e.g. 123456789012" autocomplete="off">
+            <label class="upi-form-label">Upload Payment Screenshot</label>
+            <label class="upi-file-input" id="upiFileLabel">
+                📎 Click to upload screenshot
+                <input type="file" id="upiScreenshot" accept="image/*" onchange="previewScreenshot(this)">
+            </label>
+            <img class="upi-preview" id="upiPreview">
+            <button class="upi-submit-btn" id="upiSubmitBtn" onclick="submitPayment()">✅ Submit Payment</button>
+            <div class="status-msg" id="upiStatus"></div>
+            <button class="upi-close-btn" onclick="closeUpiModal()" style="margin-top:10px;">Cancel</button>
+        </div>
+        <!-- SUCCESS MESSAGE -->
+        <div class="upi-success" id="upiSuccess">
+            <div class="upi-success-icon">🎉</div>
+            <div class="upi-success-title">Request Submitted!</div>
+            <div class="upi-success-msg" id="upiSuccessMsg">
+                Your registration request has been sent to admin for approval.<br>
+                You will be notified once approved.<br><br>
+                <strong style="color:#f59e0b;">⏳ Approval Pending</strong>
+            </div>
+            <button class="upi-close-btn" onclick="closeUpiModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '';
+let pendingRegData = null;
+
+async function loadPlans() {
+    try {
+        const r = await fetch(API + '/api/settings').then(r => r.json());
+        const sel = document.getElementById('regPlan');
+        if (r.plans && r.plans.length > 0) {
+            r.plans.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id || p.name;
+                opt.textContent = p.name + (p.price ? ' — ₹' + p.price : '') + (p.days ? ' (' + p.days + ' days)' : '');
+                sel.appendChild(opt);
+            });
+        } else {
+            const opt = document.createElement('option');
+            opt.value = 'default';
+            opt.textContent = 'Standard Plan (30 days)';
+            sel.appendChild(opt);
+        }
+    } catch (e) {
+        const sel = document.getElementById('regPlan');
+        const opt = document.createElement('option');
+        opt.value = 'default';
+        opt.textContent = 'Standard Plan (30 days)';
+        sel.appendChild(opt);
+    }
+}
+loadPlans();
+
+function previewScreenshot(input) {
+    const preview = document.getElementById('upiPreview');
+    const label = document.getElementById('upiFileLabel');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            label.innerHTML = '📎 ' + input.files[0].name + '<input type="file" id="upiScreenshot" accept="image/*" onchange="previewScreenshot(this)">';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function copyUpiId() {
+    const upiId = document.getElementById('upiIdDisplay').textContent;
+    navigator.clipboard.writeText(upiId).then(() => {
+        document.getElementById('upiIdDisplay').style.borderColor = '#22c55e';
+        setTimeout(() => { document.getElementById('upiIdDisplay').style.borderColor = '#2a2a35'; }, 1500);
+    }).catch(() => {});
+}
+
+async function submitRegistration(e) {
+    e.preventDefault();
+    const btn = document.getElementById('regSubmitBtn');
+    const status = document.getElementById('regStatus');
+    const fullName = document.getElementById('regFullName').value.trim();
+    const dob = document.getElementById('regDob').value;
+    const phone = document.getElementById('regPhone').value.trim();
+    const whatsapp = document.getElementById('regWhatsApp').checked;
+    const email = document.getElementById('regEmail').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    const plan = document.getElementById('regPlan').value;
+    const telegram = document.getElementById('regTelegram').value.trim();
+    const source = document.getElementById('regSource').value;
+
+    if (!fullName || !dob || !phone || !email || !username || !password || !plan) {
+        status.innerHTML = '<span style="color:#ef4444;">⚠️ Please fill all required fields</span>';
+        return;
+    }
+    if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
+        status.innerHTML = '<span style="color:#ef4444;">⚠️ Enter valid 10-digit mobile number</span>';
+        return;
+    }
+    if (password.length < 6) {
+        status.innerHTML = '<span style="color:#ef4444;">⚠️ Password must be at least 6 characters</span>';
+        return;
+    }
+    if (password !== confirm) {
+        status.innerHTML = '<span style="color:#ef4444;">⚠️ Passwords don\'t match</span>';
+        return;
+    }
+
+    pendingRegData = { fullName, dob, phone, whatsapp: whatsapp ? phone : '', email, username, password, plan, telegram, source };
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Submitting...';
+    status.innerHTML = '<span style="color:#ffab00;">⏳ Sending request...</span>';
+
+    try {
+        const r = await fetch(API + '/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pendingRegData)
+        }).then(r => r.json());
+
+        if (r.success) {
+            btn.textContent = '✅ Sent!';
+            openUpiModal(r.upiQr, r.upiId, r.amount);
+            document.getElementById('regForm').reset();
+        } else {
+            status.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>';
+        }
+    } catch (err) {
+        status.innerHTML = '<span style="color:#ef4444;">❌ Server error</span>';
+    }
+    btn.disabled = false;
+    btn.textContent = '🚀 Submit Request';
+}
+
+async function openUpiModal(upiQr, upiId, amount) {
+    const overlay = document.getElementById('upiOverlay');
+    overlay.style.display = 'flex';
+    document.getElementById('upiPaymentForm').style.display = 'block';
+    document.getElementById('upiSuccess').style.display = 'none';
+    document.getElementById('upiTnxId').value = '';
+    document.getElementById('upiPreview').style.display = 'none';
+    document.getElementById('upiStatus').innerHTML = '';
+
+    if (upiQr) {
+        document.getElementById('upiQrImg').src = upiQr;
+        document.getElementById('upiQrImg').style.display = 'block';
+        document.getElementById('upiQrPlaceholder').style.display = 'none';
+    }
+    if (upiId) document.getElementById('upiIdDisplay').textContent = upiId;
+}
+
+function closeUpiModal() {
+    document.getElementById('upiOverlay').style.display = 'none';
+    pendingRegData = null;
+}
+
+async function submitPayment() {
+    const tnxId = document.getElementById('upiTnxId').value.trim();
+    const screenshot = document.getElementById('upiScreenshot').files[0];
+    const status = document.getElementById('upiStatus');
+    const btn = document.getElementById('upiSubmitBtn');
+
+    if (!tnxId) {
+        status.innerHTML = '<span style="color:#ef4444;">⚠️ Enter transaction ID</span>';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Submitting...';
+    status.innerHTML = '<span style="color:#ffab00;">⏳ Uploading...</span>';
+
+    let screenshotBase64 = '';
+    if (screenshot) {
+        screenshotBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(screenshot);
+        });
+    }
+
+    try {
+        const r = await fetch(API + '/api/register/payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: pendingRegData?.username, transactionId: tnxId, screenshot: screenshotBase64 })
+        }).then(r => r.json());
+
+        if (r.success) {
+            document.getElementById('upiPaymentForm').style.display = 'none';
+            document.getElementById('upiSuccess').style.display = 'block';
+        } else {
+            status.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>';
+        }
+    } catch (err) {
+        status.innerHTML = '<span style="color:#ef4444;">❌ Server error</span>';
+    }
+    btn.disabled = false;
+    btn.textContent = '✅ Submit Payment';
+}
+</script>
+</body>
+</html>

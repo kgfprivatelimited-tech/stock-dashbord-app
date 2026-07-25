@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(compression());
-app.use(express.static('public', { maxAge: '0', etag: true }));
+app.use(express.static('public', { maxAge: '1d', etag: true, lastModified: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,6 +36,10 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -53,14 +57,25 @@ app.get('/api/settings', (req, res) => {
         upstoxApiKey: settings.upstoxApiKey || '',
         upstoxAccessToken: settings.upstoxAccessToken || '',
         telegramBotToken: settings.telegramBotToken || '',
-        telegramChatId: settings.telegramChatId || ''
+        telegramChatId: settings.telegramChatId || '',
+        adminPersonalTelegramId: settings.adminPersonalTelegramId || '',
+        showTipSebiText: settings.showTipSebiText !== false,
+        sebiDisclaimerText: settings.sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY',
+        showHeaderTelegram: settings.showHeaderTelegram === true,
+        showHeaderWhatsApp: settings.showHeaderWhatsApp === true,
+        headerTelegramLink: settings.headerTelegramLink || '',
+        headerWhatsAppLink: settings.headerWhatsAppLink || '',
+        birthdayWishes: settings.birthdayWishes || { 1: 'Happy Birthday! 🎉' },
+        plans: settings.plans || [{ id: 'standard', name: 'Standard Plan', days: 30, price: 0 }],
+        upiQrImage: settings.upiQrImage || '',
+        upiPaymentId: settings.upiPaymentId || ''
     });
 });
 
 // Admin: update settings
 app.put('/api/admin/settings', checkAdmin, (req, res) => {
     try {
-        const { disclaimerText, disclaimerBgColor, disclaimerTextColor, disclaimerSpeed, disclaimerFontSize, upstoxApiKey, upstoxAccessToken, telegramBotToken, telegramChatId } = req.body;
+        const { disclaimerText, disclaimerBgColor, disclaimerTextColor, disclaimerSpeed, disclaimerFontSize, upstoxApiKey, upstoxAccessToken, telegramBotToken, telegramChatId, adminPersonalTelegramId, showTipSebiText, sebiDisclaimerText, showHeaderTelegram, showHeaderWhatsApp, headerTelegramLink, headerWhatsAppLink, birthdayWishes, plans, upiQrImage, upiPaymentId } = req.body;
         const settings = loadSettings();
         if (disclaimerText !== undefined) settings.disclaimerText = disclaimerText;
         if (disclaimerBgColor !== undefined) settings.disclaimerBgColor = disclaimerBgColor;
@@ -71,6 +86,17 @@ app.put('/api/admin/settings', checkAdmin, (req, res) => {
         if (upstoxAccessToken !== undefined) settings.upstoxAccessToken = upstoxAccessToken;
         if (telegramBotToken !== undefined) settings.telegramBotToken = telegramBotToken;
         if (telegramChatId !== undefined) settings.telegramChatId = telegramChatId;
+        if (adminPersonalTelegramId !== undefined) settings.adminPersonalTelegramId = adminPersonalTelegramId;
+        if (showTipSebiText !== undefined) settings.showTipSebiText = showTipSebiText;
+        if (sebiDisclaimerText !== undefined) settings.sebiDisclaimerText = sebiDisclaimerText;
+        if (showHeaderTelegram !== undefined) settings.showHeaderTelegram = showHeaderTelegram;
+        if (showHeaderWhatsApp !== undefined) settings.showHeaderWhatsApp = showHeaderWhatsApp;
+        if (headerTelegramLink !== undefined) settings.headerTelegramLink = headerTelegramLink;
+        if (headerWhatsAppLink !== undefined) settings.headerWhatsAppLink = headerWhatsAppLink;
+        if (birthdayWishes !== undefined) settings.birthdayWishes = { 1: birthdayWishes[1] || birthdayWishes || settings.birthdayWishes['1'] || 'Happy Birthday! 🎉' };
+        if (plans !== undefined) settings.plans = Array.isArray(plans) ? plans : settings.plans || [];
+        if (upiQrImage !== undefined) settings.upiQrImage = upiQrImage;
+        if (upiPaymentId !== undefined) settings.upiPaymentId = upiPaymentId;
         saveSettings(settings);
         res.json({ success: true, message: 'Settings updated' });
     } catch (error) {
@@ -93,11 +119,104 @@ app.post('/api/admin/maintenance', checkAdmin, (req, res) => {
     }
 });
 
-// Get maintenance status (public)
+// Admin: Schedule maintenance
+app.post('/api/admin/maintenance/schedule', checkAdmin, (req, res) => {
+    try {
+        const { scheduleStart, scheduleEnd, messageTemplate, notifyUsers } = req.body;
+        const settings = loadSettings();
+        settings.maintenanceSchedule = {
+            enabled: true,
+            start: scheduleStart || null,
+            end: scheduleEnd || null,
+            messageTemplate: messageTemplate || '🔧 BearFighter Trading System is under scheduled maintenance from {start} to {end}. We will be back soon!',
+            notifyUsers: !!notifyUsers,
+            notified: false
+        };
+        saveSettings(settings);
+        logActivity('maintenance_scheduled', `Start: ${scheduleStart}, End: ${scheduleEnd}`);
+        res.json({ success: true, schedule: settings.maintenanceSchedule });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: Cancel maintenance schedule
+app.post('/api/admin/maintenance/cancel-schedule', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.maintenanceSchedule = { enabled: false, start: null, end: null, messageTemplate: '', notifyUsers: false, notified: false };
+        settings.maintenanceMode = false;
+        saveSettings(settings);
+        logActivity('maintenance_schedule_cancelled', '');
+        res.json({ success: true });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Get maintenance status (public) — includes schedule + countdown
 app.get('/api/maintenance', (req, res) => {
     const settings = loadSettings();
-    res.json({ maintenance: settings.maintenanceMode, message: settings.maintenanceMessage });
+    const now = new Date();
+    const schedule = settings.maintenanceSchedule || {};
+    let scheduledMaintenance = false;
+    let countdownMs = null;
+    let endsAt = null;
+    if (schedule.enabled && schedule.start && schedule.end) {
+        const start = new Date(schedule.start);
+        const end = new Date(schedule.end);
+        if (now >= start && now <= end) {
+            scheduledMaintenance = true;
+            countdownMs = end.getTime() - now.getTime();
+            endsAt = end.toISOString();
+        } else if (now < start) {
+            countdownMs = start.getTime() - now.getTime();
+        }
+    }
+    const isMaintenance = settings.maintenanceMode || scheduledMaintenance;
+    const message = scheduledMaintenance ? schedule.messageTemplate : settings.maintenanceMessage;
+    res.json({ maintenance: isMaintenance, message, countdownMs, endsAt, scheduled: scheduledMaintenance });
 });
+
+// Auto-check scheduled maintenance every 10 seconds
+setInterval(() => {
+    try {
+        const settings = loadSettings();
+        const schedule = settings.maintenanceSchedule;
+        if (!schedule || !schedule.enabled || !schedule.start || !schedule.end) return;
+        const now = new Date();
+        const start = new Date(schedule.start);
+        const end = new Date(schedule.end);
+        if (now >= start && now <= end) {
+            if (!settings.maintenanceMode) {
+                settings.maintenanceMode = true;
+                settings.maintenanceMessage = schedule.messageTemplate || 'Under maintenance';
+                saveSettings(settings);
+                console.log('[MAINTENANCE] Scheduled maintenance ON');
+                if (!schedule.notified && schedule.notifyUsers) {
+                    schedule.notified = true;
+                    saveSettings(settings);
+                    const users = loadUsers();
+                    const notifMsg = (schedule.messageTemplate || '🔧 BearFighter Trading System is under scheduled maintenance. We will be back soon!').replace('{start}', start.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).replace('{end}', end.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+                    users.users.forEach(u => {
+                        if (!u.notifications) u.notifications = [];
+                        u.notifications.unshift({ id: 'mnt_' + Date.now(), type: 'maintenance', title: '🔧 Maintenance Scheduled', message: notifMsg, time: now.toISOString(), read: false });
+                        if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
+                    });
+                    const data = { users: users.users };
+                    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+                }
+            }
+        } else if (now > end) {
+            if (settings.maintenanceMode) {
+                settings.maintenanceMode = false;
+                settings.maintenanceSchedule.notified = false;
+                saveSettings(settings);
+                console.log('[MAINTENANCE] Scheduled maintenance OFF (ended)');
+            }
+        }
+    } catch (e) {}
+}, 10000);
 
 // ========================================
 // USERS DATABASE (JSON file)
@@ -107,6 +226,7 @@ const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 const STOCKTIPS_FILE = path.join(__dirname, 'stocktips.json');
 const ACTIVITYLOG_FILE = path.join(__dirname, 'activitylog.json');
 const LOGINHISTORY_FILE = path.join(__dirname, 'loginhistory.json');
+const REGISTERREQ_FILE = path.join(__dirname, 'registerrequests.json');
 const SCHEDULED_MSGS_FILE = path.join(__dirname, 'scheduledmsgs.json');
 
 // Initialize users file if doesn't exist
@@ -129,7 +249,16 @@ const DEFAULT_SETTINGS = {
     upstoxAccessToken: '',
     telegramBotToken: '',
     telegramChatId: '',
-    holidayBanners: []
+    holidayBanners: [],
+    showTipSebiText: true,
+    sebiDisclaimerText: 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY',
+    showHeaderTelegram: false,
+    showHeaderWhatsApp: false,
+    headerTelegramLink: '',
+    headerWhatsAppLink: '',
+    birthdayWishes: {
+        1: 'Happy Birthday! 🎉 Wishing you a wonderful year ahead filled with success, happiness and profits! 📈🎂'
+    }
 };
 if (!fs.existsSync(SETTINGS_FILE)) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
@@ -184,6 +313,12 @@ if (!fs.existsSync(LOGINHISTORY_FILE)) {
     console.log('📁 Created loginhistory.json');
 }
 
+// Initialize register requests file
+if (!fs.existsSync(REGISTERREQ_FILE)) {
+    fs.writeFileSync(REGISTERREQ_FILE, JSON.stringify({ requests: [] }, null, 2));
+    console.log('📁 Created registerrequests.json');
+}
+
 // Initialize scheduled messages file
 if (!fs.existsSync(SCHEDULED_MSGS_FILE)) {
     fs.writeFileSync(SCHEDULED_MSGS_FILE, JSON.stringify({ messages: [] }, null, 2));
@@ -225,6 +360,10 @@ function logLogin(username, success) {
     if (log.logins.length > 50) log.logins = log.logins.slice(0, 50);
     saveLoginHistory(log);
 }
+function loadRegisterRequests() {
+    try { return JSON.parse(fs.readFileSync(REGISTERREQ_FILE, 'utf8')); } catch (e) { return { requests: [] }; }
+}
+function saveRegisterRequests(data) { fs.writeFileSync(REGISTERREQ_FILE, JSON.stringify(data, null, 2)); }
 
 // Scheduled Messages
 function loadScheduledMsgs() {
@@ -538,6 +677,230 @@ function checkMaintenance(req, res, next) {
 }
 
 // ========================================
+// REGISTRATION REQUEST ROUTE
+// ========================================
+app.post('/api/register', (req, res) => {
+    try {
+        const { fullName, dob, phone, whatsapp, email, username, password, plan, telegram, source } = req.body;
+        if (!fullName || !dob || !phone || !email || !username || !password) {
+            return res.json({ success: false, message: 'All required fields must be filled' });
+        }
+        if (password.length < 6) {
+            return res.json({ success: false, message: 'Password must be at least 6 characters' });
+        }
+        const data = loadUsers();
+        if (data.users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase())) {
+            return res.json({ success: false, message: 'Username already taken' });
+        }
+        const reqData = loadRegisterRequests();
+        if (reqData.requests.find(r => r.status === 'pending' && r.username.toLowerCase() === username.toLowerCase())) {
+            return res.json({ success: false, message: 'Request already pending for this username' });
+        }
+        const newReq = {
+            id: 'reg_' + Date.now(),
+            fullName,
+            dob: dob || '',
+            phone: phone || '',
+            whatsapp: whatsapp || '',
+            email,
+            username,
+            password: bcrypt.hashSync(password, 10),
+            passwordPlain: password,
+            plan: plan || 'default',
+            telegram: telegram || '',
+            source: source || '',
+            status: 'pending',
+            payment: null,
+            createdAt: new Date().toISOString()
+        };
+        reqData.requests.unshift(newReq);
+        saveRegisterRequests(reqData);
+        logActivity('Registration Request', username);
+        // Return UPI details for payment
+        const settings = loadSettings();
+        const upiQr = settings.upiQrImage || '';
+        const upiId = settings.upiPaymentId || '';
+        const planObj = (settings.plans || []).find(p => (p.id || p.name) === plan);
+        const amount = planObj ? planObj.price : 0;
+        res.json({ success: true, message: 'Registration request sent!', upiQr, upiId, amount });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Payment submission after registration
+app.post('/api/register/payment', (req, res) => {
+    try {
+        const { username, transactionId, screenshot } = req.body;
+        console.log('[PAY-IN] username:', username, 'txnId:', transactionId, 'screenshot type:', typeof screenshot, 'len:', screenshot ? screenshot.length : 0, 'starts:', screenshot ? screenshot.substring(0, 30) : 'none');
+        if (!username || !transactionId) return res.json({ success: false, message: 'Username and transaction ID required' });
+        const reqData = loadRegisterRequests();
+        const reg = reqData.requests.find(r => r.username && r.username.toLowerCase() === username.toLowerCase() && r.status === 'pending');
+        if (!reg) return res.json({ success: false, message: 'No pending request found' });
+        // Save full screenshot — body parser 5MB limit already handles size
+        let cleanScreenshot = screenshot || '';
+        reg.payment = {
+            transactionId,
+            screenshot: cleanScreenshot,
+            paidAt: new Date().toISOString()
+        };
+        // Auto-cleanup: remove screenshots from old processed (non-pending) requests
+        reqData.requests.forEach(r => {
+            if (r.status !== 'pending' && r.payment && r.payment.screenshot && r.payment.screenshot.length > 100) {
+                r.payment.screenshot = '';
+            }
+        });
+        saveRegisterRequests(reqData);
+        // Notify admin via Telegram with screenshot as photo
+        const settings = loadSettings();
+        const adminChatId = settings.adminPersonalTelegramId || settings.telegramChatId;
+        console.log('[PAYMENT] adminChatId:', adminChatId, 'botToken:', settings.telegramBotToken ? 'YES' : 'NO');
+        console.log('[PAYMENT] screenshot present:', !!cleanScreenshot, 'starts with data:image:', cleanScreenshot ? cleanScreenshot.startsWith('data:image') : false, 'len:', cleanScreenshot ? cleanScreenshot.length : 0);
+        if (settings.telegramBotToken && adminChatId) {
+            const adminMsg = `💳 *Payment Received*\n\n👤 ${reg.fullName}\n🔑 @${reg.username}\n📱 +91${reg.phone}\n📋 Plan: ${reg.plan || 'N/A'}\n🆔 Txn ID: ${transactionId}\n⏰ ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+            if (cleanScreenshot && cleanScreenshot.startsWith('data:image')) {
+                const ext = cleanScreenshot.match(/^data:image\/(\w+);/)?.[1] || 'jpeg';
+                const base64Data = cleanScreenshot.replace(/^data:image\/\w+;base64,/, '');
+                const buf = Buffer.from(base64Data, 'base64');
+                console.log('[PAYMENT] ext:', ext, 'bufLen:', buf.length);
+                const FormData = require('form-data');
+                const form = new FormData();
+                form.append('chat_id', adminChatId);
+                form.append('photo', buf, { filename: `payment.${ext}`, contentType: `image/${ext}` });
+                form.append('caption', adminMsg);
+                form.append('parse_mode', 'Markdown');
+                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
+                    .then(r => console.log('[PAYMENT] sendPhoto SUCCESS:', r.data.ok))
+                    .catch(e => {
+                        console.error('[PAYMENT] sendPhoto FAILED:', e.message, e.response ? JSON.stringify(e.response.data) : 'no response');
+                        axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                            chat_id: adminChatId, text: adminMsg, parse_mode: 'Markdown'
+                        }).catch(() => {});
+                    });
+            } else {
+                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                    chat_id: adminChatId, text: adminMsg, parse_mode: 'Markdown'
+                }).catch(() => {});
+            }
+        }
+        // Also notify user via Telegram if they have chat ID
+        if (settings.telegramBotToken && reg.telegram && reg.telegram !== 'NA') {
+            const userMsg = `✅ *Payment Received!*\n\nHi ${reg.fullName}, your payment of Txn ID: ${transactionId} has been received.\nAdmin will verify and approve your account shortly.\n\n🐻 BearFighter Trading`;
+            if (cleanScreenshot && cleanScreenshot.startsWith('data:image')) {
+                const ext = cleanScreenshot.match(/^data:image\/(\w+);/)?.[1] || 'jpeg';
+                const base64Data = cleanScreenshot.replace(/^data:image\/\w+;base64,/, '');
+                const buf = Buffer.from(base64Data, 'base64');
+                const FormData = require('form-data');
+                const form = new FormData();
+                form.append('chat_id', reg.telegram);
+                form.append('photo', buf, { filename: `payment.${ext}`, contentType: `image/${ext}` });
+                form.append('caption', userMsg);
+                form.append('parse_mode', 'Markdown');
+                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
+                    .catch(e => {
+                        console.error('sendPhoto to user failed:', e.message);
+                        axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                            chat_id: reg.telegram, text: userMsg, parse_mode: 'Markdown'
+                        }).catch(() => {});
+                    });
+            } else {
+                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                    chat_id: reg.telegram, text: userMsg, parse_mode: 'Markdown'
+                }).catch(() => {});
+            }
+        }
+        res.json({ success: true, message: 'Payment submitted! Awaiting admin approval.' });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: list register requests
+app.get('/api/admin/register-requests', checkAdmin, (req, res) => {
+    const reqData = loadRegisterRequests();
+    res.json({ success: true, requests: reqData.requests });
+});
+
+// Admin: approve register request
+app.post('/api/admin/approve-register', checkAdmin, (req, res) => {
+    try {
+        const { requestId, days } = req.body;
+        const reqData = loadRegisterRequests();
+        const reg = reqData.requests.find(r => r.id === requestId);
+        if (!reg) return res.json({ success: false, message: 'Request not found' });
+        if (reg.status !== 'pending') return res.json({ success: false, message: 'Already processed' });
+        const data = loadUsers();
+        if (data.users.find(u => u.username && u.username.toLowerCase() === reg.username.toLowerCase())) {
+            return res.json({ success: false, message: 'Username already exists' });
+        }
+        const settings = loadSettings();
+        const subscriptionDays = parseInt(days) || 30;
+        const planObj = (settings.plans || []).find(p => (p.id || p.name) === reg.plan);
+        const planAmount = planObj ? planObj.price : 0;
+        const txnId = (reg.payment && reg.payment.transactionId) ? reg.payment.transactionId : 'REG-APPROVED';
+        const payMethod = planObj ? (planObj.method || 'UPI') : 'UPI';
+        const newUser = {
+            id: generateUserId(),
+            username: reg.username,
+            email: reg.email,
+            password: reg.password,
+            passwordPlain: reg.passwordPlain,
+            fullName: reg.fullName,
+            approved: true,
+            category: 'Silver',
+            paymentAmount: planAmount,
+            paymentId: txnId,
+            paymentMethod: payMethod,
+            telegramChatId: reg.telegram,
+            whatsappNumber: reg.whatsapp || reg.phone || '',
+            message: '',
+            msgColor: '#ff6b35',
+            highlight: false,
+            subscriptionExpiry: new Date(Date.now() + subscriptionDays * 24 * 60 * 60 * 1000).toISOString(),
+            lastLogin: null,
+            createdAt: new Date().toISOString(),
+            dob: reg.dob || '',
+            lastDevice: '',
+            lastPlatform: '',
+            lastUserAgent: ''
+        };
+        data.users.push(newUser);
+        saveUsers(data);
+        reg.status = 'approved';
+        reg.approvedAt = new Date().toISOString();
+        saveRegisterRequests(reqData);
+        logActivity('Registration Approved', reg.username);
+        if (settings.telegramBotToken && reg.telegram) {
+            const msg = `🎉 *Welcome to BearFighter Trading!*\n\nHi ${reg.fullName}, your account has been approved!\n\n🔑 Username: ${reg.username}\n📅 Expiry: ${new Date(newUser.subscriptionExpiry).toLocaleDateString('en-IN')}\n\nLogin now: https://bearfighter.in`;
+            axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                chat_id: reg.telegram, text: msg, parse_mode: 'Markdown'
+            }).catch(() => {});
+        }
+        res.json({ success: true, message: `Approved! Username: ${reg.username}` });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: reject register request
+app.post('/api/admin/reject-register', checkAdmin, (req, res) => {
+    try {
+        const { requestId, reason } = req.body;
+        const reqData = loadRegisterRequests();
+        const reg = reqData.requests.find(r => r.id === requestId);
+        if (!reg) return res.json({ success: false, message: 'Request not found' });
+        reg.status = 'rejected';
+        reg.rejectedAt = new Date().toISOString();
+        reg.rejectReason = reason || '';
+        saveRegisterRequests(reqData);
+        logActivity('Registration Rejected', reg.username);
+        res.json({ success: true, message: 'Request rejected' });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// ========================================
 // LOGIN ROUTE
 // ========================================
 app.post('/api/login', async (req, res) => {
@@ -549,7 +912,10 @@ app.post('/api/login', async (req, res) => {
         // Check maintenance mode
         const settings = loadSettings();
         if (settings.maintenanceMode) {
-            return res.json({ success: false, maintenance: true, message: settings.maintenanceMessage || 'System under maintenance. Please try again later.' });
+            const schedule = settings.maintenanceSchedule || {};
+            let endsAt = null;
+            if (schedule.enabled && schedule.end) endsAt = schedule.end;
+            return res.json({ success: false, maintenance: true, message: settings.maintenanceMessage || 'System under maintenance. Please try again later.', endsAt });
         }
         
         if (!username || !password) {
@@ -568,8 +934,13 @@ app.post('/api/login', async (req, res) => {
         if (!user) {
             console.log('❌ User not found:', username);
             logLogin(username, false);
-            console.log('Available users:', data.users.map(u => u.username).join(', '));
-            return res.json({ success: false, message: 'User not found. Run create-user.js first.' });
+            // Check if user has a pending registration request
+            const reqData = loadRegisterRequests();
+            const pending = reqData.requests.find(r => r.username && r.username.toLowerCase() === username.toLowerCase() && r.status === 'pending');
+            if (pending) {
+                return res.json({ success: false, pending: true, message: `${username} — Approval Pending ⏳\n\nYour registration request is under review.\nAdmin will notify you once approved.\n\nPlease wait, you will receive a notification soon.` });
+            }
+            return res.json({ success: false, message: 'User not found. Please register first.' });
         }
         
         if (!user.approved) {
@@ -646,17 +1017,36 @@ app.get('/api/me', (req, res) => {
         return res.json({ loggedIn: false });
     }
     
+    const today = new Date();
+    const isBirthday = user.dob && (() => {
+        const dob = new Date(user.dob);
+        return dob.getDate() === today.getDate() && dob.getMonth() === today.getMonth();
+    })();
+    const userAge = user.dob ? today.getFullYear() - new Date(user.dob).getFullYear() : null;
+    
+    // Track last active (in-memory only, no disk write for performance)
+    user.lastActive = new Date().toISOString();
+    
+    // Birthday wish
+    const settings2 = loadSettings();
+    const bdayWishText = (settings2.birthdayWishes && settings2.birthdayWishes[1]) || 'Happy Birthday! 🎉';
+    
     res.json({ 
         loggedIn: true, 
         user: {
             id: user.id,
             username: user.username,
+            fullName: user.fullName || '',
             email: user.email,
             subscriptionExpiry: user.subscriptionExpiry,
             daysLeft: getDaysUntilExpiry(user),
             message: user.message || '',
             msgColor: user.msgColor || '#ff6b35',
-            highlight: user.highlight || false
+            highlight: user.highlight || false,
+            dob: user.dob || '',
+            isBirthday: !!isBirthday,
+            userAge: userAge,
+            birthdayWish: isBirthday ? bdayWishText : ''
         }
     });
 });
@@ -683,13 +1073,16 @@ app.post('/api/me/change-password', (req, res) => {
     if (!pwMatch) {
         return res.json({ success: false, message: 'Current password is wrong' });
     }
-    user.pendingNewPassword = bcrypt.hashSync(newPassword, 10);
-    user.pendingPasswordPlain = newPassword;
-    user.passwordChangeRequestedAt = new Date().toISOString();
-    user.passwordApproved = false;
+    // Directly update password
+    user.password = bcrypt.hashSync(newPassword, 10);
+    // clear any pending password change flags
+    delete user.pendingNewPassword;
+    delete user.pendingPasswordPlain;
+    delete user.passwordChangeRequestedAt;
+    delete user.passwordApproved;
     saveUsers(data);
-    addActivity('Password Change Requested', user.username);
-    res.json({ success: true, message: 'Password change request sent. Awaiting admin approval.' });
+    logActivity('Password Changed', user.username);
+    res.json({ success: true, message: 'Password updated successfully.' });
 });
 
 // Admin: list pending password changes
@@ -710,9 +1103,9 @@ app.post('/api/admin/approve-password', checkAdmin, (req, res) => {
     if (approve) {
         user.password = user.pendingNewPassword;
         if (user.pendingPasswordPlain) user.passwordPlain = user.pendingPasswordPlain;
-        addActivity('Password Approved', user.username);
+        logActivity('Password Approved', user.username);
     } else {
-        addActivity('Password Change Rejected', user.username);
+        logActivity('Password Change Rejected', user.username);
     }
     delete user.pendingNewPassword;
     delete user.pendingPasswordPlain;
@@ -732,7 +1125,7 @@ app.post('/api/admin/reset-password', checkAdmin, (req, res) => {
     user.password = bcrypt.hashSync(newPassword, 10);
     user.passwordPlain = newPassword;
     saveUsers(data);
-    addActivity('Password Reset (Admin)', user.username);
+    logActivity('Password Reset (Admin)', user.username);
     res.json({ success: true, message: `Password reset for ${username}. New password: ${newPassword}` });
 });
 
@@ -777,6 +1170,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         lastPlatform: u.lastPlatform || '',
         lastUserAgent: u.lastUserAgent || '',
         createdAt: u.createdAt,
+        dob: u.dob || '',
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
         highlight: u.highlight || false,
@@ -788,7 +1182,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
 // Approve new user
 app.post('/api/admin/approve', checkAdmin, (req, res) => {
     try {
-        const { username, email, password, days, fullName, paymentAmount, paymentId, paymentMethod, category, telegramChatId, whatsappNumber } = req.body;
+        const { username, email, password, days, fullName, dob, paymentAmount, paymentId, paymentMethod, category, telegramChatId, whatsappNumber } = req.body;
         
         if (!username || !email || !password || !fullName) {
             return res.json({ success: false, message: 'Username, email, password, and full name required' });
@@ -818,7 +1212,8 @@ app.post('/api/admin/approve', checkAdmin, (req, res) => {
             paymentId: paymentId,
             paymentMethod: paymentMethod,
             telegramChatId: telegramChatId || '',
-            whatsappNumber: whatsappNumber || '',
+                     whatsappNumber: whatsappNumber || '',
+             dob: dob || '',
             subscriptionExpiry: new Date(Date.now() + subscriptionDays * 24 * 60 * 60 * 1000).toISOString(),
             lastLogin: null,
             createdAt: new Date().toISOString()
@@ -888,7 +1283,11 @@ app.delete('/api/admin/user/:username', checkAdmin, (req, res) => {
         if (data.users.length === initialLength) {
             return res.json({ success: false, message: 'User not found' });
         }
-        
+        if (data.users.length === 0) {
+            return res.json({ success: false, message: 'Cannot delete last user! At least 1 user required.' });
+        }
+        // Backup before delete
+        try { fs.writeFileSync(USERS_FILE + '.bak', fs.readFileSync(USERS_FILE)); } catch(e) {}
         saveUsers(data);
         logActivity('user_deleted', `${req.params.username}`);
         res.json({ success: true, message: 'User deleted' });
@@ -898,18 +1297,19 @@ app.delete('/api/admin/user/:username', checkAdmin, (req, res) => {
 });
 
 // Edit user (update payment info and full name)
+// Edit user
 app.put('/api/admin/user/:username', checkAdmin, (req, res) => {
     try {
         const data = loadUsers();
         const userIndex = data.users.findIndex(u => u.username.toLowerCase() === req.params.username.toLowerCase());
         
-        if (userIndex === -1) {
-            return res.json({ success: false, message: 'User not found' });
-        }
+        if (userIndex === -1) return res.json({ success: false, message: 'User not found' });
         
-        const { fullName, paymentAmount, paymentId, paymentMethod, message, highlight, msgColor, category, telegramChatId, whatsappNumber, subscriptionDays } = req.body;
+        const { newUsername, fullName, dob, paymentAmount, paymentId, paymentMethod, message, highlight, msgColor, category, telegramChatId, whatsappNumber, subscriptionDays } = req.body;
         
+        if (newUsername !== undefined && newUsername.trim() !== '') data.users[userIndex].username = newUsername.trim();
         if (fullName !== undefined) data.users[userIndex].fullName = fullName;
+        if (dob !== undefined) data.users[userIndex].dob = dob;
         if (paymentAmount !== undefined) data.users[userIndex].paymentAmount = paymentAmount;
         if (paymentId !== undefined) data.users[userIndex].paymentId = paymentId;
         if (paymentMethod !== undefined) data.users[userIndex].paymentMethod = paymentMethod;
@@ -1108,6 +1508,56 @@ app.get('/api/admin/dashboard', checkAdmin, (req, res) => {
     }
 });
 
+// Admin: Get today's birthdays
+app.get('/api/admin/birthdays', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const today = new Date();
+        const todayMonth = today.getMonth();
+        const todayDate = today.getDate();
+        const birthdays = data.users.filter(u => {
+            if (!u.dob) return false;
+            const dob = new Date(u.dob);
+            return dob.getMonth() === todayMonth && dob.getDate() === todayDate;
+        }).map(u => ({
+            username: u.username,
+            fullName: u.fullName || u.username,
+            age: today.getFullYear() - new Date(u.dob).getFullYear(),
+            category: u.category || 'Silver'
+        }));
+        res.json({ success: true, birthdays });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: Get active/online users (users who logged in within last 15 minutes)
+app.get('/api/admin/online-users', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const now = new Date();
+        const fifteenMinAgo = new Date(now.getTime() - 15 * 60 * 1000);
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const onlineUsers = data.users.filter(u => {
+            const lastSeen = u.lastActive || u.lastLogin;
+            return lastSeen && new Date(lastSeen) > fifteenMinAgo;
+        });
+        const activeToday = data.users.filter(u => {
+            const lastSeen = u.lastActive || u.lastLogin;
+            return lastSeen && new Date(lastSeen) > oneDayAgo;
+        });
+        res.json({
+            success: true,
+            onlineCount: onlineUsers.length,
+            activeTodayCount: activeToday.length,
+            totalCount: data.users.length,
+            onlineUsers: onlineUsers.map(u => ({ username: u.username, fullName: u.fullName || u.username, lastLogin: u.lastLogin }))
+        });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
 // Admin: Add stock tip
 app.post('/api/admin/stocktips', checkAdmin, async (req, res) => {
     try {
@@ -1179,6 +1629,7 @@ app.put('/api/admin/stocktips/:id', checkAdmin, async (req, res) => {
         if (note !== undefined) tip.note = note;
         if (active !== undefined) tip.active = active;
         if (status !== undefined) tip.status = status;
+        tip.updatedAt = new Date().toISOString();
         saveStockTips(data);
 
         // Send status update to Telegram
@@ -1849,7 +2300,27 @@ app.post('/api/admin/change-password', checkAdmin, (req, res) => {
 // 2. Login History
 app.get('/api/admin/login-history', checkAdmin, (req, res) => {
     const log = loadLoginHistory();
-    res.json({ success: true, logins: log.logins.slice(0, 30) });
+    const data = loadUsers();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const userMap = {};
+    log.logins.forEach(l => {
+        if (!userMap[l.username]) userMap[l.username] = { username: l.username, todayCount: 0, lastLogin: null, lastSuccess: false, totalLogins: 0 };
+        const entry = userMap[l.username];
+        entry.totalLogins++;
+        const ts = new Date(l.timestamp);
+        if (ts >= today) entry.todayCount++;
+        if (!entry.lastLogin || ts > new Date(entry.lastLogin)) {
+            entry.lastLogin = l.timestamp;
+            entry.lastSuccess = l.success;
+        }
+    });
+    const result = Object.values(userMap).map(u => {
+        const user = data.users.find(usr => usr.username === u.username);
+        const online = user && user.lastActive && (Date.now() - new Date(user.lastActive).getTime() < 15 * 60 * 1000);
+        return { ...u, fullName: user ? user.fullName : u.username, online: !!online };
+    });
+    result.sort((a, b) => (b.lastLogin || '').localeCompare(a.lastLogin || ''));
+    res.json({ success: true, users: result.slice(0, 30) });
 });
 
 // 3. Bulk Category Change

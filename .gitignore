@@ -8,5 +8,6 @@ marketcache.json
 scheduledmsgs.json
 settings.json
 stocktips.json
+registerrequests.json
 server.log
 error.log
