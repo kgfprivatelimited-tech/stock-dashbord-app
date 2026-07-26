@@ -10,6 +10,8 @@ const moment = require('moment-timezone');
 const axios = require('axios');
 const compression = require('compression');
 const bcrypt = require('bcryptjs');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const db = require('./db');
 
@@ -17,9 +19,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(compression());
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(express.static('public', { maxAge: '1d', etag: true, lastModified: true }));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// Rate limiters
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Too many attempts. Try again in 15 minutes.' } });
+const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, message: { success: false, message: 'Too many registrations. Try again later.' } });
+const apiLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 200, message: { success: false, message: 'Too many requests. Slow down.' } });
+
+app.use('/api', apiLimiter);
 
 // Prevent API caching on mobile browsers
 app.use('/api', (req, res, next) => {
@@ -45,8 +55,31 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Get public settings (disclaimer text)
+// Get public settings (disclaimer text) — NO SECRETS
 app.get('/api/settings', (req, res) => {
+    const settings = loadSettings();
+    res.json({
+        success: true,
+        disclaimerText: settings.disclaimerText,
+        disclaimerBgColor: settings.disclaimerBgColor || '#ffeb3b',
+        disclaimerTextColor: settings.disclaimerTextColor || '#000000',
+        disclaimerSpeed: settings.disclaimerSpeed || 8,
+        disclaimerFontSize: settings.disclaimerFontSize || 10,
+        showTipSebiText: settings.showTipSebiText !== false,
+        sebiDisclaimerText: settings.sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY',
+        showHeaderTelegram: settings.showHeaderTelegram === true,
+        showHeaderWhatsApp: settings.showHeaderWhatsApp === true,
+        headerTelegramLink: settings.headerTelegramLink || '',
+        headerWhatsAppLink: settings.headerWhatsAppLink || '',
+        birthdayWishes: settings.birthdayWishes || { 1: 'Happy Birthday! 🎉' },
+        plans: settings.plans || [{ id: 'standard', name: 'Standard Plan', days: 30, price: 0 }],
+        upiQrImage: settings.upiQrImage || '',
+        upiPaymentId: settings.upiPaymentId || ''
+    });
+});
+
+// Admin-only settings with secrets
+app.get('/api/admin/settings', checkAdmin, (req, res) => {
     const settings = loadSettings();
     res.json({
         success: true,
@@ -69,7 +102,10 @@ app.get('/api/settings', (req, res) => {
         birthdayWishes: settings.birthdayWishes || { 1: 'Happy Birthday! 🎉' },
         plans: settings.plans || [{ id: 'standard', name: 'Standard Plan', days: 30, price: 0 }],
         upiQrImage: settings.upiQrImage || '',
-        upiPaymentId: settings.upiPaymentId || ''
+        upiPaymentId: settings.upiPaymentId || '',
+        maintenanceMode: settings.maintenanceMode || false,
+        maintenanceMessage: settings.maintenanceMessage || '',
+        maintenanceEndsAt: settings.maintenanceEndsAt || null
     });
 });
 
@@ -643,7 +679,7 @@ function checkMaintenance(req, res, next) {
 // ========================================
 // REGISTRATION REQUEST ROUTE
 // ========================================
-app.post('/api/register', (req, res) => {
+app.post('/api/register', registerLimiter, (req, res) => {
     try {
         const { fullName, dob, phone, whatsapp, email, username, password, plan, telegram, source } = req.body;
         if (!fullName || !dob || !phone || !email || !username || !password) {
@@ -867,7 +903,7 @@ app.post('/api/admin/reject-register', checkAdmin, (req, res) => {
 // ========================================
 // LOGIN ROUTE
 // ========================================
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
     try {
         const { username, password, location, device, platform, userAgent } = req.body;
         
@@ -959,8 +995,8 @@ app.post('/api/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Login error:', error);
-        res.json({ success: false, message: 'Server error: ' + error.message });
+        console.error('❌ Login error:', error.message);
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -1138,7 +1174,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
         highlight: u.highlight || false,
-        passwordPlain: u.passwordPlain || u.password || ''
+        passwordPlain: u.passwordPlain || ''
     }));
     res.json({ success: true, users });
 });
@@ -1191,7 +1227,8 @@ app.post('/api/admin/approve', checkAdmin, (req, res) => {
         
         res.json({ success: true, message: `User ${fullName} created for ${subscriptionDays} days! Payment: ₹${paymentAmount}`, user: newUser });
     } catch (error) {
-        res.json({ success: false, message: 'Server error: ' + error.message });
+        console.error('❌ Create user error:', error.message);
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -2947,7 +2984,7 @@ async function startServer() {
         console.log(`🐻 BEAR FIGHTER TRADING - Login System`);
         console.log(`   By Vaibhav`);
         console.log(`🌐 Dashboard: http://localhost:${PORT}`);
-        console.log(`🔐 Admin Password: ${ADMIN_PASSWORD}`);
+        console.log(`🔐 Admin: use panel to login`);
         console.log(`💾 Database: ${mongoConnected ? 'MongoDB Atlas ✅' : 'JSON files (local)'}`);
         console.log(`📊 Background refresher: 1s (indices), 5s (stocks)`);
         console.log(`${'='.repeat(50)}\n`);

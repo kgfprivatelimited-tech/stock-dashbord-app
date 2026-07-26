@@ -4180,7 +4180,7 @@ async function changeAdminPassword() {
 // ═══════ API KEYS ═══════
 async function loadApiKeys() {
     try {
-        const r = await fetch(API + '/api/settings').then(r => r.json());
+        const r = await fetch(API + '/api/admin/settings', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         if (r.success) {
             const el = (id) => document.getElementById(id);
             if (el('settingsUpstoxKey')) el('settingsUpstoxKey').value = r.upstoxApiKey || '';
