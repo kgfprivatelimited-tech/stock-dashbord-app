@@ -207,10 +207,43 @@ app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
         };
         saveSettings(settings);
         logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
+        console.log('[MAINTENANCE] Daily settings saved:', JSON.stringify(settings.dailyMaintenance));
         res.json({ success: true, dailyMaintenance: settings.dailyMaintenance });
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
     }
+});
+
+// Admin: Debug maintenance state
+app.get('/api/admin/maintenance/debug', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const now = new Date();
+        const nowIST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        const schedule = settings.maintenanceSchedule || {};
+        const dm = settings.dailyMaintenance || {};
+        let scheduleActive = false;
+        if (schedule.enabled && schedule.start && schedule.end) {
+            const start = new Date(schedule.start);
+            const end = new Date(schedule.end);
+            scheduleActive = now >= start && now <= end;
+        }
+        let dmInWindow = false;
+        if (dm.enabled) {
+            const curMin = nowIST.getHours() * 60 + nowIST.getMinutes();
+            const startMin = (dm.startHour || 2) * 60 + (dm.startMin || 0);
+            const endMin = (dm.endHour || 7) * 60 + (dm.endMin || 0);
+            dmInWindow = startMin < endMin ? (curMin >= startMin && curMin < endMin) : (curMin >= startMin || curMin < endMin);
+        }
+        res.json({
+            maintenanceMode: settings.maintenanceMode,
+            nowUTC: now.toISOString(),
+            nowIST: nowIST.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+            schedule: { enabled: schedule.enabled, start: schedule.start, end: schedule.end, active: scheduleActive },
+            dailyMaintenance: { ...dm, inWindow: dmInWindow },
+            message: settings.maintenanceMessage
+        });
+    } catch(e) { res.json({ error: e.message }); }
 });
 
 // Get maintenance status (public) — includes schedule + countdown

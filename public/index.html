@@ -2789,34 +2789,49 @@ input[type="color"] {
             <div class="admin-card-header">
                 <div class="admin-card-title">🔄 Daily Recurring Maintenance</div>
             </div>
-            <p style="font-size:11px;color:#71717a;margin-bottom:10px;">Roz automatically on/off — jaise raat 2am-7am.</p>
+            <p style="font-size:11px;color:#71717a;margin-bottom:10px;">Roz automatically on/off — jaise raat 2:00 AM se 7:00 AM (IST +05:30).</p>
+            <div id="dailyMaintCurrentStatus" style="font-size:11px;margin-bottom:10px;padding:8px;border-radius:8px;background:rgba(30,30,40,0.8);border:1px solid #2a2a35;color:#71717a;display:none;"></div>
             <div class="admin-toggle-wrap">
                 <span class="admin-toggle-label">Enable Daily Maintenance</span>
                 <div class="admin-toggle" id="dailyMaintToggle" onclick="this.classList.toggle('active');saveDailyMaintenance();"></div>
             </div>
-            <div class="admin-form-row" style="margin-top:10px;">
+            <div style="margin-top:12px;padding:10px;background:rgba(30,30,40,0.6);border-radius:8px;border:1px solid #2a2a35;">
+              <div class="admin-form-row">
                 <div class="admin-form-group">
-                    <label class="admin-form-label">Start Time (IST)</label>
-                    <div style="display:flex;gap:4px;">
-                        <input type="number" id="dmStartHour" class="admin-form-input" min="0" max="23" value="2" style="width:50px;text-align:center;">
-                        <span style="color:#71717a;line-height:36px;">:</span>
-                        <input type="number" id="dmStartMin" class="admin-form-input" min="0" max="59" value="0" style="width:50px;text-align:center;">
+                    <label class="admin-form-label">⏰ Start Time (IST +05:30)</label>
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <select id="dmStartHour" class="admin-form-select" style="width:60px;padding:6px 4px;font-size:12px;">
+                            <option value="0">12</option><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">1</option><option value="14">2</option><option value="15">3</option><option value="16">4</option><option value="17">5</option><option value="18">6</option><option value="19">7</option><option value="20">8</option><option value="21">9</option><option value="22">10</option><option value="23">11</option>
+                        </select>
+                        <select id="dmStartAMPM" class="admin-form-select" style="width:52px;padding:6px 4px;font-size:12px;">
+                            <option value="AM" selected>AM</option><option value="PM">PM</option>
+                        </select>
+                        <span style="color:#555;font-size:9px;">IST</span>
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label class="admin-form-label">End Time (IST)</label>
-                    <div style="display:flex;gap:4px;">
-                        <input type="number" id="dmEndHour" class="admin-form-input" min="0" max="23" value="7" style="width:50px;text-align:center;">
-                        <span style="color:#71717a;line-height:36px;">:</span>
-                        <input type="number" id="dmEndMin" class="admin-form-input" min="0" max="59" value="0" style="width:50px;text-align:center;">
+                    <label class="admin-form-label">⏰ End Time (IST +05:30)</label>
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <select id="dmEndHour" class="admin-form-select" style="width:60px;padding:6px 4px;font-size:12px;">
+                            <option value="0">12</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7" selected>7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">1</option><option value="14">2</option><option value="15">3</option><option value="16">4</option><option value="17">5</option><option value="18">6</option><option value="19">7</option><option value="20">8</option><option value="21">9</option><option value="22">10</option><option value="23">11</option>
+                        </select>
+                        <select id="dmEndAMPM" class="admin-form-select" style="width:52px;padding:6px 4px;font-size:12px;">
+                            <option value="AM" selected>AM</option><option value="PM">PM</option>
+                        </select>
+                        <span style="color:#555;font-size:9px;">IST</span>
                     </div>
                 </div>
+              </div>
+              <div style="font-size:9px;color:#555;margin-top:4px;text-align:center;">🕐 All times Indian Standard Time (Kolkata/Mumbai) UTC+05:30</div>
             </div>
-            <div class="admin-form-group">
+            <div class="admin-form-group" style="margin-top:10px;">
                 <label class="admin-form-label">Maintenance Message</label>
                 <textarea id="dailyMaintMsg" rows="2" class="admin-form-input" placeholder="🔧 Daily maintenance in progress..." style="resize:vertical;">🔧 Daily maintenance in progress. We will be back shortly!</textarea>
             </div>
             <button class="admin-btn admin-btn-primary" onclick="saveDailyMaintenance()" style="width:100%;">💾 Save Daily Schedule</button>
+            <div style="display:flex;gap:6px;margin-top:8px;">
+              <button class="admin-btn admin-btn-danger" onclick="testDailyMaintenance()" style="flex:1;font-size:10px;padding:6px;">🔍 Check Status Now</button>
+            </div>
             <div id="dailyMaintStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
         </div>
@@ -5819,11 +5834,28 @@ async function loadMaintenanceStatus() {
             const dm = sr.dailyMaintenance || {};
             const dmToggle = document.getElementById('dailyMaintToggle');
             if (dm.enabled) dmToggle.classList.add('active'); else dmToggle.classList.remove('active');
-            document.getElementById('dmStartHour').value = dm.startHour ?? 2;
-            document.getElementById('dmStartMin').value = dm.startMin ?? 0;
-            document.getElementById('dmEndHour').value = dm.endHour ?? 7;
-            document.getElementById('dmEndMin').value = dm.endMin ?? 0;
+            function to12HSelect(h24, selectId, ampmId) {
+                const ap = h24 >= 12 ? 'PM' : 'AM';
+                let h12 = h24 % 12; if (h12 === 0) h12 = 12;
+                document.getElementById(selectId).value = String(h24);
+                document.getElementById(ampmId).value = ap;
+            }
+            to12HSelect(dm.startHour ?? 2, 'dmStartHour', 'dmStartAMPM');
+            to12HSelect(dm.endHour ?? 7, 'dmEndHour', 'dmEndAMPM');
             if (dm.message) document.getElementById('dailyMaintMsg').value = dm.message;
+            const curStatus = document.getElementById('dailyMaintCurrentStatus');
+            if (curStatus && dm.enabled) {
+                const fmtH = h => { const hr12 = h % 12 || 12; return hr12 + ':00 ' + (h < 12 ? 'AM' : 'PM'); };
+                curStatus.style.display = 'block';
+                curStatus.style.background = 'rgba(34,197,94,0.1)';
+                curStatus.style.border = '1px solid #166534';
+                curStatus.style.color = '#22c55e';
+                curStatus.innerHTML = '🟢 Active: ' + fmtH(dm.startHour||2) + ' — ' + fmtH(dm.endHour||7) + ' IST daily';
+            } else if (curStatus) {
+                curStatus.style.display = 'block';
+                curStatus.style.color = '#71717a';
+                curStatus.innerHTML = '⚪ Daily maintenance is OFF';
+            }
         } catch(e) {}
     } catch (e) {}
 }
@@ -5919,12 +5951,20 @@ async function cancelMaintenanceSchedule() {
 async function saveDailyMaintenance() {
     const toggle = document.getElementById('dailyMaintToggle');
     const enabled = toggle.classList.contains('active');
+    let startH = parseInt(document.getElementById('dmStartHour').value) || 2;
+    const startAP = document.getElementById('dmStartAMPM').value;
+    let endH = parseInt(document.getElementById('dmEndHour').value) || 7;
+    const endAP = document.getElementById('dmEndAMPM').value;
+    if (startAP === 'PM' && startH < 12) startH += 12;
+    if (startAP === 'AM' && startH === 12) startH = 0;
+    if (endAP === 'PM' && endH < 12) endH += 12;
+    if (endAP === 'AM' && endH === 12) endH = 0;
     const body = {
         enabled,
-        startHour: parseInt(document.getElementById('dmStartHour').value) || 2,
-        startMin: parseInt(document.getElementById('dmStartMin').value) || 0,
-        endHour: parseInt(document.getElementById('dmEndHour').value) || 7,
-        endMin: parseInt(document.getElementById('dmEndMin').value) || 0,
+        startHour: startH,
+        startMin: 0,
+        endHour: endH,
+        endMin: 0,
         message: document.getElementById('dailyMaintMsg').value.trim() || '🔧 Daily maintenance in progress.'
     };
     const st = document.getElementById('dailyMaintStatus');
@@ -5934,10 +5974,33 @@ async function saveDailyMaintenance() {
             body: JSON.stringify(body)
         }).then(r => r.json());
         if (r.success) {
+            const fmtH = h => { const hr12 = h % 12 || 12; const ap = h < 12 ? 'AM' : 'PM'; return hr12 + ':00 ' + ap; };
             st.style.display='block'; st.style.color='#22c55e';
-            st.textContent = enabled ? '✅ Daily maintenance ON — ' + body.startHour + ':' + String(body.startMin).padStart(2,'0') + ' to ' + body.endHour + ':' + String(body.endMin).padStart(2,'0') + ' (IST)' : '✅ Daily maintenance OFF';
+            st.textContent = enabled ? '✅ Daily maintenance ON — ' + fmtH(startH) + ' to ' + fmtH(endH) + ' IST (UTC+05:30)' : '✅ Daily maintenance OFF';
         }
     } catch(e) { st.style.display='block'; st.style.color='#ef4444'; st.textContent='❌ Error saving'; }
+}
+
+async function testDailyMaintenance() {
+    const st = document.getElementById('dailyMaintStatus');
+    st.style.display='block'; st.style.color='#f59e0b'; st.textContent='⏳ Checking...';
+    try {
+        const r = await fetch(API + '/api/admin/maintenance/debug', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const fmtH = h => { const hr12 = h % 12 || 12; return hr12 + ':00 ' + (h < 12 ? 'AM' : 'PM'); };
+        let html = '';
+        html += '🕐 Server Time: ' + r.nowIST + ' IST<br>';
+        html += '🔧 Maintenance Mode: ' + (r.maintenanceMode ? '🟢 ON' : '⚪ OFF') + '<br>';
+        if (r.schedule && r.schedule.enabled) {
+            html += '📅 Schedule: ' + (r.schedule.active ? '🟢 ACTIVE' : '⚪ Inactive') + '<br>';
+        }
+        if (r.dailyMaintenance && r.dailyMaintenance.enabled) {
+            html += '🔄 Daily: ' + fmtH(r.dailyMaintenance.startHour) + ' — ' + fmtH(r.dailyMaintenance.endHour) + ' IST → ' + (r.dailyMaintenance.inWindow ? '🟢 IN WINDOW' : '⚪ Outside window');
+        } else {
+            html += '🔄 Daily: Disabled';
+        }
+        st.style.color = r.maintenanceMode ? '#22c55e' : '#71717a';
+        st.innerHTML = html;
+    } catch(e) { st.style.color='#ef4444'; st.textContent='❌ Error checking'; }
 }
 
 let _mntCountdownInterval = null;
