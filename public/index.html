@@ -3082,10 +3082,10 @@ input[type="color"] {
                       <div style="font-size:7px;color:#0ea5e9;">Ocean</div>
                       <div style="font-size:6px;color:#666;">Right ▶</div>
                     </div>
-                    <div onclick="selectOfferTheme('dark',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a1a1a,#0a0a0a);">
-                      <div style="background:linear-gradient(135deg,#e879f9,#d946ef);height:5px;border-radius:3px;margin-bottom:3px;"></div>
-                      <div style="font-size:7px;color:#e879f9;">Dark</div>
-                      <div style="font-size:6px;color:#666;">Center</div>
+                    <div onclick="selectOfferTheme('banner',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a1a1a,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#ffffff,#888888);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#ffffff;">Banner</div>
+                      <div style="font-size:6px;color:#666;">Image Only</div>
                     </div>
                     <div onclick="selectOfferTheme('sunset',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#2a1a0a,#0a0a0a);">
                       <div style="background:linear-gradient(135deg,#f97316,#fbbf24);height:5px;border-radius:3px;margin-bottom:3px;"></div>
@@ -6506,7 +6506,7 @@ function getOfferThemeStyles(theme) {
         neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badge: '#22c55e', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534', layout: 'left' },
         fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badge: '#ef4444', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d', layout: 'left' },
         ocean: { bg: '#0a1a2e', accent: '#0ea5e9', accentDark: '#06b6d4', badge: '#0ea5e9', badgeText: '#000', text: '#38bdf8', desc: '#bae6fd', border: '#0c4a6e', layout: 'right' },
-        dark: { bg: '#1a1a1a', accent: '#e879f9', accentDark: '#d946ef', badge: '#d946ef', badgeText: '#fff', text: '#f0abfc', desc: '#e9d5ff', border: '#581c87', layout: 'center' },
+        banner: { bg: '#111111', accent: '#ffffff', accentDark: '#aaaaaa', badge: '#ffffff', badgeText: '#000', text: '#ffffff', desc: '#cccccc', border: '#333333', layout: 'banner' },
         sunset: { bg: '#2a1a0a', accent: '#f97316', accentDark: '#fbbf24', badge: '#f97316', badgeText: '#000', text: '#fb923c', desc: '#fed7aa', border: '#7c2d12', layout: 'left' },
         crystal: { bg: '#0a1a2a', accent: '#67e8f9', accentDark: '#22d3ee', badge: '#22d3ee', badgeText: '#000', text: '#a5f3fc', desc: '#cffafe', border: '#155e75', layout: 'right' }
     };
@@ -6522,7 +6522,15 @@ function updateOfferPreview() {
     const bgUrl = _selectedOfferBgData || document.getElementById('offerBgImage').value;
     box.style.background = bgUrl ? 'url(' + bgUrl + ') center/cover' : 'linear-gradient(135deg,' + s.bg + ',#0a0a0a)';
     box.style.textAlign = s.layout === 'center' ? 'center' : (s.layout === 'right' ? 'right' : 'left');
-    if (s.layout === 'center') {
+    if (s.layout === 'banner') {
+        if (bgUrl) {
+            box.style.background = 'url(' + bgUrl + ') center/cover';
+            box.innerHTML = '<div style="min-height:50px;"></div>';
+        } else {
+            box.style.background = 'linear-gradient(135deg,#1a1a1a,#111)';
+            box.innerHTML = '<div style="text-align:center;padding:12px;color:#666;font-size:10px;">🖼️ Upload banner image to preview</div>';
+        }
+    } else if (s.layout === 'center') {
         box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
             '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + title + '</div>' +
             (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + desc + '</div>' : '') +
@@ -6584,7 +6592,7 @@ async function loadOffers() {
         if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:24px;">No offers yet. Click "+ Create Offer" to start!</div>'; return; }
         el.innerHTML = r.offers.map(o => {
             const isExpired = o.expiry && new Date(o.expiry) < new Date();
-            const themes = { golden: '#f59e0b', royal: '#7c3aed', neon: '#22c55e', fire: '#ef4444', ocean: '#0ea5e9', dark: '#e879f9', sunset: '#f97316', crystal: '#67e8f9' };
+            const themes = { golden: '#f59e0b', royal: '#7c3aed', neon: '#22c55e', fire: '#ef4444', ocean: '#0ea5e9', banner: '#ffffff', sunset: '#f97316', crystal: '#67e8f9' };
             const tColor = themes[o.theme] || '#f59e0b';
             const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:3px 10px;border-radius:10px;">Off</span>';
             const targetLabel = { all:'All Users', active:'Active Only', expired:'Expired Only', expiring:'Expiring Soon', silver:'Silver', gold:'Gold', diamond:'Diamond', premium:'Premium', specific:'Specific Users' }[o.target] || o.target;
@@ -6603,7 +6611,7 @@ async function loadOffers() {
                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">🎯 ' + targetLabel + (userCount ? ' (' + userCount + ')' : '') + '</span>' +
                 (o.expiry ?                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">📅 ' + o.expiry + '</span>' : '') +
                 (o.bgImage ? '<span style="font-size:10px;background:rgba(59,130,246,0.3);padding:3px 10px;border-radius:6px;">🖼️ BG Image</span>' : '') +
-                '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🎨 ' + (o.theme || 'golden') + ' (' + (({golden:'◀L',royal:'◀L',neon:'◀L',fire:'◀L',ocean:'R▶',dark:'Center',sunset:'◀L',crystal:'R▶'})[o.theme] || '◀L') + ')</span>' +
+                '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🎨 ' + (o.theme || 'golden') + ' (' + (({golden:'◀L',royal:'◀L',neon:'◀L',fire:'◀L',ocean:'R▶',banner:'Img',sunset:'◀L',crystal:'R▶'})[o.theme] || '◀L') + ')</span>' +
                 '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🕐 ' + new Date(o.createdAt).toLocaleDateString('en-IN') + '</span>' +
                 '</div></div></div>';
         }).join('');
@@ -6663,7 +6671,7 @@ function editOffer(id) {
         _selectedOfferTheme = o.theme || 'golden';
         document.querySelectorAll('#offerColorPick .offer-theme-card').forEach(c => c.style.borderColor = 'transparent');
         const themeCards = document.querySelectorAll('#offerColorPick .offer-theme-card');
-        const themeIdx = { golden:0, royal:1, neon:2, fire:3, ocean:4, dark:5, sunset:6, crystal:7 };
+        const themeIdx = { golden:0, royal:1, neon:2, fire:3, ocean:4, banner:5, sunset:6, crystal:7 };
         if (themeIdx[_selectedOfferTheme] !== undefined && themeCards[themeIdx[_selectedOfferTheme]]) themeCards[themeIdx[_selectedOfferTheme]].style.borderColor = '#f59e0b';
         if (o.bgImage && o.bgImage.startsWith('data:')) {
             _selectedOfferBgData = o.bgImage;
@@ -6920,7 +6928,7 @@ async function loadActiveOffers() {
             neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534', layout: 'left' },
             fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d', layout: 'left' },
             ocean: { bg: '#0a1a2e', accent: '#0ea5e9', accentDark: '#06b6d4', badgeText: '#000', text: '#38bdf8', desc: '#bae6fd', border: '#0c4a6e', layout: 'right' },
-            dark: { bg: '#1a1a1a', accent: '#e879f9', accentDark: '#d946ef', badgeText: '#fff', text: '#f0abfc', desc: '#e9d5ff', border: '#581c87', layout: 'center' },
+            banner: { bg: '#111111', accent: '#ffffff', accentDark: '#aaaaaa', badgeText: '#000', text: '#ffffff', desc: '#cccccc', border: '#333333', layout: 'banner' },
             sunset: { bg: '#2a1a0a', accent: '#f97316', accentDark: '#fbbf24', badgeText: '#000', text: '#fb923c', desc: '#fed7aa', border: '#7c2d12', layout: 'left' },
             crystal: { bg: '#0a1a2a', accent: '#67e8f9', accentDark: '#22d3ee', badgeText: '#000', text: '#a5f3fc', desc: '#cffafe', border: '#155e75', layout: 'right' }
         };
@@ -6936,7 +6944,13 @@ async function loadActiveOffers() {
                 '<span style="font-size:11px;font-weight:800;color:' + s.accent + ';letter-spacing:1px;">' + o.code + '</span>' +
                 '</div>' : '';
             let inner = '';
-            if (lay === 'center') {
+            if (lay === 'banner') {
+                if (o.bgImage) {
+                    inner = '<div style="width:100%;min-height:60px;background:url(' + o.bgImage + ') center/cover no-repeat;border-radius:8px;"></div>';
+                } else {
+                    inner = '<div style="text-align:center;padding:12px;color:#888;font-size:10px;">Banner image not uploaded</div>';
+                }
+            } else if (lay === 'center') {
                 inner = '<div style="text-align:center;padding:4px 0;">' +
                     '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
                     '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + o.title + '</div>' +
