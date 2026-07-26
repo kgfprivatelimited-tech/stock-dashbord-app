@@ -2946,7 +2946,7 @@ app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
         if (target !== undefined) offer.target = target;
         if (selectedUsers !== undefined) offer.selectedUsers = selectedUsers;
         if (theme !== undefined) offer.theme = theme;
-        if (bgImage !== undefined) offer.bgImage = bgImage || '';
+        if (bgImage !== undefined) { if (bgImage) { offer.bgImage = bgImage; } else { delete offer.bgImage; } }
         offer.updatedAt = new Date().toISOString();
         saveSettings(settings);
         res.json({ success: true, message: 'Offer updated', offer });

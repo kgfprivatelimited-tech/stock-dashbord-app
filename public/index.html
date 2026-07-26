@@ -3043,34 +3043,59 @@ input[type="color"] {
                   <div class="admin-form-group"><label class="admin-form-label">📅 Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
                 </div>
                 <div class="admin-form-group">
-                  <label class="admin-form-label">🖼️ Background Image <span style="color:#555;font-weight:400;font-size:10px;">(Max 200KB, PNG/JPG)</span></label>
+                  <label class="admin-form-label">🖼️ Background Image <span style="color:#555;font-weight:400;font-size:10px;">(Max 200KB | 800×400px best)</span></label>
                   <div style="display:flex;gap:6px;">
                     <input type="text" id="offerBgImage" class="admin-form-input" placeholder="Paste image URL..." style="flex:1;" oninput="updateOfferPreview()">
                     <label style="background:#2a2a35;color:#e4e4e7;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;flex-shrink:0;border:1px solid #444;">📁 Upload<input type="file" accept="image/*" style="display:none;" onchange="handleOfferImageUpload(this)"></label>
                   </div>
                   <div id="offerImagePreview" style="display:none;margin-top:6px;position:relative;">
                     <img id="offerImagePreviewImg" style="width:100%;max-height:80px;object-fit:cover;border-radius:6px;">
+                    <div id="offerImageDims" style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.75);color:#fff;padding:2px 6px;border-radius:4px;font-size:9px;"></div>
                     <button onclick="clearOfferImage()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:10px;cursor:pointer;">✕</button>
                   </div>
                 </div>
                 <div class="admin-form-group">
                   <label class="admin-form-label">🎨 Card Theme</label>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;" id="offerColorPick">
-                    <div onclick="selectOfferTheme('golden',this)" class="offer-theme-card selected" style="width:70px;padding:8px 6px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid #f59e0b;background:linear-gradient(135deg,#1a1a0e,#0a0a0a);">
-                      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);height:6px;border-radius:3px;margin-bottom:4px;"></div>
-                      <div style="font-size:8px;color:#f59e0b;">Golden</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;" id="offerColorPick">
+                    <div onclick="selectOfferTheme('golden',this)" class="offer-theme-card selected" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid #f59e0b;background:linear-gradient(135deg,#1a1a0e,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#f59e0b;">Golden</div>
+                      <div style="font-size:6px;color:#666;">◀ Left</div>
                     </div>
-                    <div onclick="selectOfferTheme('royal',this)" class="offer-theme-card" style="width:70px;padding:8px 6px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a0a2e,#0a0a1a);">
-                      <div style="background:linear-gradient(135deg,#7c3aed,#a855f7);height:6px;border-radius:3px;margin-bottom:4px;"></div>
-                      <div style="font-size:8px;color:#a855f7;">Royal</div>
+                    <div onclick="selectOfferTheme('royal',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a0a2e,#0a0a1a);">
+                      <div style="background:linear-gradient(135deg,#7c3aed,#a855f7);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#a855f7;">Royal</div>
+                      <div style="font-size:6px;color:#666;">◀ Left</div>
                     </div>
-                    <div onclick="selectOfferTheme('neon',this)" class="offer-theme-card" style="width:70px;padding:8px 6px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#0a1a0e,#0a0a0a);">
-                      <div style="background:linear-gradient(135deg,#22c55e,#10b981);height:6px;border-radius:3px;margin-bottom:4px;"></div>
-                      <div style="font-size:8px;color:#22c55e;">Neon</div>
+                    <div onclick="selectOfferTheme('neon',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#0a1a0e,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#22c55e,#10b981);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#22c55e;">Neon</div>
+                      <div style="font-size:6px;color:#666;">◀ Left</div>
                     </div>
-                    <div onclick="selectOfferTheme('fire',this)" class="offer-theme-card" style="width:70px;padding:8px 6px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a0a0a,#0a0a0a);">
-                      <div style="background:linear-gradient(135deg,#ef4444,#f97316);height:6px;border-radius:3px;margin-bottom:4px;"></div>
-                      <div style="font-size:8px;color:#ef4444;">Fire</div>
+                    <div onclick="selectOfferTheme('fire',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a0a0a,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#ef4444,#f97316);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#ef4444;">Fire</div>
+                      <div style="font-size:6px;color:#666;">◀ Left</div>
+                    </div>
+                    <div onclick="selectOfferTheme('ocean',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#0a1a2e,#0a0a1a);">
+                      <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#0ea5e9;">Ocean</div>
+                      <div style="font-size:6px;color:#666;">Right ▶</div>
+                    </div>
+                    <div onclick="selectOfferTheme('dark',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#1a1a1a,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#e879f9,#d946ef);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#e879f9;">Dark</div>
+                      <div style="font-size:6px;color:#666;">Center</div>
+                    </div>
+                    <div onclick="selectOfferTheme('sunset',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#2a1a0a,#0a0a0a);">
+                      <div style="background:linear-gradient(135deg,#f97316,#fbbf24);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#f97316;">Sunset</div>
+                      <div style="font-size:6px;color:#666;">◀ Left</div>
+                    </div>
+                    <div onclick="selectOfferTheme('crystal',this)" class="offer-theme-card" style="width:62px;padding:6px 4px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg,#0a1a2a,#0a0a1a);">
+                      <div style="background:linear-gradient(135deg,#67e8f9,#22d3ee);height:5px;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="font-size:7px;color:#67e8f9;">Crystal</div>
+                      <div style="font-size:6px;color:#666;">Right ▶</div>
                     </div>
                   </div>
                 </div>
@@ -6454,7 +6479,12 @@ function handleOfferImageUpload(input) {
         _selectedOfferBgData = e.target.result;
         document.getElementById('offerBgImage').value = '';
         const prev = document.getElementById('offerImagePreview');
-        document.getElementById('offerImagePreviewImg').src = e.target.result;
+        const img = document.getElementById('offerImagePreviewImg');
+        img.src = e.target.result;
+        img.onload = function() {
+            const dims = document.getElementById('offerImageDims');
+            if (dims) dims.textContent = img.naturalWidth + '×' + img.naturalHeight + 'px | ' + (file.size / 1024).toFixed(0) + 'KB';
+        };
         prev.style.display = 'block';
         updateOfferPreview();
     };
@@ -6471,10 +6501,14 @@ function clearOfferImage() {
 
 function getOfferThemeStyles(theme) {
     const themes = {
-        golden: { bg: '#1a1a0e', accent: '#f59e0b', accentDark: '#d97706', badge: '#f59e0b', badgeText: '#000', text: '#f59e0b', desc: '#ccc', border: '#3d3510' },
-        royal: { bg: '#1a0a2e', accent: '#7c3aed', accentDark: '#a855f7', badge: '#7c3aed', badgeText: '#fff', text: '#a855f7', desc: '#c4b5fd', border: '#3b1d6e' },
-        neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badge: '#22c55e', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534' },
-        fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badge: '#ef4444', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d' }
+        golden: { bg: '#1a1a0e', accent: '#f59e0b', accentDark: '#d97706', badge: '#f59e0b', badgeText: '#000', text: '#f59e0b', desc: '#ccc', border: '#3d3510', layout: 'left' },
+        royal: { bg: '#1a0a2e', accent: '#7c3aed', accentDark: '#a855f7', badge: '#7c3aed', badgeText: '#fff', text: '#a855f7', desc: '#c4b5fd', border: '#3b1d6e', layout: 'left' },
+        neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badge: '#22c55e', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534', layout: 'left' },
+        fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badge: '#ef4444', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d', layout: 'left' },
+        ocean: { bg: '#0a1a2e', accent: '#0ea5e9', accentDark: '#06b6d4', badge: '#0ea5e9', badgeText: '#000', text: '#38bdf8', desc: '#bae6fd', border: '#0c4a6e', layout: 'right' },
+        dark: { bg: '#1a1a1a', accent: '#e879f9', accentDark: '#d946ef', badge: '#d946ef', badgeText: '#fff', text: '#f0abfc', desc: '#e9d5ff', border: '#581c87', layout: 'center' },
+        sunset: { bg: '#2a1a0a', accent: '#f97316', accentDark: '#fbbf24', badge: '#f97316', badgeText: '#000', text: '#fb923c', desc: '#fed7aa', border: '#7c2d12', layout: 'left' },
+        crystal: { bg: '#0a1a2a', accent: '#67e8f9', accentDark: '#22d3ee', badge: '#22d3ee', badgeText: '#000', text: '#a5f3fc', desc: '#cffafe', border: '#155e75', layout: 'right' }
     };
     return themes[theme] || themes.golden;
 }
@@ -6487,10 +6521,28 @@ function updateOfferPreview() {
     const s = getOfferThemeStyles(_selectedOfferTheme);
     const bgUrl = _selectedOfferBgData || document.getElementById('offerBgImage').value;
     box.style.background = bgUrl ? 'url(' + bgUrl + ') center/cover' : 'linear-gradient(135deg,' + s.bg + ',#0a0a0a)';
-    box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-        '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;">' + title + '</div>' +
-        (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
-        (code ? '<div style="margin-top:4px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Code: ' + code + '</div>' : '');
+    box.style.textAlign = s.layout === 'center' ? 'center' : (s.layout === 'right' ? 'right' : 'left');
+    if (s.layout === 'center') {
+        box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+            '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + title + '</div>' +
+            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + desc + '</div>' : '') +
+            (code ? '<div style="margin-top:6px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.5);padding:3px 10px;border-radius:4px;display:inline-block;border:1px dashed ' + s.accent + ';">Code: ' + code + '</div>' : '');
+    } else if (s.layout === 'right') {
+        box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<div>' +
+            '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+            (code ? '<div style="margin-top:3px;font-size:9px;color:' + s.accent + ';font-weight:700;">Code: ' + code + '</div>' : '') +
+            '</div>' +
+            '<div style="text-align:right;">' +
+            '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + title + '</div>' +
+            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
+            '</div></div>';
+    } else {
+        box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+            '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;">' + title + '</div>' +
+            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
+            (code ? '<div style="margin-top:4px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Code: ' + code + '</div>' : '');
+    }
 }
 
 async function loadOfferTargetUsers() {
@@ -6532,7 +6584,7 @@ async function loadOffers() {
         if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:24px;">No offers yet. Click "+ Create Offer" to start!</div>'; return; }
         el.innerHTML = r.offers.map(o => {
             const isExpired = o.expiry && new Date(o.expiry) < new Date();
-            const themes = { golden: '#f59e0b', royal: '#7c3aed', neon: '#22c55e', fire: '#ef4444' };
+            const themes = { golden: '#f59e0b', royal: '#7c3aed', neon: '#22c55e', fire: '#ef4444', ocean: '#0ea5e9', dark: '#e879f9', sunset: '#f97316', crystal: '#67e8f9' };
             const tColor = themes[o.theme] || '#f59e0b';
             const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:3px 10px;border-radius:10px;">Off</span>';
             const targetLabel = { all:'All Users', active:'Active Only', expired:'Expired Only', expiring:'Expiring Soon', silver:'Silver', gold:'Gold', diamond:'Diamond', premium:'Premium', specific:'Specific Users' }[o.target] || o.target;
@@ -6551,7 +6603,7 @@ async function loadOffers() {
                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">🎯 ' + targetLabel + (userCount ? ' (' + userCount + ')' : '') + '</span>' +
                 (o.expiry ?                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">📅 ' + o.expiry + '</span>' : '') +
                 (o.bgImage ? '<span style="font-size:10px;background:rgba(59,130,246,0.3);padding:3px 10px;border-radius:6px;">🖼️ BG Image</span>' : '') +
-                '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🎨 ' + (o.theme || 'golden') + '</span>' +
+                '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🎨 ' + (o.theme || 'golden') + ' (' + (({golden:'◀L',royal:'◀L',neon:'◀L',fire:'◀L',ocean:'R▶',dark:'Center',sunset:'◀L',crystal:'R▶'})[o.theme] || '◀L') + ')</span>' +
                 '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🕐 ' + new Date(o.createdAt).toLocaleDateString('en-IN') + '</span>' +
                 '</div></div></div>';
         }).join('');
@@ -6611,7 +6663,7 @@ function editOffer(id) {
         _selectedOfferTheme = o.theme || 'golden';
         document.querySelectorAll('#offerColorPick .offer-theme-card').forEach(c => c.style.borderColor = 'transparent');
         const themeCards = document.querySelectorAll('#offerColorPick .offer-theme-card');
-        const themeIdx = { golden:0, royal:1, neon:2, fire:3 };
+        const themeIdx = { golden:0, royal:1, neon:2, fire:3, ocean:4, dark:5, sunset:6, crystal:7 };
         if (themeIdx[_selectedOfferTheme] !== undefined && themeCards[themeIdx[_selectedOfferTheme]]) themeCards[themeIdx[_selectedOfferTheme]].style.borderColor = '#f59e0b';
         if (o.bgImage && o.bgImage.startsWith('data:')) {
             _selectedOfferBgData = o.bgImage;
@@ -6863,33 +6915,58 @@ async function loadActiveOffers() {
         const existing = document.getElementById('activeOfferWrap');
         if (existing) existing.remove();
         const themes = {
-            golden: { bg: '#1a1a0e', accent: '#f59e0b', accentDark: '#d97706', badgeText: '#000', text: '#f59e0b', desc: '#ccc', border: '#3d3510' },
-            royal: { bg: '#1a0a2e', accent: '#7c3aed', accentDark: '#a855f7', badgeText: '#fff', text: '#a855f7', desc: '#c4b5fd', border: '#3b1d6e' },
-            neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534' },
-            fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d' }
+            golden: { bg: '#1a1a0e', accent: '#f59e0b', accentDark: '#d97706', badgeText: '#000', text: '#f59e0b', desc: '#ccc', border: '#3d3510', layout: 'left' },
+            royal: { bg: '#1a0a2e', accent: '#7c3aed', accentDark: '#a855f7', badgeText: '#fff', text: '#a855f7', desc: '#c4b5fd', border: '#3b1d6e', layout: 'left' },
+            neon: { bg: '#0a1a0e', accent: '#22c55e', accentDark: '#10b981', badgeText: '#000', text: '#22c55e', desc: '#bbf7d0', border: '#166534', layout: 'left' },
+            fire: { bg: '#1a0a0a', accent: '#ef4444', accentDark: '#f97316', badgeText: '#fff', text: '#f97316', desc: '#fca5a5', border: '#7f1d1d', layout: 'left' },
+            ocean: { bg: '#0a1a2e', accent: '#0ea5e9', accentDark: '#06b6d4', badgeText: '#000', text: '#38bdf8', desc: '#bae6fd', border: '#0c4a6e', layout: 'right' },
+            dark: { bg: '#1a1a1a', accent: '#e879f9', accentDark: '#d946ef', badgeText: '#fff', text: '#f0abfc', desc: '#e9d5ff', border: '#581c87', layout: 'center' },
+            sunset: { bg: '#2a1a0a', accent: '#f97316', accentDark: '#fbbf24', badgeText: '#000', text: '#fb923c', desc: '#fed7aa', border: '#7c2d12', layout: 'left' },
+            crystal: { bg: '#0a1a2a', accent: '#67e8f9', accentDark: '#22d3ee', badgeText: '#000', text: '#a5f3fc', desc: '#cffafe', border: '#155e75', layout: 'right' }
         };
         const wrap = document.createElement('div');
         wrap.id = 'activeOfferWrap';
         wrap.style.cssText = 'margin:8px 12px;animation:bannerSlideIn 0.5s ease-out;position:relative;';
         wrap.innerHTML = r.offers.filter(o => !sessionStorage.getItem('offer_dismissed_' + o.id)).map((o, idx) => {
             const s = themes[o.theme] || themes.golden;
+            const lay = s.layout || 'left';
             const bgImg = o.bgImage ? 'background-image:url(' + o.bgImage + ');background-size:cover;background-position:center;' : '';
-            return '<div style="margin-bottom:8px;border-radius:10px;overflow:hidden;position:relative;border:1px solid ' + s.border + ';box-shadow:0 2px 12px ' + s.accent + '25;' + (bgImg || 'background:' + s.bg + ';') + '">' +
-                '<div style="position:relative;padding:10px 12px;min-height:50px;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<div style="flex:1;padding-right:8px;">' +
-                '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-                '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' + o.title + '</div>' +
-                (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;line-height:1.3;">' + o.description + '</div>' : '') +
-                (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
-                '</div>' +
-                (o.code ? '<div onclick="navigator.clipboard.writeText(\'' + o.code + '\');this.querySelector(\'span\').textContent=\'Copied!\';setTimeout(()=>this.querySelector(\'span\').textContent=\'' + o.code + '\',1500);" style="cursor:pointer;text-align:center;background:rgba(0,0,0,0.5);border:1px dashed ' + s.accent + ';border-radius:5px;padding:4px 8px;flex-shrink:0;">' +
+            const codeBlock = o.code ? '<div onclick="event.stopPropagation();navigator.clipboard.writeText(\'' + o.code + '\');this.querySelector(\'span\').textContent=\'Copied!\';setTimeout(()=>this.querySelector(\'span\').textContent=\'' + o.code + '\',1500);" style="cursor:pointer;text-align:center;background:rgba(0,0,0,0.5);border:1px dashed ' + s.accent + ';border-radius:5px;padding:4px 8px;flex-shrink:0;">' +
                 '<div style="font-size:6px;color:' + s.accent + ';letter-spacing:0.5px;">CODE</div>' +
                 '<span style="font-size:11px;font-weight:800;color:' + s.accent + ';letter-spacing:1px;">' + o.code + '</span>' +
-                '</div>' : '') +
-                '</div>' +
-                '</div>' +
-                '</div>';
+                '</div>' : '';
+            let inner = '';
+            if (lay === 'center') {
+                inner = '<div style="text-align:center;padding:4px 0;">' +
+                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+                    '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + o.title + '</div>' +
+                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + o.description + '</div>' : '') +
+                    (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
+                    (o.code ? '<div style="margin-top:6px;">' + codeBlock + '</div>' : '') +
+                    '</div>';
+            } else if (lay === 'right') {
+                inner = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                    '<div style="flex:1;padding-right:10px;">' +
+                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+                    (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
+                    '</div>' +
+                    '<div style="text-align:right;">' +
+                    '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + o.title + '</div>' +
+                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + o.description + '</div>' : '') +
+                    '</div>' +
+                    codeBlock + '</div>';
+            } else {
+                inner = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                    '<div style="flex:1;padding-right:8px;">' +
+                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+                    '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' + o.title + '</div>' +
+                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;line-height:1.3;">' + o.description + '</div>' : '') +
+                    (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
+                    '</div>' +
+                    codeBlock + '</div>';
+            }
+            return '<div style="margin-bottom:8px;border-radius:10px;overflow:hidden;position:relative;border:1px solid ' + s.border + ';box-shadow:0 2px 12px ' + s.accent + '25;' + (bgImg || 'background:' + s.bg + ';') + '">' +
+                '<div style="position:relative;padding:10px 12px;min-height:50px;">' + inner + '</div></div>';
         }).join('');
         if (!wrap.innerHTML.trim()) return;
         const disclaimer = document.getElementById('disclaimerTicker');
