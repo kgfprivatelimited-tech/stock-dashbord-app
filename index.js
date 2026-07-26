@@ -149,8 +149,16 @@ app.post('/api/admin/maintenance', checkAdmin, (req, res) => {
         const settings = loadSettings();
         settings.maintenanceMode = enabled;
         if (message !== undefined) settings.maintenanceMessage = message;
+        // When admin manually turns OFF, set override flag so interval won't fight back
+        if (!enabled) {
+            settings.maintenanceManualOff = Date.now();
+        } else {
+            // When admin manually turns ON, clear override
+            delete settings.maintenanceManualOff;
+        }
         saveSettings(settings);
         logActivity('maintenance_' + (enabled ? 'on' : 'off'), message || '');
+        console.log('[MAINTENANCE] Manual toggle:', enabled ? 'ON' : 'OFF', '(override set:', !enabled + ')');
         res.json({ success: true, maintenance: settings.maintenanceMode });
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
@@ -205,6 +213,11 @@ app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
             endMin: parseInt(endMin) || 0,
             message: message || '🔧 Daily maintenance in progress. We will be back shortly!'
         };
+        // When admin re-enables daily, clear manual override so auto can resume
+        if (enabled && settings.maintenanceManualOff) {
+            delete settings.maintenanceManualOff;
+            console.log('[MAINTENANCE] Manual override cleared (daily re-enabled)');
+        }
         saveSettings(settings);
         logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
         console.log('[MAINTENANCE] Daily settings saved:', JSON.stringify(settings.dailyMaintenance));
@@ -278,6 +291,37 @@ setInterval(() => {
         const schedule = settings.maintenanceSchedule;
         const scheduleActive = schedule && schedule.enabled && schedule.start && schedule.end;
 
+        // Check if admin manually turned off maintenance recently (24hr cooldown)
+        const manualOff = settings.maintenanceManualOff || 0;
+        const manualOverrideActive = manualOff && (Date.now() - manualOff < 24 * 60 * 60 * 1000);
+
+        // If manual override is active, don't auto-toggle anything
+        if (manualOverrideActive) {
+            // Still allow scheduled maintenance to FORCE ON (it's a hard schedule)
+            if (scheduleActive) {
+                const start = new Date(schedule.start);
+                const end = new Date(schedule.end);
+                if (now >= start && now <= end) {
+                    if (!settings.maintenanceMode) {
+                        settings.maintenanceMode = true;
+                        settings.maintenanceMessage = schedule.messageTemplate || 'Under maintenance';
+                        delete settings.maintenanceManualOff; // scheduled takes priority, clear override
+                        saveSettings(settings);
+                        console.log('[MAINTENANCE] Scheduled maintenance FORCE ON (overrides manual off)');
+                    }
+                } else if (now > end) {
+                    if (settings.maintenanceMode) {
+                        settings.maintenanceMode = false;
+                        settings.maintenanceSchedule.notified = false;
+                        saveSettings(settings);
+                        console.log('[MAINTENANCE] Scheduled maintenance OFF (ended)');
+                    }
+                }
+            }
+            // Daily recurring RESPECTS manual override — does nothing
+            return;
+        }
+
         // 1. Scheduled maintenance check
         if (scheduleActive) {
             const start = new Date(schedule.start);
@@ -329,6 +373,11 @@ setInterval(() => {
                 console.log('[MAINTENANCE] Daily maintenance ON (' + dm.startHour + ':' + String(dm.startMin||0).padStart(2,'0') + '-' + dm.endHour + ':' + String(dm.endMin||0).padStart(2,'0') + ')');
             } else if (!inWindow && settings.maintenanceMode && !scheduleActive) {
                 settings.maintenanceMode = false;
+                // Clear manual override when window naturally ends — next day can start fresh
+                if (settings.maintenanceManualOff) {
+                    delete settings.maintenanceManualOff;
+                    console.log('[MAINTENANCE] Manual override cleared (window ended)');
+                }
                 saveSettings(settings);
                 console.log('[MAINTENANCE] Daily maintenance OFF');
             }
