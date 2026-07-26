@@ -113,6 +113,7 @@ body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#e0e0e0; min-he
             <select id="regPlan" class="form-input" required style="cursor:pointer;">
                 <option value="">Select a plan</option>
             </select>
+            <div id="planDescription" style="display:none;margin-top:4px;font-size:12px;color:#a1a1aa;background:rgba(255,255,255,0.05);padding:6px 10px;border-radius:6px;"></div>
         </div>
         <div class="form-group">
             <label class="form-label">Telegram Chat ID (Optional)</label>
@@ -191,7 +192,19 @@ async function loadPlans() {
                 const opt = document.createElement('option');
                 opt.value = p.id || p.name;
                 opt.textContent = p.name + (p.price ? ' — ₹' + p.price : '') + (p.days ? ' (' + p.days + ' days)' : '');
+                if (p.description) opt.dataset.desc = p.description;
                 sel.appendChild(opt);
+            });
+            sel.addEventListener('change', function() {
+                const idx = this.selectedIndex;
+                const opt = this.options[idx];
+                const descEl = document.getElementById('planDescription');
+                if (descEl && opt && opt.dataset.desc) {
+                    descEl.textContent = '📋 ' + opt.dataset.desc;
+                    descEl.style.display = 'block';
+                } else if (descEl) {
+                    descEl.style.display = 'none';
+                }
             });
         } else {
             const opt = document.createElement('option');

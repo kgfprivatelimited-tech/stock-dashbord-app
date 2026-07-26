@@ -105,7 +105,8 @@ app.get('/api/admin/settings', checkAdmin, (req, res) => {
         upiPaymentId: settings.upiPaymentId || '',
         maintenanceMode: settings.maintenanceMode || false,
         maintenanceMessage: settings.maintenanceMessage || '',
-        maintenanceEndsAt: settings.maintenanceEndsAt || null
+        maintenanceEndsAt: settings.maintenanceEndsAt || null,
+        dailyMaintenance: settings.dailyMaintenance || { enabled: false, startHour: 2, startMin: 0, endHour: 7, endMin: 0, message: '' }
     });
 });
 
@@ -191,6 +192,27 @@ app.post('/api/admin/maintenance/cancel-schedule', checkAdmin, (req, res) => {
     }
 });
 
+// Admin: Set daily recurring maintenance (e.g., 2am-7am)
+app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
+    try {
+        const { enabled, startHour, startMin, endHour, endMin, message } = req.body;
+        const settings = loadSettings();
+        settings.dailyMaintenance = {
+            enabled: !!enabled,
+            startHour: parseInt(startHour) || 2,
+            startMin: parseInt(startMin) || 0,
+            endHour: parseInt(endHour) || 7,
+            endMin: parseInt(endMin) || 0,
+            message: message || '🔧 Daily maintenance in progress. We will be back shortly!'
+        };
+        saveSettings(settings);
+        logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
+        res.json({ success: true, dailyMaintenance: settings.dailyMaintenance });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
 // Get maintenance status (public) — includes schedule + countdown
 app.get('/api/maintenance', (req, res) => {
     const settings = loadSettings();
@@ -250,6 +272,25 @@ setInterval(() => {
                 settings.maintenanceSchedule.notified = false;
                 saveSettings(settings);
                 console.log('[MAINTENANCE] Scheduled maintenance OFF (ended)');
+            }
+        }
+        // Daily recurring maintenance check
+        const dm = settings.dailyMaintenance;
+        if (dm && dm.enabled) {
+            const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+            const curMin = nowIST.getHours() * 60 + nowIST.getMinutes();
+            const startMin = (dm.startHour || 2) * 60 + (dm.startMin || 0);
+            const endMin = (dm.endHour || 7) * 60 + (dm.endMin || 0);
+            const inWindow = startMin < endMin ? (curMin >= startMin && curMin < endMin) : (curMin >= startMin || curMin < endMin);
+            if (inWindow && !settings.maintenanceMode && !schedule.enabled) {
+                settings.maintenanceMode = true;
+                settings.maintenanceMessage = dm.message || '🔧 Daily maintenance in progress. We will be back shortly!';
+                saveSettings(settings);
+                console.log('[MAINTENANCE] Daily maintenance ON (' + dm.startHour + ':' + String(dm.startMin||0).padStart(2,'0') + '-' + dm.endHour + ':' + String(dm.endMin||0).padStart(2,'0') + ')');
+            } else if (!inWindow && settings.maintenanceMode && !schedule.enabled) {
+                settings.maintenanceMode = false;
+                saveSettings(settings);
+                console.log('[MAINTENANCE] Daily maintenance OFF');
             }
         }
     } catch (e) {}
@@ -2730,6 +2771,79 @@ async function refreshStocksBackground() {
         }
     } catch (e) {}
 }
+
+// ========================================
+// OFFERS & PROMOTIONS
+// ========================================
+app.get('/api/offers', (req, res) => {
+    try {
+        const settings = loadSettings();
+        const offers = (settings.offers || []).filter(o => {
+            if (!o.active) return false;
+            if (o.expiry && new Date(o.expiry) < new Date()) return false;
+            return true;
+        });
+        res.json({ success: true, offers });
+    } catch (e) { res.json({ success: true, offers: [] }); }
+});
+
+app.get('/api/admin/offers', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        res.json({ success: true, offers: settings.offers || [] });
+    } catch (e) { res.json({ success: false }); }
+});
+
+app.post('/api/admin/offers', checkAdmin, (req, res) => {
+    try {
+        const { title, description, code, expiry, target } = req.body;
+        if (!title) return res.json({ success: false, message: 'Title required' });
+        const settings = loadSettings();
+        if (!settings.offers) settings.offers = [];
+        const offer = {
+            id: 'offer_' + Date.now(),
+            title: title.trim(),
+            description: (description || '').trim(),
+            code: (code || '').trim(),
+            expiry: expiry || null,
+            target: target || 'all',
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+        settings.offers.push(offer);
+        saveSettings(settings);
+        // Send notification to target users
+        const data = loadUsers();
+        const targetUsers = data.users.filter(u => {
+            if (target === 'all') return true;
+            if (target === 'active') return isSubscriptionActive(u);
+            if (target === 'expired') return !isSubscriptionActive(u);
+            return (u.category || 'silver').toLowerCase() === target;
+        });
+        targetUsers.forEach(u => {
+            if (!u.notifications) u.notifications = [];
+            u.notifications.unshift({
+                id: 'offer_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+                type: 'offer', title: '🎁 ' + title,
+                message: (description || '') + (code ? ' | Code: ' + code : ''),
+                time: new Date().toISOString(), read: false
+            });
+            if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
+        });
+        saveUsers(data);
+        logActivity('offer_created', `Title: ${title}, Target: ${target}, Users notified: ${targetUsers.length}`);
+        res.json({ success: true, message: `Offer sent to ${targetUsers.length} users!`, offer });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.delete('/api/admin/offers/:id', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.offers = (settings.offers || []).filter(o => o.id !== req.params.id);
+        saveSettings(settings);
+        res.json({ success: true });
+    } catch (e) { res.json({ success: false }); }
+});
 
 // ========================================
 // HOLIDAY/FESTIVAL BANNERS

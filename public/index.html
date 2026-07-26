@@ -2178,6 +2178,7 @@ input[type="color"] {
     <div class="admin-nav-section">
       <div class="admin-nav-label">Sent Messages</div>
       <div class="admin-nav-item" onclick="showAdminSection('broadcast', this)">📢 Broadcast</div>
+      <div class="admin-nav-item" onclick="showAdminSection('offers', this)">🎁 Offers</div>
       <div class="admin-nav-item" onclick="showAdminSection('scheduled', this)">⏰ Scheduled</div>
       <div class="admin-nav-item" onclick="showAdminSection('reminders', this)">💳 Reminders</div>
       <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
@@ -2678,6 +2679,15 @@ input[type="color"] {
                     <div class="admin-form-group"><label class="admin-form-label">Start Date</label><input type="date" id="bannerStartDate" class="admin-form-input"></div>
                     <div class="admin-form-group"><label class="admin-form-label">End Date</label><input type="date" id="bannerEndDate" class="admin-form-input"></div>
                 </div>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+                    <span style="font-size:10px;color:#71717a;line-height:24px;margin-right:4px;">Quick:</span>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('independence')" style="padding:2px 8px;font-size:9px;">🇮🇳 Aug 15</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('raksha')" style="padding:2px 8px;font-size:9px;"> Raksha Bandhan</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('diwali')" style="padding:2px 8px;font-size:9px;">🪔 Diwali</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('holi')" style="padding:2px 8px;font-size:9px;">🎨 Holi</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('christmas')" style="padding:2px 8px;font-size:9px;">🎄 Christmas</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="setFestivalDates('newyear')" style="padding:2px 8px;font-size:9px;">🎉 New Year</button>
+                </div>
                 <div class="admin-form-row">
                     <div class="admin-form-group"><label class="admin-form-label">Background Color</label><input type="color" id="bannerBgColor" value="#ff6b35" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
                     <div class="admin-form-group"><label class="admin-form-label">Text Color</label><input type="color" id="bannerTextColor" value="#ffffff" style="width:100%;height:36px;border:none;border-radius:6px;cursor:pointer;"></div>
@@ -2771,6 +2781,41 @@ input[type="color"] {
                 <button class="admin-btn admin-btn-primary" onclick="saveMaintenanceSchedule()" style="flex:1;">📅 Schedule</button>
                 <button class="admin-btn admin-btn-danger" onclick="cancelMaintenanceSchedule()" style="flex:1;">❌ Cancel Schedule</button>
             </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:12px;">
+            <div class="admin-card-header">
+                <div class="admin-card-title">🔄 Daily Recurring Maintenance</div>
+            </div>
+            <p style="font-size:11px;color:#71717a;margin-bottom:10px;">Roz automatically on/off — jaise raat 2am-7am.</p>
+            <div class="admin-toggle-wrap">
+                <span class="admin-toggle-label">Enable Daily Maintenance</span>
+                <div class="admin-toggle" id="dailyMaintToggle" onclick="this.classList.toggle('active');saveDailyMaintenance();"></div>
+            </div>
+            <div class="admin-form-row" style="margin-top:10px;">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Start Time (IST)</label>
+                    <div style="display:flex;gap:4px;">
+                        <input type="number" id="dmStartHour" class="admin-form-input" min="0" max="23" value="2" style="width:50px;text-align:center;">
+                        <span style="color:#71717a;line-height:36px;">:</span>
+                        <input type="number" id="dmStartMin" class="admin-form-input" min="0" max="59" value="0" style="width:50px;text-align:center;">
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">End Time (IST)</label>
+                    <div style="display:flex;gap:4px;">
+                        <input type="number" id="dmEndHour" class="admin-form-input" min="0" max="23" value="7" style="width:50px;text-align:center;">
+                        <span style="color:#71717a;line-height:36px;">:</span>
+                        <input type="number" id="dmEndMin" class="admin-form-input" min="0" max="59" value="0" style="width:50px;text-align:center;">
+                    </div>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Maintenance Message</label>
+                <textarea id="dailyMaintMsg" rows="2" class="admin-form-input" placeholder="🔧 Daily maintenance in progress..." style="resize:vertical;">🔧 Daily maintenance in progress. We will be back shortly!</textarea>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveDailyMaintenance()" style="width:100%;">💾 Save Daily Schedule</button>
+            <div id="dailyMaintStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
         </div>
 
@@ -2912,6 +2957,10 @@ input[type="color"] {
                 <label class="admin-form-label">Price (₹)</label>
                 <input type="number" id="newPlanPrice" class="admin-form-input" placeholder="0" min="0">
             </div>
+            <div class="admin-form-group">
+                <label class="admin-form-label">Description (what user gets)</label>
+                <textarea id="newPlanDesc" class="admin-form-input" rows="2" placeholder="e.g. Daily stock tips, Priority support, Telegram alerts..." style="resize:vertical;"></textarea>
+            </div>
             <button class="admin-btn admin-btn-primary" onclick="addPlan()" style="width:100%;">➕ Add Plan</button>
             <div id="plansStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
@@ -2959,6 +3008,45 @@ input[type="color"] {
           </div>
           <button class="admin-btn admin-btn-danger" onclick="clearBroadcast()" style="width:100%;margin-bottom:6px;">🗑️ Clear Selected</button>
           <div id="broadcastStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+      </div>
+
+      <!-- ═══ OFFERS SECTION ═══ -->
+      <div id="section-offers" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">🎁 Offers & Promotions</div>
+          </div>
+          <p style="font-size:11px;color:#71717a;margin-bottom:10px;">Users ko offer bhejo — notification + dashboard pe dikhega.</p>
+          <div id="offersList"></div>
+          <div style="margin-top:12px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;">
+            <div class="admin-form-group">
+              <label class="admin-form-label">Offer Title</label>
+              <input type="text" id="offerTitle" class="admin-form-input" placeholder="e.g. 🎉 Independence Day Sale — 50% OFF!">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Description</label>
+              <textarea id="offerDesc" rows="2" class="admin-form-input" placeholder="All premium plans par 50% discount! Limited time..." style="resize:vertical;"></textarea>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group"><label class="admin-form-label">Code (optional)</label><input type="text" id="offerCode" class="admin-form-input" placeholder="e.g. INDIE50"></div>
+              <div class="admin-form-group"><label class="admin-form-label">Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Send To</label>
+              <select id="offerTarget" class="admin-form-select">
+                <option value="all">All Users</option>
+                <option value="active">Active Users Only</option>
+                <option value="expired">Expired Users Only</option>
+                <option value="silver">Silver Category</option>
+                <option value="gold">Gold Category</option>
+                <option value="diamond">Diamond Category</option>
+                <option value="premium">Premium Category</option>
+              </select>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="createOffer()" style="width:100%;">🚀 Send Offer</button>
+            <div id="offerStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+          </div>
         </div>
       </div>
 
@@ -3767,6 +3855,7 @@ function showAdminSection(section, navEl) {
     if (section === 'maintenance') loadMaintenanceStatus();
     if (section === 'apiKeys') loadApiKeys();
     if (section === 'broadcast') { renderBroadcastUsers(); loadApiKeys(); loadPlansAdmin(); }
+    if (section === 'offers') { loadOffers(); }
     if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
     if (section === 'reminders') loadReminderList();
 }
@@ -4316,9 +4405,12 @@ async function loadPlansAdmin() {
         const el = document.getElementById('plansList');
         if (!el) return;
         if (adminPlans.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:8px;">No plans yet</div>'; return; }
-        el.innerHTML = adminPlans.map((p, i) => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:12px;">' +
+        el.innerHTML = adminPlans.map((p, i) => '<div style="padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:12px;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;">' +
             '<div><strong style="color:#e4e4e7;">' + p.name + '</strong> <span style="color:#71717a;">— ' + p.days + ' days</span> <span style="color:#22c55e;">₹' + (p.price || 0) + '</span></div>' +
-            '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="removePlan(' + i + ')">🗑️</button></div>').join('');
+            '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="removePlan(' + i + ')">🗑️</button></div>' +
+            (p.description ? '<div style="font-size:10px;color:#a1a1aa;margin-top:4px;padding-left:2px;">📋 ' + p.description + '</div>' : '') +
+            '</div>').join('');
     } catch (e) {}
 }
 
@@ -4326,13 +4418,15 @@ async function addPlan() {
     const name = document.getElementById('newPlanName').value.trim();
     const days = parseInt(document.getElementById('newPlanDays').value) || 30;
     const price = parseInt(document.getElementById('newPlanPrice').value) || 0;
+    const description = document.getElementById('newPlanDesc').value.trim();
     if (!name) return;
-    adminPlans.push({ id: name.toLowerCase().replace(/\s+/g, '_'), name, days, price });
+    adminPlans.push({ id: name.toLowerCase().replace(/\s+/g, '_'), name, days, price, description });
     try {
         await fetch(API + '/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify({ plans: adminPlans }) }).then(r => r.json());
         document.getElementById('newPlanName').value = '';
         document.getElementById('newPlanDays').value = '';
         document.getElementById('newPlanPrice').value = '';
+        document.getElementById('newPlanDesc').value = '';
         loadPlansAdmin();
     } catch (e) {}
 }
@@ -5406,6 +5500,18 @@ async function loadMaintenanceStatus() {
             st.style.display='block'; st.style.background='rgba(245,158,11,0.1)'; st.style.color='#f59e0b';
             st.textContent='📅 Schedule active — Auto ON/OFF running. Ends: ' + (r.endsAt ? new Date(r.endsAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'}) : '-');
         }
+        // Load daily maintenance settings
+        try {
+            const sr = await fetch(API + '/api/admin/settings', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+            const dm = sr.dailyMaintenance || {};
+            const dmToggle = document.getElementById('dailyMaintToggle');
+            if (dm.enabled) dmToggle.classList.add('active'); else dmToggle.classList.remove('active');
+            document.getElementById('dmStartHour').value = dm.startHour ?? 2;
+            document.getElementById('dmStartMin').value = dm.startMin ?? 0;
+            document.getElementById('dmEndHour').value = dm.endHour ?? 7;
+            document.getElementById('dmEndMin').value = dm.endMin ?? 0;
+            if (dm.message) document.getElementById('dailyMaintMsg').value = dm.message;
+        } catch(e) {}
     } catch (e) {}
 }
 
@@ -5493,6 +5599,30 @@ async function cancelMaintenanceSchedule() {
             document.getElementById('mntScheduleMsg').value = '';
         }
     } catch (e) {}
+}
+
+async function saveDailyMaintenance() {
+    const toggle = document.getElementById('dailyMaintToggle');
+    const enabled = toggle.classList.contains('active');
+    const body = {
+        enabled,
+        startHour: parseInt(document.getElementById('dmStartHour').value) || 2,
+        startMin: parseInt(document.getElementById('dmStartMin').value) || 0,
+        endHour: parseInt(document.getElementById('dmEndHour').value) || 7,
+        endMin: parseInt(document.getElementById('dmEndMin').value) || 0,
+        message: document.getElementById('dailyMaintMsg').value.trim() || '🔧 Daily maintenance in progress.'
+    };
+    const st = document.getElementById('dailyMaintStatus');
+    try {
+        const r = await fetch(API + '/api/admin/maintenance/daily', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify(body)
+        }).then(r => r.json());
+        if (r.success) {
+            st.style.display='block'; st.style.color='#22c55e';
+            st.textContent = enabled ? '✅ Daily maintenance ON — ' + body.startHour + ':' + String(body.startMin).padStart(2,'0') + ' to ' + body.endHour + ':' + String(body.endMin).padStart(2,'0') + ' (IST)' : '✅ Daily maintenance OFF';
+        }
+    } catch(e) { st.style.display='block'; st.style.color='#ef4444'; st.textContent='❌ Error saving'; }
 }
 
 let _mntCountdownInterval = null;
@@ -5747,6 +5877,7 @@ function loadAll() {
     loadSignals();
     loadDashboardStockTips();
     loadHolidayBanners();
+    loadActiveOffers();
 }
 
 // ═══════ DASHBOARD SETTINGS ═══════
@@ -5961,6 +6092,34 @@ function renderBannerList() {
     }).join('');
 }
 
+function setFestivalDates(festival) {
+    const now = new Date();
+    const y = now.getFullYear();
+    let s, e, title = '', msg = '', emoji = '🎊';
+    switch(festival) {
+        case 'independence': s = y+'-08-15'; e = y+'-08-16'; title = 'Happy Independence Day! 🇮🇳'; msg = 'Azadi Ka Amrit Mahotsav! Jai Hind!'; emoji = '🇮🇳'; break;
+        case 'raksha':
+            const rd = new Date(y, 7, 15); for(let i=0;i<90;i++){const d=new Date(y,7,15-i);if(d.getDay()===1||d.getDay()===2||d.getDay()===3){rd.setDate(d.getDate());break;}}
+            s = rd.toISOString().split('T')[0]; e = new Date(rd.getTime()+86400000).toISOString().split('T')[0];
+            title = 'Happy Raksha Bandhan! 🎀'; msg = 'Rakhi ki hardik shubhkamnaye!'; emoji = '🎀'; break;
+        case 'diwali':
+            const dd = new Date(y, 9, 20); s = dd.toISOString().split('T')[0]; e = new Date(dd.getTime()+2*86400000).toISOString().split('T')[0];
+            title = 'Happy Diwali! 🪔'; msg = 'BearFighter Trading ki taraf se Diwali ki shubhkamnaye!'; emoji = '🪔'; break;
+        case 'holi':
+            const hd = new Date(y, 2, 10); s = hd.toISOString().split('T')[0]; e = new Date(hd.getTime()+86400000).toISOString().split('T')[0];
+            title = 'Happy Holi! 🎨'; msg = 'Rangom ki Holi ki hardik shubhkamnaye!'; emoji = '🎨'; break;
+        case 'christmas': s = y+'-12-24'; e = y+'-12-26'; title = 'Merry Christmas! 🎄'; msg = 'Christmas ki hardik shubhkamnaye!'; emoji = '🎄'; break;
+        case 'newyear': s = y+'-12-31'; e = (y+1)+'-01-02'; title = 'Happy New Year! 🎉'; msg = 'Naye saal ki shubhkamnaye!'; emoji = '🎉'; break;
+    }
+    document.getElementById('bannerStartDate').value = s;
+    document.getElementById('bannerEndDate').value = e;
+    if (title && !document.getElementById('bannerTitle').value) {
+        document.getElementById('bannerTitle').value = title;
+        document.getElementById('bannerMessage').value = msg;
+        document.getElementById('bannerEmoji').value = emoji;
+    }
+}
+
 function toggleBannerForm() {
     const wrap = document.getElementById('bannerFormWrap');
     const isOpen = wrap.style.display !== 'none';
@@ -5980,6 +6139,56 @@ function toggleBannerForm() {
         document.getElementById('bannerIsDefault').checked = false;
         removeBannerImage();
     }
+}
+
+// ═══════ OFFERS ═══════
+async function loadOffers() {
+    try {
+        const r = await fetch(API + '/api/admin/offers', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        const el = document.getElementById('offersList');
+        if (!el) return;
+        if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">No offers yet</div>'; return; }
+        el.innerHTML = r.offers.map(o => {
+            const isExpired = o.expiry && new Date(o.expiry) < new Date();
+            const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:2px 6px;border-radius:4px;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 6px;border-radius:4px;">Off</span>';
+            return '<div style="padding:10px;border:1px solid #2a2a35;border-radius:8px;margin-bottom:6px;background:#1a1a24;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<div style="font-size:12px;color:#e4e4e7;font-weight:600;">' + o.title + ' ' + badge + '</div>' +
+                '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="deleteOffer(\'' + o.id + '\')">🗑️</button></div>' +
+                (o.description ? '<div style="font-size:10px;color:#a1a1aa;margin-top:4px;">' + o.description + '</div>' : '') +
+                '<div style="font-size:9px;color:#555;margin-top:4px;">' + (o.code ? 'Code: ' + o.code + ' | ' : '') + 'Target: ' + o.target + (o.expiry ? ' | Until: ' + o.expiry : '') + '</div></div>';
+        }).join('');
+    } catch (e) {}
+}
+
+async function createOffer() {
+    const title = document.getElementById('offerTitle').value.trim();
+    const description = document.getElementById('offerDesc').value.trim();
+    const code = document.getElementById('offerCode').value.trim();
+    const expiry = document.getElementById('offerExpiry').value;
+    const target = document.getElementById('offerTarget').value;
+    const st = document.getElementById('offerStatus');
+    if (!title) { st.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
+    try {
+        const r = await fetch(API + '/api/admin/offers', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ title, description, code, expiry, target })
+        }).then(r => r.json());
+        if (r.success) {
+            st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
+            document.getElementById('offerTitle').value = '';
+            document.getElementById('offerDesc').value = '';
+            document.getElementById('offerCode').value = '';
+            document.getElementById('offerExpiry').value = '';
+            loadOffers();
+        } else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+async function deleteOffer(id) {
+    if (!await customConfirm('Delete this offer?', '🗑️', 'Delete')) return;
+    await fetch(API + '/api/admin/offers/' + id, { method: 'DELETE', headers: { 'admin-key': ADMIN_KEY } });
+    loadOffers();
 }
 
 function cancelBannerForm() { document.getElementById('bannerFormWrap').style.display = 'none'; document.getElementById('bannerImagePreview').style.display = 'none'; document.getElementById('bannerImageUrl').value = ''; document.getElementById('bannerImageFile').value = ''; document.getElementById('bannerImageFileName').textContent = ''; }
@@ -6188,6 +6397,32 @@ function dismissHolidayBanner(bannerId) {
     wrap.style.maxHeight = '0'; wrap.style.opacity = '0'; wrap.style.margin = '0';
     setTimeout(() => { wrap.style.display = 'none'; }, 300);
     try { sessionStorage.setItem('hbanner_dismissed_' + (bannerId || 'current'), '1'); } catch(e) {}
+}
+
+async function loadActiveOffers() {
+    try {
+        const r = await fetch(API + '/api/offers').then(r => r.json());
+        if (!r.success || !r.offers || r.offers.length === 0) return;
+        const offer = r.offers[0];
+        if (sessionStorage.getItem('offer_dismissed_' + offer.id)) return;
+        const existing = document.getElementById('activeOfferWrap');
+        if (existing) existing.remove();
+        const wrap = document.createElement('div');
+        wrap.id = 'activeOfferWrap';
+        wrap.style.cssText = 'margin:8px 12px;padding:10px 14px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;color:#fff;font-size:12px;display:flex;align-items:center;gap:10px;animation:bannerSlideIn 0.5s ease-out;position:relative;';
+        wrap.innerHTML = '<div style="flex:1;"><strong>' + offer.title + '</strong>' +
+            (offer.description ? '<div style="font-size:10px;opacity:0.9;margin-top:2px;">' + offer.description + '</div>' : '') +
+            (offer.code ? '<div style="font-size:10px;margin-top:4px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: <strong>' + offer.code + '</strong></div>' : '') +
+            '</div><button onclick="dismissOffer(\'' + offer.id + '\')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:11px;flex-shrink:0;">✕</button>';
+        const disclaimer = document.getElementById('disclaimerTicker');
+        if (disclaimer && disclaimer.parentNode) { disclaimer.parentNode.insertBefore(wrap, disclaimer.nextSibling); }
+    } catch(e) {}
+}
+
+function dismissOffer(offerId) {
+    const wrap = document.getElementById('activeOfferWrap');
+    if (wrap) { wrap.style.transition='all 0.3s'; wrap.style.maxHeight='0'; wrap.style.opacity='0'; wrap.style.margin='0'; wrap.style.padding='0'; setTimeout(()=>wrap.remove(),300); }
+    try { sessionStorage.setItem('offer_dismissed_' + offerId, '1'); } catch(e) {}
 }
 
 /* ── MARKET STATUS ── */
