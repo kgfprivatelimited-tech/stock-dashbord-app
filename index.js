@@ -903,7 +903,9 @@ app.post('/api/admin/approve-register', checkAdmin, (req, res) => {
             dob: reg.dob || '',
             lastDevice: '',
             lastPlatform: '',
-            lastUserAgent: ''
+            lastUserAgent: '',
+            approvedDevices: [],
+            pendingDevice: null
         };
         data.users.push(newUser);
         saveUsers(data);
@@ -1013,6 +1015,24 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         
         console.log('✅ Login successful:', username);
         logLogin(username, true);
+        
+        // Device lock check
+        const deviceFingerprint = (device || '') + '|' + (platform || '') + '|' + (userAgent || '').substring(0, 80);
+        if (!user.approvedDevices) user.approvedDevices = [];
+        if (!user.pendingDevice) user.pendingDevice = null;
+        
+        let deviceApproved = true;
+        if (deviceFingerprint && deviceFingerprint !== '|') {
+            if (user.approvedDevices.length > 0 && !user.approvedDevices.includes(deviceFingerprint)) {
+                deviceApproved = false;
+                user.pendingDevice = { fingerprint: deviceFingerprint, device: device || '', platform: platform || '', userAgent: (userAgent || '').substring(0, 150), requestedAt: new Date().toISOString() };
+                saveUsers(data);
+                return res.json({ success: false, deviceApproval: true, message: 'New device detected. Waiting for admin approval.' });
+            }
+            if (user.approvedDevices.length === 0) {
+                user.approvedDevices.push(deviceFingerprint);
+            }
+        }
         
         // Update last login, location, and device
         user.lastLogin = new Date().toISOString();
@@ -1210,6 +1230,8 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         lastDevice: u.lastDevice || '',
         lastPlatform: u.lastPlatform || '',
         lastUserAgent: u.lastUserAgent || '',
+        pendingDevice: u.pendingDevice || null,
+        approvedDevices: u.approvedDevices || [],
         createdAt: u.createdAt,
         dob: u.dob || '',
         message: u.message || '',
@@ -1530,6 +1552,9 @@ app.get('/api/admin/dashboard', checkAdmin, (req, res) => {
         const activeTips = tips.tips.filter(t => t.active).length;
         const totalTips = tips.tips.length;
 
+        // Pending device approvals
+        const pendingDevices = data.users.filter(u => u.pendingDevice).length;
+
         res.json({
             success: true,
             stats: {
@@ -1540,6 +1565,7 @@ app.get('/api/admin/dashboard', checkAdmin, (req, res) => {
                 totalRevenue,
                 monthlyRevenue,
                 pendingPayments: pendingPayments.length,
+                pendingDevices,
                 categories,
                 stockTips: { total: totalTips, active: activeTips }
             },
@@ -2841,6 +2867,44 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
         logActivity('offer_created', `Title: ${title}, Target: ${target}, Users notified: ${targetUsers.length}`);
         res.json({ success: true, message: `Offer sent to ${targetUsers.length} users!`, offer });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Device approval endpoints
+app.get('/api/admin/pending-devices', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const pending = data.users.filter(u => u.pendingDevice).map(u => ({
+            username: u.username, fullName: u.fullName || u.username,
+            pendingDevice: u.pendingDevice
+        }));
+        res.json({ success: true, pending });
+    } catch (e) { res.json({ success: false, pending: [] }); }
+});
+
+app.post('/api/admin/device/:username/approve', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const user = data.users.find(u => u.username === req.params.username);
+        if (!user || !user.pendingDevice) return res.json({ success: false, message: 'No pending device' });
+        if (!user.approvedDevices) user.approvedDevices = [];
+        user.approvedDevices.push(user.pendingDevice.fingerprint);
+        logActivity('device_approved', `Device approved for ${user.username}: ${user.pendingDevice.device}`);
+        user.pendingDevice = null;
+        saveUsers(data);
+        res.json({ success: true, message: 'Device approved' });
+    } catch (e) { res.json({ success: false }); }
+});
+
+app.post('/api/admin/device/:username/reject', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const user = data.users.find(u => u.username === req.params.username);
+        if (!user || !user.pendingDevice) return res.json({ success: false, message: 'No pending device' });
+        logActivity('device_rejected', `Device rejected for ${user.username}: ${user.pendingDevice.device}`);
+        user.pendingDevice = null;
+        saveUsers(data);
+        res.json({ success: true, message: 'Device rejected' });
+    } catch (e) { res.json({ success: false }); }
 });
 
 app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
