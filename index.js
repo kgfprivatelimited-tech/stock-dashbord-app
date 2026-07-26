@@ -2840,7 +2840,7 @@ app.get('/api/admin/offers', checkAdmin, (req, res) => {
 
 app.post('/api/admin/offers', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, colors } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage } = req.body;
         if (!title) return res.json({ success: false, message: 'Title required' });
         const settings = loadSettings();
         if (!settings.offers) settings.offers = [];
@@ -2852,7 +2852,8 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
             expiry: expiry || null,
             target: target || 'all',
             selectedUsers: (selectedUsers || []),
-            colors: (colors || '#7c3aed,#2563eb'),
+            theme: (theme || 'golden'),
+            bgImage: (bgImage || ''),
             active: true,
             createdAt: new Date().toISOString()
         };
@@ -2934,7 +2935,7 @@ app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
 
 app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, colors, bgImage } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage } = req.body;
         const settings = loadSettings();
         const offer = (settings.offers || []).find(o => o.id === req.params.id);
         if (!offer) return res.json({ success: false, message: 'Offer not found' });
@@ -2944,7 +2945,7 @@ app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
         if (expiry !== undefined) offer.expiry = expiry || null;
         if (target !== undefined) offer.target = target;
         if (selectedUsers !== undefined) offer.selectedUsers = selectedUsers;
-        if (colors !== undefined) offer.colors = colors;
+        if (theme !== undefined) offer.theme = theme;
         if (bgImage !== undefined) offer.bgImage = bgImage || '';
         offer.updatedAt = new Date().toISOString();
         saveSettings(settings);
