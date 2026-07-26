@@ -2289,27 +2289,6 @@ input[type="color"] {
 
         <!-- Pending Password Changes — removed (auto-approved) -->
 
-        <!-- Today's Birthdays (compact) -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🎂 Today's Birthdays</div>
-          </div>
-          <div id="adminBirthdayFeed">
-            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Pending Registration Requests -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">📋 Registration Requests</div>
-            <div style="font-size:10px;color:#71717a;cursor:pointer;" onclick="loadRegisterRequests()">🔄 Refresh</div>
-          </div>
-          <div id="registerRequestsFeed">
-            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Loading...</div>
-          </div>
-        </div>
-
         <!-- Login History -->
         <div class="admin-card">
           <div class="admin-card-header">
@@ -3045,9 +3024,10 @@ input[type="color"] {
         <div id="offerFormWrap" style="display:none;">
           <div class="admin-card" style="border:1px solid #7c3aed;">
             <div class="admin-card-header">
-              <div class="admin-card-title">✨ Create New Offer</div>
+              <div class="admin-card-title" id="offerFormTitle">✨ Create New Offer</div>
               <button class="admin-btn admin-btn-secondary" onclick="toggleOfferForm()">✕ Close</button>
             </div>
+            <input type="hidden" id="offerEditId" value="">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div>
                 <div class="admin-form-group">
@@ -3061,6 +3041,15 @@ input[type="color"] {
                 <div class="admin-form-row">
                   <div class="admin-form-group"><label class="admin-form-label">🎟️ Promo Code</label><input type="text" id="offerCode" class="admin-form-input" placeholder="e.g. INDIE50"></div>
                   <div class="admin-form-group"><label class="admin-form-label">📅 Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">🖼️ Background Image URL</label>
+                  <input type="text" id="offerBgImage" class="admin-form-input" placeholder="https://example.com/image.jpg" oninput="updateOfferPreview()">
+                  <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;">
+                    <span onclick="document.getElementById(\'offerBgImage\').value=\'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800\';updateOfferPreview();" style="font-size:9px;color:#f59e0b;cursor:pointer;text-decoration:underline;">Demo: Stocks 📈</span>
+                    <span onclick="document.getElementById(\'offerBgImage\').value=\'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800\';updateOfferPreview();" style="font-size:9px;color:#f59e0b;cursor:pointer;text-decoration:underline;">Demo: Celebration 🎉</span>
+                    <span onclick="document.getElementById(\'offerBgImage\').value=\'\';updateOfferPreview();" style="font-size:9px;color:#ef4444;cursor:pointer;text-decoration:underline;">Clear</span>
+                  </div>
                 </div>
                 <div class="admin-form-group">
                   <label class="admin-form-label">🎨 Theme Color</label>
@@ -3100,7 +3089,7 @@ input[type="color"] {
                     <div style="margin-top:6px;font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: SAMPLE</div>
                   </div>
                 </div>
-                <button class="admin-btn admin-btn-primary" onclick="createOffer()" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:13px;">🚀 Send Offer Now</button>
+                <button class="admin-btn admin-btn-primary" onclick="createOffer()" id="offerSubmitBtn" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:13px;">🚀 Send Offer Now</button>
                 <div id="offerStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
               </div>
             </div>
@@ -5321,28 +5310,42 @@ async function blockUser(username) {
 }
 
 async function renewUser(username) {
-    const days = prompt(`Extend subscription for "${username}"\nEnter number of days:`, '30');
-    if (!days) return;
-    
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:12px;padding:20px;width:320px;max-width:90vw;">' +
+        '<div style="font-size:14px;font-weight:700;color:#e4e4e7;margin-bottom:12px;">🔄 Renew — ' + username + '</div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">📅 Subscription Days</label>' +
+        '<input type="number" id="renewDays" class="admin-form-input" value="30" min="1" placeholder="30"></div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">🎟️ Offer Code (optional)</label>' +
+        '<input type="text" id="renewOfferCode" class="admin-form-input" placeholder="e.g. INDIE50">' +
+        '<div id="renewOfferMsg" style="font-size:10px;margin-top:4px;color:#555;"></div></div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">💰 Payment Amount (₹)</label>' +
+        '<input type="number" id="renewAmount" class="admin-form-input" placeholder="0"></div>' +
+        '<div style="display:flex;gap:8px;"><button class="admin-btn admin-btn-primary" onclick="doRenew(\'' + username + '\')" style="flex:1;">✅ Renew</button>' +
+        '<button class="admin-btn admin-btn-secondary" onclick="this.closest(\'div[style*=fixed]\').remove()" style="flex:1;">Cancel</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+async function doRenew(username) {
+    const days = document.getElementById('renewDays').value;
+    const offerCode = document.getElementById('renewOfferCode').value.trim();
+    const amount = document.getElementById('renewAmount').value;
+    const msg = document.getElementById('renewOfferMsg');
     try {
         const r = await fetch(API + '/api/admin/renew', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'admin-key': ADMIN_KEY
-            },
-            body: JSON.stringify({ username, days })
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ username, days, offerCode, amount: parseFloat(amount) || 0 })
         }).then(r => r.json());
-        
         if (r.success) {
-            customAlert(r.message, '✅');
+            document.querySelector('div[style*="position:fixed"]').remove();
+            customAlert(r.message + (r.offerApplied ? '\n🎁 Offer applied: ' + r.offerApplied : ''), '✅');
             loadAdminData();
         } else {
-            customAlert(r.message, '❌');
+            msg.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>';
         }
-    } catch (e) {
-        customAlert('Server error', '❌');
-    }
+    } catch (e) { msg.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
 }
 
 async function deleteUser(username) {
@@ -6491,11 +6494,13 @@ async function loadOffers() {
                 (o.description ? '<div style="font-size:11px;opacity:0.9;margin-top:4px;line-height:1.4;">' + o.description + '</div>' : '') +
                 '</div>' +
                 '<button onclick="toggleOfferActive(\'' + o.id + '\',' + o.active + ')" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;">' + (o.active ? 'ON' : 'OFF') + '</button>' +
+                '<button onclick="editOffer(\'' + o.id + '\')" style="background:rgba(59,130,246,0.4);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;margin-left:4px;">✏️</button>' +
                 '<button onclick="deleteOffer(\'' + o.id + '\')" style="background:rgba(255,0,0,0.3);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;margin-left:4px;">🗑️</button></div>' +
                 '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
                 (o.code ? '<span style="font-size:10px;background:rgba(255,255,255,0.25);padding:3px 10px;border-radius:6px;font-weight:600;">🎟️ ' + o.code + '</span>' : '') +
                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">🎯 ' + targetLabel + (userCount ? ' (' + userCount + ')' : '') + '</span>' +
-                (o.expiry ? '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">📅 ' + o.expiry + '</span>' : '') +
+                (o.expiry ?                 '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">📅 ' + o.expiry + '</span>' : '') +
+                (o.bgImage ? '<span style="font-size:10px;background:rgba(59,130,246,0.3);padding:3px 10px;border-radius:6px;">🖼️ BG Image</span>' : '') +
                 '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🕐 ' + new Date(o.createdAt).toLocaleDateString('en-IN') + '</span>' +
                 '</div></div></div>';
         }).join('');
@@ -6510,6 +6515,7 @@ async function toggleOfferActive(id, currentActive) {
 }
 
 async function createOffer() {
+    const editId = document.getElementById('offerEditId').value;
     const title = document.getElementById('offerTitle').value.trim();
     const description = document.getElementById('offerDesc').value.trim();
     const code = document.getElementById('offerCode').value.trim();
@@ -6517,22 +6523,58 @@ async function createOffer() {
     const target = document.getElementById('offerTarget').value;
     const selectedUsers = getSelectedOfferUsers();
     const colors = _selectedOfferColor;
+    const bgImage = document.getElementById('offerBgImage').value.trim();
     const st = document.getElementById('offerStatus');
     if (!title) { st.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
     if (target === 'specific' && !selectedUsers.length) { st.innerHTML = '<span style="color:#ef4444;">Select at least 1 user</span>'; return; }
     try {
-        const r = await fetch(API + '/api/admin/offers', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ title, description, code, expiry, target, selectedUsers, colors })
+        const body = { title, description, code, expiry, target, selectedUsers, colors, bgImage };
+        const url = editId ? API + '/api/admin/offers/' + editId : API + '/api/admin/offers';
+        const r = await fetch(url, {
+            method: editId ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify(body)
         }).then(r => r.json());
         if (r.success) {
             st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
-            ['offerTitle','offerDesc','offerCode','offerExpiry'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('offerTarget').value = 'all';
-            document.getElementById('offerSpecificUsers').style.display = 'none';
+            resetOfferForm();
             loadOffers();
         } else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
     } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+function editOffer(id) {
+    fetch(API + '/api/admin/offers', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(data => {
+        const o = (data.offers || []).find(x => x.id === id);
+        if (!o) return;
+        document.getElementById('offerFormWrap').style.display = 'block';
+        document.getElementById('offerFormTitle').textContent = '✏️ Edit Offer';
+        document.getElementById('offerEditId').value = o.id;
+        document.getElementById('offerSubmitBtn').textContent = '💾 Save Changes';
+        document.getElementById('offerTitle').value = o.title || '';
+        document.getElementById('offerDesc').value = o.description || '';
+        document.getElementById('offerCode').value = o.code || '';
+        document.getElementById('offerExpiry').value = o.expiry || '';
+        document.getElementById('offerTarget').value = o.target || 'all';
+        document.getElementById('offerBgImage').value = o.bgImage || '';
+        if (o.colors) {
+            _selectedOfferColor = o.colors;
+            document.querySelectorAll('#offerColorPick span').forEach(s => {
+                s.style.borderColor = s.getAttribute('onclick').includes(o.colors) ? '#fff' : 'transparent';
+            });
+        }
+        updateOfferPreview();
+    });
+}
+
+function resetOfferForm() {
+    document.getElementById('offerEditId').value = '';
+    document.getElementById('offerFormTitle').textContent = '✨ Create New Offer';
+    document.getElementById('offerSubmitBtn').textContent = '🚀 Send Offer Now';
+    ['offerTitle','offerDesc','offerCode','offerExpiry','offerBgImage'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('offerTarget').value = 'all';
+    document.getElementById('offerSpecificUsers').style.display = 'none';
+    document.getElementById('offerStatus').innerHTML = '';
 }
 
 async function deleteOffer(id) {
@@ -6758,27 +6800,26 @@ async function loadActiveOffers() {
         if (existing) existing.remove();
         const wrap = document.createElement('div');
         wrap.id = 'activeOfferWrap';
-        wrap.style.cssText = 'margin:6px 0;border-radius:12px;color:#fff;animation:bannerSlideIn 0.5s ease-out;position:relative;';
+        wrap.style.cssText = 'margin:8px 12px;animation:bannerSlideIn 0.5s ease-out;position:relative;';
         wrap.innerHTML = r.offers.filter(o => !sessionStorage.getItem('offer_dismissed_' + o.id)).map((o, idx) => {
-            const gc = o.colors || '#7c3aed,#2563eb';
-            const gradientColors = gc.split(',');
-            const primaryColor = gradientColors[0] || '#7c3aed';
-            return '<div style="margin-bottom:8px;border-radius:12px;overflow:hidden;position:relative;background:linear-gradient(135deg,' + gc + ');box-shadow:0 4px 20px ' + primaryColor + '40;">' +
-                '<div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>' +
-                '<div style="position:absolute;bottom:-30px;right:20px;width:60px;height:60px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>' +
-                '<div style="position:relative;padding:16px 40px 16px 16px;">' +
-                '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
-                '<span style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:0.5px;">LIMITED OFFER</span>' +
-                '<span style="font-size:9px;opacity:0.7;">🎉</span>' +
-                '</div>' +
-                '<div style="font-size:16px;font-weight:800;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,0.2);">' + o.title + '</div>' +
-                (o.description ? '<div style="font-size:11px;opacity:0.9;margin-top:4px;line-height:1.4;">' + o.description + '</div>' : '') +
-                '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;">' +
-                (o.code ? '<div style="background:rgba(255,255,255,0.2);backdrop-filter:blur(4px);padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:1px;border:1px dashed rgba(255,255,255,0.4);cursor:pointer;" onclick="navigator.clipboard.writeText(\'' + o.code + '\');this.textContent=\'✅ Copied!\';setTimeout(()=>this.textContent=\'🎟️ ' + o.code + '\',1500);">🎟️ ' + o.code + '</div>' : '') +
-                (o.expiry ? '<div style="font-size:9px;opacity:0.8;background:rgba(0,0,0,0.15);padding:3px 8px;border-radius:6px;">⏰ Valid till ' + o.expiry + '</div>' : '') +
+            const bgImg = o.bgImage ? 'background-image:url(' + o.bgImage + ');background-size:cover;background-position:center;' : 'background:linear-gradient(135deg,#1a1a0e,#0a0a0a,#1a1a0e);';
+            return '<div style="margin-bottom:8px;border-radius:10px;overflow:hidden;position:relative;border:1px solid #3d3510;box-shadow:0 2px 12px rgba(245,158,11,0.15);' + bgImg + '">' +
+                '<div style="position:relative;padding:12px 14px;min-height:70px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+                '<div style="flex:1;padding-right:8px;">' +
+                '<span style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;padding:2px 10px;border-radius:4px;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Limited Offer</span>' +
+                '<div style="font-size:14px;font-weight:800;color:#f59e0b;margin-top:6px;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' + o.title + '</div>' +
+                (o.description ? '<div style="font-size:10px;color:#ccc;margin-top:3px;line-height:1.3;">' + o.description + '</div>' : '') +
+                '<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">' +
+                (o.expiry ? '<span style="font-size:8px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;">⏰ Valid till ' + o.expiry + '</span>' : '') +
                 '</div>' +
                 '</div>' +
-                '<button onclick="dismissOffer(\'' + o.id + '\')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(255,0,0,0.4)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.2)\'">✕</button>' +
+                (o.code ? '<div onclick="navigator.clipboard.writeText(\'' + o.code + '\');this.querySelector(\'span\').textContent=\'Copied!\';setTimeout(()=>this.querySelector(\'span\').textContent=\'' + o.code + '\',1500);" style="cursor:pointer;text-align:center;background:rgba(0,0,0,0.5);border:1px dashed #f59e0b;border-radius:6px;padding:6px 10px;flex-shrink:0;">' +
+                '<div style="font-size:7px;color:#f59e0b;letter-spacing:0.5px;">CODE</div>' +
+                '<span style="font-size:13px;font-weight:800;color:#f59e0b;letter-spacing:1px;">' + o.code + '</span>' +
+                '</div>' : '') +
+                '</div>' +
+                '</div>' +
                 '</div>';
         }).join('');
         if (!wrap.innerHTML.trim()) return;

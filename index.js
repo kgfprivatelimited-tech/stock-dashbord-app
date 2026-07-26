@@ -1317,21 +1317,35 @@ app.post('/api/admin/block', checkAdmin, (req, res) => {
 // Renew user
 app.post('/api/admin/renew', checkAdmin, (req, res) => {
     try {
-        const { username, days } = req.body;
+        const { username, days, offerCode, amount } = req.body;
         const extendDays = parseInt(days) || 30;
         const data = loadUsers();
         const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
         
         if (!user) return res.json({ success: false, message: 'User not found' });
         
+        let extraDays = 0;
+        let offerApplied = '';
+        if (offerCode) {
+            const settings = loadSettings();
+            const matchedOffer = (settings.offers || []).find(o => o.active && o.code && o.code.toLowerCase() === offerCode.toLowerCase() && (!o.expiry || new Date(o.expiry) >= new Date()));
+            if (matchedOffer) {
+                extraDays = 7;
+                offerApplied = matchedOffer.title + ' (+7 bonus days)';
+            }
+        }
+        
+        const totalDays = extendDays + extraDays;
         const currentExpiry = new Date(user.subscriptionExpiry);
         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
-        user.subscriptionExpiry = new Date(baseDate.getTime() + extendDays * 24 * 60 * 60 * 1000).toISOString();
+        user.subscriptionExpiry = new Date(baseDate.getTime() + totalDays * 24 * 60 * 60 * 1000).toISOString();
         user.approved = true;
+        if (amount) user.paymentAmount = (parseFloat(user.paymentAmount) || 0) + parseFloat(amount);
+        user.lastRenewDate = new Date().toISOString();
         saveUsers(data);
-        logActivity('user_renewed', `${username} — ${extendDays} days extended`);
+        logActivity('user_renewed', `${username} — ${extendDays} days${extraDays ? ' + ' + extraDays + ' bonus' : ''} extended`);
         
-        res.json({ success: true, message: `User ${username} extended by ${extendDays} days.` });
+        res.json({ success: true, message: `${username} extended by ${totalDays} days.`, offerApplied: offerApplied || null });
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
     }
@@ -2916,6 +2930,26 @@ app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
         saveSettings(settings);
         res.json({ success: true, active: offer.active });
     } catch (e) { res.json({ success: false }); }
+});
+
+app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
+    try {
+        const { title, description, code, expiry, target, selectedUsers, colors, bgImage } = req.body;
+        const settings = loadSettings();
+        const offer = (settings.offers || []).find(o => o.id === req.params.id);
+        if (!offer) return res.json({ success: false, message: 'Offer not found' });
+        if (title !== undefined) offer.title = title.trim();
+        if (description !== undefined) offer.description = description.trim();
+        if (code !== undefined) offer.code = code.trim();
+        if (expiry !== undefined) offer.expiry = expiry || null;
+        if (target !== undefined) offer.target = target;
+        if (selectedUsers !== undefined) offer.selectedUsers = selectedUsers;
+        if (colors !== undefined) offer.colors = colors;
+        if (bgImage !== undefined) offer.bgImage = bgImage || '';
+        offer.updatedAt = new Date().toISOString();
+        saveSettings(settings);
+        res.json({ success: true, message: 'Offer updated', offer });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
 });
 
 app.delete('/api/admin/offers/:id', checkAdmin, (req, res) => {
