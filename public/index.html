@@ -2211,8 +2211,11 @@ input[type="color"] {
         <!-- Top Bar -->
         <div class="admin-top-bar">
           <h1>Dashboard Overview</h1>
-          <div class="admin-top-bar-actions">
-            <input type="text" id="searchUser" placeholder="🔍 Search user..." class="admin-form-input" style="width:180px;" onkeyup="filterUsersAndShowAll()">
+          <div class="admin-top-bar-actions" style="position:relative;">
+            <div style="position:relative;">
+              <input type="text" id="searchUser" placeholder="🔍 Search functions, users..." class="admin-form-input" style="width:240px;" oninput="handleGlobalSearch(this.value)" onfocus="handleGlobalSearch(this.value)" autocomplete="off">
+              <div id="globalSearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:300px;overflow-y:auto;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+            </div>
             <button class="admin-btn admin-btn-primary" onclick="toggleUserForm()">+ Add User</button>
             <button class="admin-btn admin-btn-secondary" onclick="refreshAdminData()">🔄</button>
             <button class="admin-btn admin-btn-secondary" onclick="exportUsers()">📥 Export</button>
@@ -2220,7 +2223,7 @@ input[type="color"] {
         </div>
 
         <!-- Stats -->
-        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(7, 1fr);">
+        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(4, 1fr);">
           <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
@@ -2237,6 +2240,8 @@ input[type="color"] {
             <div class="admin-stat-label">Expired</div>
             <div class="admin-stat-value" style="color: #ef4444;" id="dashExpiredUsers">0</div>
           </div>
+        </div>
+        <div class="admin-stats-grid" id="dashStats2" style="grid-template-columns: repeat(4, 1fr);margin-top:6px;">
           <div class="admin-stat-card" onclick="showStatPopup('expiringSoon')" style="cursor:pointer;" title="Click to view expiring soon">
             <div class="admin-stat-label">Expiring Soon</div>
             <div class="admin-stat-value" style="color: #eab308;" id="dashExpiringSoon">0</div>
@@ -2249,8 +2254,26 @@ input[type="color"] {
             <div class="admin-stat-label">🎂 Birthdays</div>
             <div class="admin-stat-value" style="color: #f59e0b;" id="dashBirthdayCount">0</div>
           </div>
+          <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;" title="Click to view registration requests">
+            <div class="admin-stat-label">📝 Registrations</div>
+            <div class="admin-stat-value" style="color: #0ea5e9;" id="dashRegRequests">0</div>
+          </div>
         </div>
         <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
+
+        <!-- Quick Shortcuts Row -->
+        <div style="margin:10px 0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:11px;color:#71717a;font-weight:600;">⚡ Quick Actions</span>
+            <span style="font-size:10px;color:#555;cursor:pointer;" onclick="toggleShortcutEditor()">⚙️ Customize</span>
+          </div>
+          <div id="shortcutsEditor" style="display:none;margin-bottom:8px;padding:10px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;">
+            <div style="font-size:11px;color:#71717a;margin-bottom:6px;">Choose 6 shortcuts to show:</div>
+            <div id="shortcutCheckboxes" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;"></div>
+            <button class="admin-btn admin-btn-primary" onclick="saveShortcuts()" style="margin-top:8px;width:100%;font-size:11px;">Save Shortcuts</button>
+          </div>
+          <div id="shortcutsRow" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
+        </div>
 
         <!-- ═══ DASHBOARD SECTION ═══ -->
         <div id="section-dashboard">
@@ -3009,36 +3032,72 @@ input[type="color"] {
         <div class="admin-card">
           <div class="admin-card-header">
             <div class="admin-card-title">🎁 Offers & Promotions</div>
+            <button class="admin-btn admin-btn-primary" onclick="toggleOfferForm()">+ Create Offer</button>
           </div>
-          <p style="font-size:11px;color:#71717a;margin-bottom:10px;">Users ko offer bhejo — notification + dashboard pe dikhega.</p>
           <div id="offersList"></div>
-          <div style="margin-top:12px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;">
-            <div class="admin-form-group">
-              <label class="admin-form-label">Offer Title</label>
-              <input type="text" id="offerTitle" class="admin-form-input" placeholder="e.g. 🎉 Independence Day Sale — 50% OFF!">
+        </div>
+        <div id="offerFormWrap" style="display:none;">
+          <div class="admin-card" style="border:1px solid #7c3aed;">
+            <div class="admin-card-header">
+              <div class="admin-card-title">✨ Create New Offer</div>
+              <button class="admin-btn admin-btn-secondary" onclick="toggleOfferForm()">✕ Close</button>
             </div>
-            <div class="admin-form-group">
-              <label class="admin-form-label">Description</label>
-              <textarea id="offerDesc" rows="2" class="admin-form-input" placeholder="All premium plans par 50% discount! Limited time..." style="resize:vertical;"></textarea>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">🏷️ Offer Title</label>
+                  <input type="text" id="offerTitle" class="admin-form-input" placeholder="e.g. 🎉 Independence Day Sale — 50% OFF!">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">📝 Description</label>
+                  <textarea id="offerDesc" rows="3" class="admin-form-input" placeholder="All premium plans par 50% discount! Limited time..." style="resize:vertical;"></textarea>
+                </div>
+                <div class="admin-form-row">
+                  <div class="admin-form-group"><label class="admin-form-label">🎟️ Promo Code</label><input type="text" id="offerCode" class="admin-form-input" placeholder="e.g. INDIE50"></div>
+                  <div class="admin-form-group"><label class="admin-form-label">📅 Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">🎨 Theme Color</label>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;" id="offerColorPick">
+                    <span onclick="selectOfferColor('#7c3aed,#2563eb',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#2563eb);cursor:pointer;border:2px solid transparent;" data-selected="true"></span>
+                    <span onclick="selectOfferColor('#f59e0b,#ff6b35',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ff6b35);cursor:pointer;border:2px solid transparent;"></span>
+                    <span onclick="selectOfferColor('#22c55e,#059669',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#059669);cursor:pointer;border:2px solid transparent;"></span>
+                    <span onclick="selectOfferColor('#ef4444,#dc2626',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);cursor:pointer;border:2px solid transparent;"></span>
+                    <span onclick="selectOfferColor('#ec4899,#f43f5e',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#f43f5e);cursor:pointer;border:2px solid transparent;"></span>
+                    <span onclick="selectOfferColor('#0ea5e9,#6366f1',this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);cursor:pointer;border:2px solid transparent;"></span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">🎯 Send To</label>
+                  <select id="offerTarget" class="admin-form-select" onchange="loadOfferTargetUsers()">
+                    <option value="all">All Users</option>
+                    <option value="active">Active Users Only</option>
+                    <option value="expired">Expired Users Only</option>
+                    <option value="expiring">Expiring Soon (7 days)</option>
+                    <option value="silver">Silver Category</option>
+                    <option value="gold">Gold Category</option>
+                    <option value="diamond">Diamond Category</option>
+                    <option value="premium">Premium Category</option>
+                    <option value="specific">Specific Users ☑️</option>
+                  </select>
+                </div>
+                <div id="offerSpecificUsers" style="display:none;max-height:150px;overflow-y:auto;border:1px solid #2a2a35;border-radius:8px;padding:6px;margin-top:4px;">
+                  <div id="offerUserCheckboxes"></div>
+                </div>
+                <div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:10px;border:1px solid #2a2a35;">
+                  <div style="font-size:11px;color:#71717a;margin-bottom:6px;">👁️ Preview</div>
+                  <div id="offerPreviewBox" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:12px;">
+                    <strong>Offer Title</strong>
+                    <div style="font-size:10px;opacity:0.85;margin-top:2px;">Description will appear here...</div>
+                    <div style="margin-top:6px;font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: SAMPLE</div>
+                  </div>
+                </div>
+                <button class="admin-btn admin-btn-primary" onclick="createOffer()" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:13px;">🚀 Send Offer Now</button>
+                <div id="offerStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+              </div>
             </div>
-            <div class="admin-form-row">
-              <div class="admin-form-group"><label class="admin-form-label">Code (optional)</label><input type="text" id="offerCode" class="admin-form-input" placeholder="e.g. INDIE50"></div>
-              <div class="admin-form-group"><label class="admin-form-label">Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
-            </div>
-            <div class="admin-form-group">
-              <label class="admin-form-label">Send To</label>
-              <select id="offerTarget" class="admin-form-select">
-                <option value="all">All Users</option>
-                <option value="active">Active Users Only</option>
-                <option value="expired">Expired Users Only</option>
-                <option value="silver">Silver Category</option>
-                <option value="gold">Gold Category</option>
-                <option value="diamond">Diamond Category</option>
-                <option value="premium">Premium Category</option>
-              </select>
-            </div>
-            <button class="admin-btn admin-btn-primary" onclick="createOffer()" style="width:100%;">🚀 Send Offer</button>
-            <div id="offerStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
           </div>
         </div>
       </div>
@@ -3866,6 +3925,7 @@ async function loadAdminData() {
             renderBroadcastUsers();
             loadAdminStockTips();
             loadDashboardData();
+            renderShortcuts();
             loadMaintenanceStatus();
             loadExpiringAlert();
             loadTipPerformance();
@@ -4069,6 +4129,15 @@ function showStatPopup(type) {
     } else if (type === 'allUsers') {
         html += '👥 All Users (' + _lastDashboardUsers.length + ')';
         list = _lastDashboardUsers;
+    } else if (type === 'regRequests') {
+        html += '📝 Registration Requests';
+        const regDiv = document.getElementById('registerRequestsFeed');
+        if (regDiv) {
+            p.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#e4e4e7;font-size:12px;">📝 Registration Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>' + regDiv.innerHTML;
+            p.style.display = 'block';
+            return;
+        }
+        html += ' (0)';
     }
     html += '</div><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
     if (type === 'revenue') {
@@ -4094,6 +4163,57 @@ function showStatPopup(type) {
     p.style.display = 'block';
 }
 
+const ALL_SHORTCUTS = [
+    { id:'broadcast', icon:'📢', label:'Broadcast', section:'broadcast' },
+    { id:'holidayBanners', icon:'🎉', label:'Holiday Banners', section:'holidayBanners' },
+    { id:'offers', icon:'🎁', label:'Offers', section:'offers' },
+    { id:'scheduled', icon:'⏰', label:'Scheduled Msg', section:'scheduled' },
+    { id:'reminders', icon:'💳', label:'Reminders', section:'reminders' },
+    { id:'createUser', icon:'➕', label:'Create User', section:'createUser' },
+    { id:'allUsers', icon:'👥', label:'All Users', section:'allUsers' },
+    { id:'dashSettings', icon:'🎛️', label:'Dashboard Settings', section:'dashSettings' },
+    { id:'disclaimer', icon:'⚙️', label:'Disclaimer', section:'disclaimer' },
+    { id:'maintenance', icon:'🔧', label:'Maintenance', section:'maintenance' },
+    { id:'apiKeys', icon:'🔑', label:'API Keys', section:'apiKeys' },
+    { id:'tipPerf', icon:'🎯', label:'Tip Performance', section:'tipPerf' },
+    { id:'activity', icon:'🕐', label:'Activity', section:'activity' },
+    { id:'loginHist', icon:'🔐', label:'Login History', section:'loginHist' },
+    { id:'changePass', icon:'🔒', label:'Change Password', section:'changePass' },
+    { id:'registerRequests', icon:'📝', label:'Registrations', section:'dashboard' }
+];
+let _userShortcuts = ['broadcast','holidayBanners','offers','scheduled','createUser','allUsers'];
+
+function toggleShortcutEditor() {
+    const e = document.getElementById('shortcutsEditor');
+    if (e.style.display === 'none') {
+        document.getElementById('shortcutCheckboxes').innerHTML = ALL_SHORTCUTS.map(s =>
+            '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;padding:3px;">' +
+            '<input type="checkbox" value="' + s.id + '" ' + (_userShortcuts.includes(s.id) ? 'checked' : '') + ' style="accent-color:#7c3aed;"> ' + s.icon + ' ' + s.label + '</label>'
+        ).join('');
+        e.style.display = 'block';
+    } else { e.style.display = 'none'; }
+}
+
+function saveShortcuts() {
+    _userShortcuts = Array.from(document.querySelectorAll('#shortcutCheckboxes input:checked')).map(cb => cb.value).slice(0, 6);
+    try { localStorage.setItem('admin_shortcuts', JSON.stringify(_userShortcuts)); } catch(e) {}
+    renderShortcuts();
+    document.getElementById('shortcutsEditor').style.display = 'none';
+}
+
+function renderShortcuts() {
+    const saved = localStorage.getItem('admin_shortcuts');
+    if (saved) try { _userShortcuts = JSON.parse(saved); } catch(e) {}
+    const el = document.getElementById('shortcutsRow');
+    el.innerHTML = _userShortcuts.map(id => {
+        const s = ALL_SHORTCUTS.find(x => x.id === id);
+        if (!s) return '';
+        return '<div onclick="showAdminSection(\'' + s.section + '\',null)" style="padding:12px 8px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#2a2a35\';this.style.transform=\'none\'">' +
+            '<div style="font-size:20px;margin-bottom:4px;">' + s.icon + '</div>' +
+            '<div style="font-size:10px;color:#a1a1aa;">' + s.label + '</div></div>';
+    }).join('');
+}
+
 function refreshAdminData() {
     document.getElementById('usersListContainer').innerHTML = '<div class="loading">Loading users...</div>';
     loadAdminData();
@@ -4116,6 +4236,10 @@ async function loadDashboardData() {
         if (el('dashActiveUsers')) el('dashActiveUsers').textContent = s.activeUsers;
         if (el('dashExpiredUsers')) el('dashExpiredUsers').textContent = s.expiredUsers;
         if (el('dashExpiringSoon')) el('dashExpiringSoon').textContent = s.pendingPayments;
+
+        fetch(API + '/api/admin/register-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r2 => r2.json()).then(r2 => {
+            if (r2.success && el('dashRegRequests')) el('dashRegRequests').textContent = (r2.pending || []).length;
+        }).catch(() => {});
 
         // Load live indices
         loadDashboardIndices();
@@ -4935,6 +5059,64 @@ function filterAllUsersSearch() {
     });
     renderUsers(filtered);
 }
+
+function handleGlobalSearch(query) {
+    const dd = document.getElementById('globalSearchDropdown');
+    if (!query || query.length < 1) { dd.style.display = 'none'; return; }
+    const q = query.toLowerCase();
+    const sections = [
+        { id:'dashboard', icon:'📊', label:'Dashboard Overview', keywords:'home main overview stats' },
+        { id:'createUser', icon:'➕', label:'Create User', keywords:'add new register' },
+        { id:'allUsers', icon:'👥', label:'All Users', keywords:'list manage users' },
+        { id:'broadcast', icon:'📢', label:'Broadcast Message', keywords:'send message notify all' },
+        { id:'offers', icon:'🎁', label:'Offers & Promotions', keywords:'offer discount coupon promo' },
+        { id:'scheduled', icon:'⏰', label:'Scheduled Messages', keywords:'schedule future timer' },
+        { id:'reminders', icon:'💳', label:'Payment Reminders', keywords:'payment renewal remind' },
+        { id:'holidayBanners', icon:'🎉', label:'Holiday Banners', keywords:'banner festival holiday' },
+        { id:'dashSettings', icon:'🎛️', label:'Dashboard Settings', keywords:'settings theme color bg' },
+        { id:'disclaimer', icon:'⚙️', label:'Disclaimer', keywords:'disclaimer legal' },
+        { id:'maintenance', icon:'🔧', label:'Maintenance Mode', keywords:'maintenance off mode' },
+        { id:'changePass', icon:'🔐', label:'Change Password', keywords:'password change reset admin' },
+        { id:'apiKeys', icon:'🔑', label:'API Keys', keywords:'api key token telegram upstox' },
+        { id:'tipPerf', icon:'🎯', label:'Tip Performance', keywords:'tips performance accuracy' },
+        { id:'activity', icon:'🕐', label:'Recent Activity', keywords:'activity log history' },
+        { id:'loginHist', icon:'📱', label:'Login History', keywords:'login history device' },
+        { id:'stockTips', icon:'📈', label:'Stock Tips', keywords:'stock tips trading' },
+        { id:'registerRequests', icon:'📝', label:'Registration Requests', keywords:'register request pending approval' }
+    ];
+    let matches = sections.filter(s => s.label.toLowerCase().includes(q) || s.keywords.includes(q));
+    if (window.allUsers) {
+        const userMatches = window.allUsers.filter(u => {
+            const name = (u.fullName || '').toLowerCase();
+            const uname = (u.username || '').toLowerCase();
+            const email = (u.email || '').toLowerCase();
+            return name.includes(q) || uname.includes(q) || email.includes(q);
+        }).slice(0, 5).map(u => ({
+            type: 'user', username: u.username, label: (u.fullName || u.username) + ' (' + u.category + ')',
+            icon: u.active ? '🟢' : '🔴'
+        }));
+        matches = matches.concat(userMatches);
+    }
+    if (!matches.length) {
+        dd.innerHTML = '<div style="padding:12px;color:#555;text-align:center;font-size:11px;">No results found</div>';
+        dd.style.display = 'block';
+        return;
+    }
+    dd.innerHTML = matches.slice(0, 12).map(m => {
+        if (m.type === 'user') {
+            return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'allUsers\',null);setTimeout(()=>{const s=document.getElementById(\'searchUser\');if(s){s.value=\'' + m.username + '\';filterUsersAndShowAll();}},200);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:#e4e4e7;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a1a24;" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
+                '<span>' + m.icon + '</span><div><div>' + m.label + '</div><div style="font-size:9px;color:#71717a;">User</div></div></div>';
+        }
+        return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'' + m.id + '\',null);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:#e4e4e7;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a1a24;" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
+            '<span>' + m.icon + '</span><div>' + m.label + '</div></div>';
+    }).join('');
+    dd.style.display = 'block';
+}
+document.addEventListener('click', function(e) {
+    const dd = document.getElementById('globalSearchDropdown');
+    const si = document.getElementById('searchUser');
+    if (dd && !dd.contains(e.target) && e.target !== si) dd.style.display = 'none';
+});
 
 function filterUsersAndShowAll() {
     const term = document.getElementById('searchUser').value.toLowerCase();
@@ -6172,28 +6354,98 @@ function toggleBannerForm() {
 }
 
 // ═══════ OFFERS ═══════
+let _selectedOfferColor = '#7c3aed,#2563eb';
+
+function toggleOfferForm() {
+    const f = document.getElementById('offerFormWrap');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectOfferColor(colors, el) {
+    _selectedOfferColor = colors;
+    document.querySelectorAll('#offerColorPick span').forEach(s => s.style.borderColor = 'transparent');
+    el.style.borderColor = '#fff';
+    updateOfferPreview();
+}
+
+function updateOfferPreview() {
+    const title = document.getElementById('offerTitle').value || 'Offer Title';
+    const desc = document.getElementById('offerDesc').value || 'Description will appear here...';
+    const code = document.getElementById('offerCode').value;
+    const box = document.getElementById('offerPreviewBox');
+    box.style.background = 'linear-gradient(135deg,' + _selectedOfferColor + ')';
+    box.innerHTML = '<strong>' + title + '</strong>' +
+        '<div style="font-size:10px;opacity:0.85;margin-top:2px;">' + desc + '</div>' +
+        (code ? '<div style="margin-top:6px;font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: ' + code + '</div>' : '');
+}
+
+async function loadOfferTargetUsers() {
+    const target = document.getElementById('offerTarget').value;
+    const wrap = document.getElementById('offerSpecificUsers');
+    if (target !== 'specific') { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    try {
+        const r = await fetch(API + '/api/admin/users', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (!r.success) return;
+        document.getElementById('offerUserCheckboxes').innerHTML = r.users.map(u =>
+            '<label style="display:flex;align-items:center;gap:6px;padding:4px 6px;font-size:11px;color:#e4e4e7;cursor:pointer;border-bottom:1px solid #1a1a24;">' +
+            '<input type="checkbox" value="' + u.username + '" style="accent-color:#7c3aed;"> ' +
+            '<span>' + (u.fullName || u.username) + '</span>' +
+            '<span style="color:#71717a;font-size:9px;margin-left:auto;">' + u.category + '</span></label>'
+        ).join('');
+    } catch(e) {}
+}
+
+function getSelectedOfferUsers() {
+    const target = document.getElementById('offerTarget').value;
+    if (target !== 'specific') return [];
+    return Array.from(document.querySelectorAll('#offerUserCheckboxes input:checked')).map(cb => cb.value);
+}
+
+function loadOffersPreviewListeners() {
+    ['offerTitle','offerDesc','offerCode'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateOfferPreview);
+    });
+}
+
 async function loadOffers() {
     try {
         const r = await fetch(API + '/api/admin/offers', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         const el = document.getElementById('offersList');
         if (!el) return;
-        if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">No offers yet</div>'; return; }
+        loadOffersPreviewListeners();
+        if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:24px;">No offers yet. Click "+ Create Offer" to start!</div>'; return; }
         el.innerHTML = r.offers.map(o => {
             const isExpired = o.expiry && new Date(o.expiry) < new Date();
-            const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 8px;border-radius:10px;">Off</span>';
-            return '<div style="padding:14px;border:1px solid #2a2a35;border-radius:12px;margin-bottom:8px;background:linear-gradient(135deg,#1a1a2e,#16213e);position:relative;overflow:hidden;">' +
-                '<div style="position:absolute;top:0;right:0;width:60px;height:60px;background:linear-gradient(135deg,#f59e0b,#ff6b35);border-radius:0 12px 0 60px;display:flex;align-items:center;justify-content:center;font-size:22px;">🎁</div>' +
+            const isDefaultOffer = o.colors === '#7c3aed,#2563eb' || !o.colors;
+            const gradientColors = o.colors || '#7c3aed,#2563eb';
+            const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:3px 10px;border-radius:10px;">Off</span>';
+            const targetLabel = { all:'All Users', active:'Active Only', expired:'Expired Only', expiring:'Expiring Soon', silver:'Silver', gold:'Gold', diamond:'Diamond', premium:'Premium', specific:'Specific Users' }[o.target] || o.target;
+            const userCount = (o.selectedUsers && o.selectedUsers.length) ? o.selectedUsers.length + ' users' : '';
+            return '<div style="padding:0;border:1px solid #2a2a35;border-radius:14px;margin-bottom:10px;overflow:hidden;">' +
+                '<div style="padding:14px 16px;background:linear-gradient(135deg,' + gradientColors + ');color:#fff;position:relative;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-                '<div style="flex:1;padding-right:40px;"><strong style="color:#f59e0b;font-size:13px;">' + o.title + '</strong> ' + badge + '</div>' +
-                '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;flex-shrink:0;" onclick="deleteOffer(\'' + o.id + '\')">🗑️</button></div>' +
-                (o.description ? '<div style="font-size:11px;color:#a1a1aa;margin-top:6px;line-height:1.4;">' + o.description + '</div>' : '') +
-                '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">' +
-                (o.code ? '<span style="font-size:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">Code: ' + o.code + '</span>' : '') +
-                '<span style="font-size:10px;background:rgba(255,255,255,0.08);color:#a1a1aa;padding:3px 10px;border-radius:6px;">👤 ' + o.target + '</span>' +
-                (o.expiry ? '<span style="font-size:10px;background:rgba(255,255,255,0.08);color:#a1a1aa;padding:3px 10px;border-radius:6px;">📅 Until: ' + o.expiry + '</span>' : '') +
-                '</div></div>';
+                '<div style="flex:1;padding-right:12px;"><strong style="font-size:14px;">' + o.title + '</strong> ' + badge +
+                (o.description ? '<div style="font-size:11px;opacity:0.9;margin-top:4px;line-height:1.4;">' + o.description + '</div>' : '') +
+                '</div>' +
+                '<button onclick="toggleOfferActive(\'' + o.id + '\',' + o.active + ')" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;">' + (o.active ? 'ON' : 'OFF') + '</button>' +
+                '<button onclick="deleteOffer(\'' + o.id + '\')" style="background:rgba(255,0,0,0.3);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;margin-left:4px;">🗑️</button></div>' +
+                '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
+                (o.code ? '<span style="font-size:10px;background:rgba(255,255,255,0.25);padding:3px 10px;border-radius:6px;font-weight:600;">🎟️ ' + o.code + '</span>' : '') +
+                '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">🎯 ' + targetLabel + (userCount ? ' (' + userCount + ')' : '') + '</span>' +
+                (o.expiry ? '<span style="font-size:10px;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;">📅 ' + o.expiry + '</span>' : '') +
+                '<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;">🕐 ' + new Date(o.createdAt).toLocaleDateString('en-IN') + '</span>' +
+                '</div></div></div>';
         }).join('');
     } catch (e) {}
+}
+
+async function toggleOfferActive(id, currentActive) {
+    await fetch(API + '/api/admin/offers/' + id + '/toggle', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }
+    });
+    loadOffers();
 }
 
 async function createOffer() {
@@ -6202,19 +6454,21 @@ async function createOffer() {
     const code = document.getElementById('offerCode').value.trim();
     const expiry = document.getElementById('offerExpiry').value;
     const target = document.getElementById('offerTarget').value;
+    const selectedUsers = getSelectedOfferUsers();
+    const colors = _selectedOfferColor;
     const st = document.getElementById('offerStatus');
     if (!title) { st.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
+    if (target === 'specific' && !selectedUsers.length) { st.innerHTML = '<span style="color:#ef4444;">Select at least 1 user</span>'; return; }
     try {
         const r = await fetch(API + '/api/admin/offers', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ title, description, code, expiry, target })
+            body: JSON.stringify({ title, description, code, expiry, target, selectedUsers, colors })
         }).then(r => r.json());
         if (r.success) {
             st.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
-            document.getElementById('offerTitle').value = '';
-            document.getElementById('offerDesc').value = '';
-            document.getElementById('offerCode').value = '';
-            document.getElementById('offerExpiry').value = '';
+            ['offerTitle','offerDesc','offerCode','offerExpiry'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('offerTarget').value = 'all';
+            document.getElementById('offerSpecificUsers').style.display = 'none';
             loadOffers();
         } else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
     } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
@@ -6436,19 +6690,23 @@ function dismissHolidayBanner(bannerId) {
 
 async function loadActiveOffers() {
     try {
-        const r = await fetch(API + '/api/offers').then(r => r.json());
+        const uParam = currentUser ? '?username=' + currentUser.username : '';
+        const r = await fetch(API + '/api/offers' + uParam).then(r => r.json());
         if (!r.success || !r.offers || r.offers.length === 0) return;
-        const offer = r.offers[0];
-        if (sessionStorage.getItem('offer_dismissed_' + offer.id)) return;
         const existing = document.getElementById('activeOfferWrap');
         if (existing) existing.remove();
         const wrap = document.createElement('div');
         wrap.id = 'activeOfferWrap';
-        wrap.style.cssText = 'margin:8px 12px;padding:10px 14px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;color:#fff;font-size:12px;display:flex;align-items:center;gap:10px;animation:bannerSlideIn 0.5s ease-out;position:relative;';
-        wrap.innerHTML = '<div style="flex:1;"><strong>' + offer.title + '</strong>' +
-            (offer.description ? '<div style="font-size:10px;opacity:0.9;margin-top:2px;">' + offer.description + '</div>' : '') +
-            (offer.code ? '<div style="font-size:10px;margin-top:4px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: <strong>' + offer.code + '</strong></div>' : '') +
-            '</div><button onclick="dismissOffer(\'' + offer.id + '\')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:11px;flex-shrink:0;">✕</button>';
+        wrap.style.cssText = 'margin:8px 12px;border-radius:10px;color:#fff;font-size:12px;animation:bannerSlideIn 0.5s ease-out;position:relative;';
+        wrap.innerHTML = r.offers.filter(o => !sessionStorage.getItem('offer_dismissed_' + o.id)).map(o => {
+            const gc = o.colors || '#7c3aed,#2563eb';
+            return '<div style="padding:10px 14px;background:linear-gradient(135deg,' + gc + ');border-radius:10px;display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+                '<div style="flex:1;"><strong>' + o.title + '</strong>' +
+                (o.description ? '<div style="font-size:10px;opacity:0.9;margin-top:2px;">' + o.description + '</div>' : '') +
+                (o.code ? '<div style="font-size:10px;margin-top:4px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;display:inline-block;">Code: <strong>' + o.code + '</strong></div>' : '') +
+                '</div><button onclick="dismissOffer(\'' + o.id + '\')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:11px;flex-shrink:0;">✕</button></div>';
+        }).join('');
+        if (!wrap.innerHTML.trim()) return;
         const disclaimer = document.getElementById('disclaimerTicker');
         if (disclaimer && disclaimer.parentNode) { disclaimer.parentNode.insertBefore(wrap, disclaimer.nextSibling); }
     } catch(e) {}

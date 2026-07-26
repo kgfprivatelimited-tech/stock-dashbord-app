@@ -2778,9 +2778,13 @@ async function refreshStocksBackground() {
 app.get('/api/offers', (req, res) => {
     try {
         const settings = loadSettings();
+        const username = req.query.username || '';
         const offers = (settings.offers || []).filter(o => {
             if (!o.active) return false;
             if (o.expiry && new Date(o.expiry) < new Date()) return false;
+            if (o.target === 'specific' && o.selectedUsers && o.selectedUsers.length) {
+                if (!username || !o.selectedUsers.includes(username)) return false;
+            }
             return true;
         });
         res.json({ success: true, offers });
@@ -2796,7 +2800,7 @@ app.get('/api/admin/offers', checkAdmin, (req, res) => {
 
 app.post('/api/admin/offers', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, colors } = req.body;
         if (!title) return res.json({ success: false, message: 'Title required' });
         const settings = loadSettings();
         if (!settings.offers) settings.offers = [];
@@ -2807,17 +2811,20 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
             code: (code || '').trim(),
             expiry: expiry || null,
             target: target || 'all',
+            selectedUsers: (selectedUsers || []),
+            colors: (colors || '#7c3aed,#2563eb'),
             active: true,
             createdAt: new Date().toISOString()
         };
         settings.offers.push(offer);
         saveSettings(settings);
-        // Send notification to target users
         const data = loadUsers();
         const targetUsers = data.users.filter(u => {
             if (target === 'all') return true;
             if (target === 'active') return isSubscriptionActive(u);
             if (target === 'expired') return !isSubscriptionActive(u);
+            if (target === 'expiring') return isSubscriptionActive(u) && getDaysUntilExpiry(u) <= 7;
+            if (target === 'specific') return (selectedUsers || []).includes(u.username);
             return (u.category || 'silver').toLowerCase() === target;
         });
         targetUsers.forEach(u => {
@@ -2834,6 +2841,17 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
         logActivity('offer_created', `Title: ${title}, Target: ${target}, Users notified: ${targetUsers.length}`);
         res.json({ success: true, message: `Offer sent to ${targetUsers.length} users!`, offer });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const offer = (settings.offers || []).find(o => o.id === req.params.id);
+        if (!offer) return res.json({ success: false });
+        offer.active = !offer.active;
+        saveSettings(settings);
+        res.json({ success: true, active: offer.active });
+    } catch (e) { res.json({ success: false }); }
 });
 
 app.delete('/api/admin/offers/:id', checkAdmin, (req, res) => {
