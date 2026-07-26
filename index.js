@@ -11,6 +11,7 @@ const axios = require('axios');
 const compression = require('compression');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -219,7 +220,7 @@ setInterval(() => {
 }, 10000);
 
 // ========================================
-// USERS DATABASE (JSON file)
+// DATABASE — MongoDB Atlas + JSON fallback
 // ========================================
 const USERS_FILE = path.join(__dirname, 'users.json');
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
@@ -229,13 +230,6 @@ const LOGINHISTORY_FILE = path.join(__dirname, 'loginhistory.json');
 const REGISTERREQ_FILE = path.join(__dirname, 'registerrequests.json');
 const SCHEDULED_MSGS_FILE = path.join(__dirname, 'scheduledmsgs.json');
 
-// Initialize users file if doesn't exist
-if (!fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify({ users: [] }, null, 2));
-    console.log('📁 Created users.json');
-}
-
-// Initialize settings file if doesn't exist
 const DEFAULT_SETTINGS = {
     disclaimerText: '⚠️ I AM NOT SEBI REGISTERED - This is for educational purposes only. Not a financial advisor.',
     disclaimerBgColor: '#ffeb3b',
@@ -260,138 +254,82 @@ const DEFAULT_SETTINGS = {
         1: 'Happy Birthday! 🎉 Wishing you a wonderful year ahead filled with success, happiness and profits! 📈🎂'
     }
 };
-if (!fs.existsSync(SETTINGS_FILE)) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
-    console.log('📁 Created settings.json');
-}
 
-// Seed demo banner if no banners exist
-const _settingsCheck = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-if (!_settingsCheck.holidayBanners || _settingsCheck.holidayBanners.length === 0) {
-    _settingsCheck.holidayBanners = [{
-        id: 'banner_demo_1',
-        title: 'Happy Diwali! 🪔',
-        message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
-        bgColor: '#ff6b00',
-        textColor: '#ffffff',
-        imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
-        startDate: '2026-01-01',
-        endDate: '2026-12-31',
-        showOnDesktop: true,
-        showOnMobile: true,
-        position: 'afterIndices',
-        showTitle: true,
-        titleColor: '#ffffff',
-        titleSize: 22,
-        bannerHeight: 120,
-        msgColor: '#ffffff',
-        msgSize: 13,
-        showMessage: true,
-        emoji: '🎊',
+function createDefaultAdmin() {
+    return {
+        id: 'usr_admin_' + Date.now(),
+        username: 'admin',
+        fullName: 'Vaibhav',
+        name: 'Vaibhav',
+        email: 'admin@bearfighter.com',
+        phone: '0000000000',
+        category: 'diamond',
+        status: 'active',
         active: true,
-        createdAt: new Date().toISOString()
-    }];
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_settingsCheck, null, 2));
-    console.log('📁 Seeded demo banner in settings.json');
+        approved: true,
+        amount: 0,
+        paymentAmount: 0,
+        paymentMethod: 'UPI',
+        paymentDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        subscriptionExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        password: bcrypt.hashSync(DEFAULT_SETTINGS.adminPassword, 10),
+        passwordPlain: 'bearfighter@admin',
+        isOwner: true,
+        message: '',
+        msgColor: '#22c55e'
+    };
 }
 
-// Initialize stocktips file
-if (!fs.existsSync(STOCKTIPS_FILE)) {
-    fs.writeFileSync(STOCKTIPS_FILE, JSON.stringify({ tips: [] }, null, 2));
-    console.log('📁 Created stocktips.json');
-}
+// ---- Load functions (read from db cache, fallback to JSON files) ----
 
-// Initialize activity log file
-if (!fs.existsSync(ACTIVITYLOG_FILE)) {
-    fs.writeFileSync(ACTIVITYLOG_FILE, JSON.stringify({ activities: [] }, null, 2));
-    console.log('📁 Created activitylog.json');
-}
-
-// Initialize login history file
-if (!fs.existsSync(LOGINHISTORY_FILE)) {
-    fs.writeFileSync(LOGINHISTORY_FILE, JSON.stringify({ logins: [] }, null, 2));
-    console.log('📁 Created loginhistory.json');
-}
-
-// Initialize register requests file
-if (!fs.existsSync(REGISTERREQ_FILE)) {
-    fs.writeFileSync(REGISTERREQ_FILE, JSON.stringify({ requests: [] }, null, 2));
-    console.log('📁 Created registerrequests.json');
-}
-
-// Initialize scheduled messages file
-if (!fs.existsSync(SCHEDULED_MSGS_FILE)) {
-    fs.writeFileSync(SCHEDULED_MSGS_FILE, JSON.stringify({ messages: [] }, null, 2));
-    console.log('📁 Created scheduledmsgs.json');
-}
-
-function loadActivityLog() {
+function loadSettings() {
+    if (db.isConnected()) {
+        const cached = db.getCache('settings');
+        if (cached) {
+            const merged = { ...DEFAULT_SETTINGS, ...cached };
+            if (!merged.holidayBanners) merged.holidayBanners = [];
+            merged.holidayBanners = merged.holidayBanners.map(b => ({
+                showTitle: true, titleColor: '#ffffff', titleSize: 22,
+                bannerHeight: 120, msgColor: '#ffffff', msgSize: 13,
+                showMessage: true, emoji: '🎊', ...b
+            }));
+            return merged;
+        }
+    }
+    // JSON fallback
     try {
-        return JSON.parse(fs.readFileSync(ACTIVITYLOG_FILE, 'utf8'));
+        const file = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+        const merged = { ...DEFAULT_SETTINGS, ...file };
+        if (!merged.holidayBanners) merged.holidayBanners = [];
+        merged.holidayBanners = merged.holidayBanners.map(b => ({
+            showTitle: true, titleColor: '#ffffff', titleSize: 22,
+            bannerHeight: 120, msgColor: '#ffffff', msgSize: 13,
+            showMessage: true, emoji: '🎊', ...b
+        }));
+        return merged;
     } catch (e) {
-        return { activities: [] };
+        return { ...DEFAULT_SETTINGS };
     }
 }
 
-function saveActivityLog(data) {
-    fs.writeFileSync(ACTIVITYLOG_FILE, JSON.stringify(data, null, 2));
-}
-
-function logActivity(action, details) {
-    const log = loadActivityLog();
-    log.activities.unshift({
-        id: 'act_' + Date.now(),
-        action,
-        details,
-        timestamp: new Date().toISOString()
-    });
-    if (log.activities.length > 100) log.activities = log.activities.slice(0, 100);
-    saveActivityLog(log);
-}
-
-// Login History
-function loadLoginHistory() {
-    try { return JSON.parse(fs.readFileSync(LOGINHISTORY_FILE, 'utf8')); } catch (e) { return { logins: [] }; }
-}
-function saveLoginHistory(data) { fs.writeFileSync(LOGINHISTORY_FILE, JSON.stringify(data, null, 2)); }
-function logLogin(username, success) {
-    const log = loadLoginHistory();
-    log.logins.unshift({ id: 'login_' + Date.now(), username, success, timestamp: new Date().toISOString() });
-    if (log.logins.length > 50) log.logins = log.logins.slice(0, 50);
-    saveLoginHistory(log);
-}
-function loadRegisterRequests() {
-    try { return JSON.parse(fs.readFileSync(REGISTERREQ_FILE, 'utf8')); } catch (e) { return { requests: [] }; }
-}
-function saveRegisterRequests(data) { fs.writeFileSync(REGISTERREQ_FILE, JSON.stringify(data, null, 2)); }
-
-// Scheduled Messages
-function loadScheduledMsgs() {
-    try { return JSON.parse(fs.readFileSync(SCHEDULED_MSGS_FILE, 'utf8')); } catch (e) { return { messages: [] }; }
-}
-function saveScheduledMsgs(data) { fs.writeFileSync(SCHEDULED_MSGS_FILE, JSON.stringify(data, null, 2)); }
-
-function loadStockTips() {
-    try {
-        return JSON.parse(fs.readFileSync(STOCKTIPS_FILE, 'utf8'));
-    } catch (e) {
-        return { tips: [] };
-    }
-}
-
-function saveStockTips(data) {
-    fs.writeFileSync(STOCKTIPS_FILE, JSON.stringify(data, null, 2));
+function saveSettings(data) {
+    if (db.isConnected()) { db.debouncedSave('settings', data); }
+    try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
 }
 
 function loadUsers() {
+    if (db.isConnected()) {
+        const cached = db.getCache('users');
+        if (cached && cached.users && cached.users.length > 0) return cached;
+    }
+    // JSON fallback
     try {
         const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
         if (!data.users || data.users.length === 0) {
             console.log('⚠️ users.json empty, trying backup...');
             return loadUsersFromBackup();
         }
-        // Save backup on every successful read
-        try { fs.writeFileSync(USERS_FILE + '.bak', JSON.stringify(data, null, 2)); } catch(e) {}
         return data;
     } catch (e) {
         console.log('📁 users.json corrupted, trying backup...');
@@ -411,80 +349,106 @@ function loadUsersFromBackup() {
             }
         }
     } catch (e) {}
-    console.log('📁 Creating default users.json with admin user...');
+    console.log('📁 Creating default admin user...');
     const defaultData = { users: [createDefaultAdmin()] };
     saveUsers(defaultData);
     return defaultData;
 }
 
-function createDefaultAdmin() {
-    const bcrypt = require('bcryptjs');
-    return {
-        id: 'usr_admin_' + Date.now(),
-        username: 'admin',
-        fullName: 'Vaibhav',
-        name: 'Vaibhav',
-        email: 'admin@bearfighter.com',
-        phone: '0000000000',
-        category: 'diamond',
-        status: 'active',
-        active: true,
-        approved: true,
-        amount: 0,
-        paymentAmount: 0,
-        paymentMethod: 'UPI',
-        paymentDate: new Date().toISOString(),
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        subscriptionExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        password: bcrypt.hashSync(loadSettings().adminPassword || 'bearfighter@admin', 10),
-        isOwner: true,
-        message: '',
-        msgColor: '#22c55e'
-    };
-}
-
 function saveUsers(data) {
+    if (db.isConnected()) { db.immediateSave('users', data); }
+    // JSON backup
     const tmpFile = USERS_FILE + '.tmp';
     try {
         fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2));
-        // Atomic rename — prevents corruption on crash
         if (process.platform === 'win32') {
             if (fs.existsSync(USERS_FILE)) fs.unlinkSync(USERS_FILE);
         }
         fs.renameSync(tmpFile, USERS_FILE);
-        // Also keep backup
         fs.writeFileSync(USERS_FILE + '.bak', JSON.stringify(data, null, 2));
     } catch (e) {
         console.error('❌ saveUsers failed:', e.message);
-        // Fallback: direct write
         try { fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2)); } catch(e2) {}
     }
 }
 
-function loadSettings() {
-    try {
-        const file = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-        const merged = { ...DEFAULT_SETTINGS, ...file };
-        if (!merged.holidayBanners) merged.holidayBanners = [];
-        merged.holidayBanners = merged.holidayBanners.map(b => ({
-            showTitle: true,
-            titleColor: '#ffffff',
-            titleSize: 22,
-            bannerHeight: 120,
-            msgColor: '#ffffff',
-            msgSize: 13,
-            showMessage: true,
-            emoji: '🎊',
-            ...b
-        }));
-        return merged;
-    } catch (e) {
-        return { ...DEFAULT_SETTINGS };
+function loadStockTips() {
+    if (db.isConnected()) {
+        const cached = db.getCache('stocktips');
+        if (cached) return cached;
     }
+    try { return JSON.parse(fs.readFileSync(STOCKTIPS_FILE, 'utf8')); } catch (e) { return { tips: [] }; }
 }
 
-function saveSettings(data) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
+function saveStockTips(data) {
+    if (db.isConnected()) { db.debouncedSave('stocktips', data); }
+    try { fs.writeFileSync(STOCKTIPS_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
+}
+
+function loadActivityLog() {
+    if (db.isConnected()) {
+        const cached = db.getCache('activitylog');
+        if (cached) return cached;
+    }
+    try { return JSON.parse(fs.readFileSync(ACTIVITYLOG_FILE, 'utf8')); } catch (e) { return { activities: [] }; }
+}
+
+function saveActivityLog(data) {
+    if (db.isConnected()) { db.debouncedSave('activitylog', data); }
+    try { fs.writeFileSync(ACTIVITYLOG_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
+}
+
+function logActivity(action, details) {
+    const log = loadActivityLog();
+    log.activities.unshift({ id: 'act_' + Date.now(), action, details, timestamp: new Date().toISOString() });
+    if (log.activities.length > 100) log.activities = log.activities.slice(0, 100);
+    saveActivityLog(log);
+}
+
+function loadLoginHistory() {
+    if (db.isConnected()) {
+        const cached = db.getCache('loginhistory');
+        if (cached) return cached;
+    }
+    try { return JSON.parse(fs.readFileSync(LOGINHISTORY_FILE, 'utf8')); } catch (e) { return { logins: [] }; }
+}
+
+function saveLoginHistory(data) {
+    if (db.isConnected()) { db.debouncedSave('loginhistory', data); }
+    try { fs.writeFileSync(LOGINHISTORY_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
+}
+
+function logLogin(username, success) {
+    const log = loadLoginHistory();
+    log.logins.unshift({ id: 'login_' + Date.now(), username, success, timestamp: new Date().toISOString() });
+    if (log.logins.length > 50) log.logins = log.logins.slice(0, 50);
+    saveLoginHistory(log);
+}
+
+function loadRegisterRequests() {
+    if (db.isConnected()) {
+        const cached = db.getCache('registerrequests');
+        if (cached) return cached;
+    }
+    try { return JSON.parse(fs.readFileSync(REGISTERREQ_FILE, 'utf8')); } catch (e) { return { requests: [] }; }
+}
+
+function saveRegisterRequests(data) {
+    if (db.isConnected()) { db.debouncedSave('registerrequests', data); }
+    try { fs.writeFileSync(REGISTERREQ_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
+}
+
+function loadScheduledMsgs() {
+    if (db.isConnected()) {
+        const cached = db.getCache('scheduledmsgs');
+        if (cached) return cached;
+    }
+    try { return JSON.parse(fs.readFileSync(SCHEDULED_MSGS_FILE, 'utf8')); } catch (e) { return { messages: [] }; }
+}
+
+function saveScheduledMsgs(data) {
+    if (db.isConnected()) { db.debouncedSave('scheduledmsgs', data); }
+    try { fs.writeFileSync(SCHEDULED_MSGS_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
 }
 
 // ========================================
@@ -1704,10 +1668,21 @@ const UPSTOX_ACCESS_TOKEN = process.env.UPSTOX_ACCESS_TOKEN || '';
 const MARKET_CACHE_FILE = path.join(__dirname, 'marketcache.json');
 
 function loadMarketCache() {
+    if (db.isConnected()) {
+        const cached = db.getCache('marketcache');
+        if (cached) {
+            cached.indices = cached.indices || { data: null, timestamp: 0 };
+            cached.stocks = cached.stocks || { data: null, timestamp: 0, symbols: '' };
+            cached.heatmap = cached.heatmap || { data: null, timestamp: 0 };
+            cached.indices.timestamp = 0;
+            cached.stocks.timestamp = 0;
+            cached.heatmap.timestamp = 0;
+            return cached;
+        }
+    }
     try {
         if (fs.existsSync(MARKET_CACHE_FILE)) {
-            const raw = fs.readFileSync(MARKET_CACHE_FILE, 'utf-8');
-            const data = JSON.parse(raw);
+            const data = JSON.parse(fs.readFileSync(MARKET_CACHE_FILE, 'utf-8'));
             console.log('📁 Loaded cached market data from file');
             data.indices = data.indices || { data: null, timestamp: 0 };
             data.stocks = data.stocks || { data: null, timestamp: 0, symbols: '' };
@@ -1721,10 +1696,9 @@ function loadMarketCache() {
     return { indices: { data: null, timestamp: 0 }, stocks: { data: null, timestamp: 0, symbols: '' }, heatmap: { data: null, timestamp: 0 } };
 }
 
-function saveMarketCache(cache) {
-    try {
-        fs.writeFileSync(MARKET_CACHE_FILE, JSON.stringify(cache));
-    } catch(e) {}
+function saveMarketCache(cacheData) {
+    if (db.isConnected()) { db.debouncedSave('marketcache', cacheData); }
+    try { fs.writeFileSync(MARKET_CACHE_FILE, JSON.stringify(cacheData)); } catch(e) {}
 }
 
 let marketCache = loadMarketCache();
@@ -1741,15 +1715,24 @@ const SIGNAL_HISTORY_MAX = 200;
 let signalHistory = {};
 
 function loadSignalHistory() {
+    if (db.isConnected()) {
+        const cached = db.getCache('signalhistory');
+        if (cached && Object.keys(cached).length > 0) {
+            signalHistory = cached;
+            console.log('📁 Signal history loaded from MongoDB for', Object.keys(signalHistory).length, 'stocks');
+            return;
+        }
+    }
     try {
         if (fs.existsSync(SIGNAL_HISTORY_FILE)) {
             signalHistory = JSON.parse(fs.readFileSync(SIGNAL_HISTORY_FILE, 'utf8'));
-            console.log('📁 Signal history loaded for', Object.keys(signalHistory).length, 'stocks');
+            console.log('📁 Signal history loaded from file for', Object.keys(signalHistory).length, 'stocks');
         }
     } catch (e) { signalHistory = {}; }
 }
 
 function saveSignalHistory() {
+    if (db.isConnected()) { db.debouncedSave('signalhistory', signalHistory); }
     try { fs.writeFileSync(SIGNAL_HISTORY_FILE, JSON.stringify(signalHistory)); } catch (e) {}
 }
 
@@ -2827,15 +2810,81 @@ setTimeout(refreshStocksBackground, 5000);
 // ========================================
 // SERVER START
 // ========================================
-app.listen(PORT, () => {
-    console.log(`\n${'='.repeat(50)}`);
-    console.log(`🐻 BEAR FIGHTER TRADING - Login System`);
-    console.log(`   By Vaibhav`);
-    console.log(`🌐 Dashboard: http://localhost:${PORT}`);
-    console.log(`🔐 Admin Password: ${ADMIN_PASSWORD}`);
-    console.log(`📊 Background refresher: 1s (indices), 5s (stocks)`);
-    console.log(`\n📋 First time setup:`);
-    console.log(`   1. Run: node create-user.js`);
-    console.log(`   2. Login with username/password created`);
-    console.log(`${'='.repeat(50)}\n`);
-});
+async function startServer() {
+    // Connect to MongoDB Atlas (falls back to JSON if unavailable)
+    const mongoConnected = await db.connect();
+    
+    if (mongoConnected) {
+        // Migrate JSON data → MongoDB if collections are empty
+        await db.migrateFromJSON({
+            users: USERS_FILE,
+            settings: SETTINGS_FILE,
+            stocktips: STOCKTIPS_FILE,
+            activitylog: ACTIVITYLOG_FILE,
+            loginhistory: LOGINHISTORY_FILE,
+            registerrequests: REGISTERREQ_FILE,
+            scheduledmsgs: SCHEDULED_MSGS_FILE,
+            marketcache: MARKET_CACHE_FILE,
+            signalhistory: SIGNAL_HISTORY_FILE
+        });
+        console.log('✅ MongoDB Atlas — all data synced');
+    }
+
+    // Ensure default admin exists
+    const data = loadUsers();
+    if (!data.users || data.users.length === 0) {
+        console.log('📁 No users found — creating default admin...');
+        saveUsers({ users: [createDefaultAdmin()] });
+    }
+
+    // Seed demo banner if no banners exist
+    const settings = loadSettings();
+    if (!settings.holidayBanners || settings.holidayBanners.length === 0) {
+        settings.holidayBanners = [{
+            id: 'banner_demo_1',
+            title: 'Happy Diwali! 🪔',
+            message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
+            bgColor: '#ff6b00',
+            textColor: '#ffffff',
+            imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
+            startDate: '2026-01-01',
+            endDate: '2026-12-31',
+            showOnDesktop: true,
+            showOnMobile: true,
+            position: 'afterIndices',
+            showTitle: true, titleColor: '#ffffff', titleSize: 22,
+            bannerHeight: 120, msgColor: '#ffffff', msgSize: 13,
+            showMessage: true, emoji: '🎊',
+            active: true,
+            createdAt: new Date().toISOString()
+        }];
+        saveSettings(settings);
+        console.log('📁 Seeded demo banner');
+    }
+
+    // Load signal history
+    loadSignalHistory();
+
+    // Graceful shutdown — flush pending MongoDB writes
+    const shutdown = async (sig) => {
+        console.log(`\n🛑 ${sig} received — shutting down...`);
+        await db.flushAll();
+        await db.close();
+        process.exit(0);
+    };
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+    app.listen(PORT, () => {
+        console.log(`\n${'='.repeat(50)}`);
+        console.log(`🐻 BEAR FIGHTER TRADING - Login System`);
+        console.log(`   By Vaibhav`);
+        console.log(`🌐 Dashboard: http://localhost:${PORT}`);
+        console.log(`🔐 Admin Password: ${ADMIN_PASSWORD}`);
+        console.log(`💾 Database: ${mongoConnected ? 'MongoDB Atlas ✅' : 'JSON files (local)'}`);
+        console.log(`📊 Background refresher: 1s (indices), 5s (stocks)`);
+        console.log(`${'='.repeat(50)}\n`);
+    });
+}
+
+startServer();
