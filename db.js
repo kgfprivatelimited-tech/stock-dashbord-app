@@ -17,6 +17,7 @@ let connected = false;
 
 // Collections
 const collections = {};
+const BANNER_IMAGE_MAX_BYTES = 200 * 1024; // 200KB per banner image
 
 // In-memory caches (loaded from MongoDB on startup)
 const cache = {
@@ -30,6 +31,8 @@ const cache = {
     marketcache: { indices: { data: null, timestamp: 0 }, stocks: { data: null, timestamp: 0, symbols: '' }, heatmap: { data: null, timestamp: 0 } },
     signalhistory: {}
 };
+
+// Banner images: { _id: bannerId, image: "base64..." }
 
 // Debounce timers for batched writes
 const writeTimers = {};
@@ -62,6 +65,7 @@ async function connect() {
         collections.scheduledmsgs = db.collection('scheduledmsgs');
         collections.marketcache = db.collection('marketcache');
         collections.signalhistory = db.collection('signalhistory');
+        collections.bannerimages = db.collection('bannerimages');
         
         connected = true;
         console.log('✅ Connected to MongoDB Atlas');
@@ -193,5 +197,33 @@ module.exports = {
     immediateSave,
     migrateFromJSON,
     flushAll,
-    close
+    close,
+    BANNER_IMAGE_MAX_BYTES,
+    async getBannerImage(bannerId) {
+        if (!connected) return null;
+        try {
+            const doc = await collections.bannerimages.findOne({ _id: bannerId });
+            return doc ? doc.image : null;
+        } catch (e) { return null; }
+    },
+    async saveBannerImage(bannerId, imageData) {
+        if (!connected) return;
+        try {
+            await collections.bannerimages.updateOne(
+                { _id: bannerId },
+                { $set: { image: imageData, updatedAt: new Date() } },
+                { upsert: true }
+            );
+        } catch (e) {
+            console.error('❌ Save banner image failed:', e.message);
+        }
+    },
+    async deleteBannerImage(bannerId) {
+        if (!connected) return;
+        try {
+            await collections.bannerimages.deleteOne({ _id: bannerId });
+        } catch (e) {
+            console.error('❌ Delete banner image failed:', e.message);
+        }
+    }
 };

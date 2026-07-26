@@ -2712,37 +2712,67 @@ app.get('/api/banners', (req, res) => {
             if (deviceType === 'mobile' && !b.showOnMobile) return false;
             return true;
         });
-        res.json({ success: true, banners: active });
+        const first = active[0];
+        if (first && first.hasImage && db.isConnected()) {
+            const imgPromise = db.getBannerImage(first.id);
+            imgPromise.then(img => {
+                if (img) first.imageUrl = img;
+                else first.imageUrl = '';
+                res.json({ success: true, banners: active });
+            }).catch(() => res.json({ success: true, banners: active }));
+        } else {
+            res.json({ success: true, banners: active });
+        }
     } catch (e) { res.json({ success: true, banners: [] }); }
 });
 
-app.get('/api/admin/banners', checkAdmin, (req, res) => {
+app.get('/api/admin/banners', checkAdmin, async (req, res) => {
     try {
         const settings = loadSettings();
-        res.json({ success: true, banners: settings.holidayBanners || [] });
+        const banners = settings.holidayBanners || [];
+        if (db.isConnected()) {
+            for (const b of banners) {
+                if (b.hasImage) {
+                    const img = await db.getBannerImage(b.id);
+                    b.imageUrl = img || '';
+                }
+            }
+        }
+        res.json({ success: true, banners });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
 });
 
-app.post('/api/admin/banners', checkAdmin, (req, res) => {
+app.get('/api/admin/banners/:id/image', checkAdmin, async (req, res) => {
     try {
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji } = req.body;
+        const img = await db.getBannerImage(req.params.id);
+        if (img) res.json({ success: true, image: img });
+        else res.json({ success: false });
+    } catch (e) { res.json({ success: false }); }
+});
+
+app.post('/api/admin/banners', checkAdmin, async (req, res) => {
+    try {
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji, isDefault } = req.body;
         if (!title || !startDate || !endDate) {
             return res.json({ success: false, message: 'Title, start date, and end date required' });
         }
         const settings = loadSettings();
         if (!settings.holidayBanners) settings.holidayBanners = [];
+        const bannerId = 'banner_' + Date.now();
         const banner = {
-            id: 'banner_' + Date.now(),
+            id: bannerId,
             title: title.trim(),
             message: (message || '').trim(),
             bgColor: bgColor || '#ff6b35',
             textColor: textColor || '#ffffff',
-            imageUrl: imageUrl || '',
+            imageUrl: '',
+            hasImage: false,
             startDate, endDate,
             showOnDesktop: showOnDesktop !== false,
             showOnMobile: showOnMobile !== false,
             position: position || 'afterDisclaimer',
             active: true,
+            isDefault: isDefault || false,
             showTitle: showTitle !== false,
             showMessage: showMessage !== false,
             emoji: emoji || '🎊',
@@ -2753,23 +2783,37 @@ app.post('/api/admin/banners', checkAdmin, (req, res) => {
             msgSize: msgSize || 13,
             createdAt: new Date().toISOString()
         };
+        if (isDefault) {
+            settings.holidayBanners.forEach(b => b.isDefault = false);
+        }
+        if (imageUrl && imageUrl.length > 100) {
+            if (imageUrl.length > db.BANNER_IMAGE_MAX_BYTES * 1.37) {
+                return res.json({ success: false, message: 'Image max 200KB!' });
+            }
+            banner.hasImage = true;
+            banner.imageUrl = '';
+            if (db.isConnected()) {
+                await db.saveBannerImage(bannerId, imageUrl);
+            } else {
+                banner.imageUrl = imageUrl;
+            }
+        }
         settings.holidayBanners.push(banner);
         saveSettings(settings);
         res.json({ success: true, message: 'Banner created!', banner });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
 });
 
-app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
+app.put('/api/admin/banners/:id', checkAdmin, async (req, res) => {
     try {
         const settings = loadSettings();
         const banner = (settings.holidayBanners || []).find(b => b.id === req.params.id);
         if (!banner) return res.json({ success: false, message: 'Banner not found' });
-        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji } = req.body;
+        const { title, message, bgColor, textColor, imageUrl, startDate, endDate, showOnDesktop, showOnMobile, active, position, showTitle, titleColor, titleSize, bannerHeight, msgColor, msgSize, showMessage, emoji, isDefault } = req.body;
         if (title !== undefined) banner.title = title.trim();
         if (message !== undefined) banner.message = message.trim();
         if (bgColor !== undefined) banner.bgColor = bgColor;
         if (textColor !== undefined) banner.textColor = textColor;
-        if (imageUrl !== undefined) banner.imageUrl = imageUrl;
         if (startDate !== undefined) banner.startDate = startDate;
         if (endDate !== undefined) banner.endDate = endDate;
         if (showOnDesktop !== undefined) banner.showOnDesktop = showOnDesktop;
@@ -2784,16 +2828,39 @@ app.put('/api/admin/banners/:id', checkAdmin, (req, res) => {
         if (msgSize !== undefined) banner.msgSize = msgSize;
         if (showMessage !== undefined) banner.showMessage = showMessage;
         if (emoji !== undefined) banner.emoji = emoji;
+        if (isDefault !== undefined) {
+            banner.isDefault = isDefault;
+            if (isDefault) settings.holidayBanners.forEach(b => { if (b.id !== banner.id) b.isDefault = false; });
+        }
+        if (imageUrl !== undefined) {
+            if (imageUrl && imageUrl.length > 100) {
+                if (imageUrl.length > db.BANNER_IMAGE_MAX_BYTES * 1.37) {
+                    return res.json({ success: false, message: 'Image max 200KB!' });
+                }
+                banner.hasImage = true;
+                banner.imageUrl = '';
+                if (db.isConnected()) {
+                    await db.saveBannerImage(banner.id, imageUrl);
+                } else {
+                    banner.imageUrl = imageUrl;
+                }
+            } else if (imageUrl === '' || imageUrl === null) {
+                banner.hasImage = false;
+                banner.imageUrl = '';
+                if (db.isConnected()) await db.deleteBannerImage(banner.id);
+            }
+        }
         saveSettings(settings);
         res.json({ success: true, message: 'Banner updated!' });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
 });
 
-app.delete('/api/admin/banners/:id', checkAdmin, (req, res) => {
+app.delete('/api/admin/banners/:id', checkAdmin, async (req, res) => {
     try {
         const settings = loadSettings();
         settings.holidayBanners = (settings.holidayBanners || []).filter(b => b.id !== req.params.id);
         saveSettings(settings);
+        if (db.isConnected()) await db.deleteBannerImage(req.params.id);
         res.json({ success: true, message: 'Banner deleted' });
     } catch (e) { res.json({ success: false, message: 'Server error' }); }
 });

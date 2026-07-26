@@ -2667,6 +2667,9 @@ input[type="color"] {
                     </div>
                 </div>
                 <div class="admin-form-group">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;cursor:pointer;"><input type="checkbox" id="bannerIsDefault" style="accent-color:#f59e0b;"> ⭐ Set as Default Banner (shown when no active banner)</label>
+                </div>
+                <div class="admin-form-group">
                     <label class="admin-form-label">📐 Banner Height (px)</label>
                     <input type="range" id="bannerHeight" min="60" max="400" value="120" style="width:100%;accent-color:#f59e0b;" oninput="document.getElementById('bannerHeightVal').textContent=this.value+'px'">
                     <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;"><span>60px (Compact)</span><span id="bannerHeightVal">120px</span><span>400px (Full)</span></div>
@@ -5941,10 +5944,13 @@ function renderBannerList() {
             : isFuture ? '<span style="font-size:9px;background:#eab308;color:#000;padding:2px 6px;border-radius:4px;">Scheduled</span>'
             : b.active ? '<span style="font-size:9px;background:#22c55e;color:#000;padding:2px 6px;border-radius:4px;">Live</span>'
             : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 6px;border-radius:4px;">Off</span>';
+        const defaultBadge = b.isDefault ? ' <span style="font-size:9px;background:#f59e0b;color:#000;padding:2px 6px;border-radius:4px;">⭐ Default</span>' : '';
+        const imageBadge = b.hasImage ? ' <span style="font-size:9px;background:#3b82f6;color:#fff;padding:2px 6px;border-radius:4px;">🖼️ Image</span>' : '';
+        const icon = b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : (b.hasImage ? '🖼️' : '🎊');
         return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:8px;">' +
-            '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + (b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : '🎊') + '</div>' +
+            '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + icon + '</div>' +
             '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + defaultBadge + imageBadge + '</div>' +
             '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterDisclaimer:'After Disclaimer',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Disclaimer') + '</div>' +
             '</div>' +
             '<div class="admin-action-btns">' +
@@ -5971,6 +5977,7 @@ function toggleBannerForm() {
         document.getElementById('bannerShowDesktop').checked = true;
         document.getElementById('bannerShowMobile').checked = true;
         document.getElementById('bannerPosition').value = 'afterDisclaimer';
+        document.getElementById('bannerIsDefault').checked = false;
         removeBannerImage();
     }
 }
@@ -5980,7 +5987,7 @@ function cancelBannerForm() { document.getElementById('bannerFormWrap').style.di
 function previewBannerImage(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
-    if (file.size > 500 * 1024) { customAlert('Image max 500KB honi chahiye!', '⚠️'); input.value = ''; return; }
+    if (file.size > 200 * 1024) { customAlert('Image max 200KB honi chahiye! MongoDB free 512MB limit hai.', '⚠️'); input.value = ''; return; }
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('bannerPreviewImg').src = e.target.result;
@@ -6025,7 +6032,8 @@ async function saveBanner() {
         msgColor: document.getElementById('bannerMsgColor').value || '#ffffff',
         msgSize: parseInt(document.getElementById('bannerMsgSize').value) || 13,
         showMessage: document.getElementById('bannerShowMessage').checked,
-        emoji: document.getElementById('bannerEmoji').value || '🎊'
+        emoji: document.getElementById('bannerEmoji').value || '🎊',
+        isDefault: document.getElementById('bannerIsDefault').checked
     };
     const status = document.getElementById('bannerFormStatus');
     if (!body.title) { status.innerHTML = '<span style="color:#ef4444;">Title required</span>'; return; }
@@ -6062,6 +6070,7 @@ function editBanner(id) {
     document.getElementById('bannerMsgSize').value = b.msgSize || 13;
     document.getElementById('bannerShowMessage').checked = b.showMessage !== false;
     document.getElementById('bannerEmoji').value = b.emoji || '🎊';
+    document.getElementById('bannerIsDefault').checked = b.isDefault || false;
     if (b.imageUrl) {
         document.getElementById('bannerImageUrl').value = b.imageUrl.startsWith('data:') ? '' : b.imageUrl;
         if (b.imageUrl.startsWith('data:')) {
