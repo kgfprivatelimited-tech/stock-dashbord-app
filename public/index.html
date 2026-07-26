@@ -2770,6 +2770,7 @@ input[type="color"] {
                     <input type="datetime-local" id="mntScheduleEnd" class="admin-form-input">
                 </div>
             </div>
+            <p style="font-size:10px;color:#555;margin-top:2px;">⚠️ Times are IST — server automatically converts to UTC.</p>
             <div class="admin-form-group">
                 <label class="admin-form-label">Message Template</label>
                 <textarea id="mntScheduleMsg" rows="3" class="admin-form-input" placeholder="🔧 BearFighter Trading System is under scheduled maintenance from {start} to {end}. We will be back soon!" style="resize:vertical;"></textarea>
@@ -5877,13 +5878,15 @@ async function saveMaintenanceSchedule() {
     const notify = document.getElementById('mntNotifyUsers').checked;
     const st = document.getElementById('scheduleStatus');
     if (!start || !end) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='⚠️ Start and End time required!'; return; }
-    if (new Date(end) <= new Date(start)) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='⚠️ End time must be after start!'; return; }
+    const startISO = new Date(start + '+05:30').toISOString();
+    const endISO = new Date(end + '+05:30').toISOString();
+    if (new Date(endISO) <= new Date(startISO)) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#ef4444'; st.textContent='⚠️ End time must be after start!'; return; }
     st.style.display='block'; st.style.background='rgba(245,158,11,0.1)'; st.style.color='#f59e0b'; st.textContent='⏳ Scheduling...';
     try {
         const r = await fetch(API + '/api/admin/maintenance/schedule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ scheduleStart: start, scheduleEnd: end, messageTemplate: msg, notifyUsers: notify })
+            body: JSON.stringify({ scheduleStart: startISO, scheduleEnd: endISO, messageTemplate: msg, notifyUsers: notify })
         }).then(r => r.json());
         if (r.success) {
             st.style.background='rgba(34,197,94,0.1)'; st.style.color='#22c55e';

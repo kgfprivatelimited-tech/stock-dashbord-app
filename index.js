@@ -237,44 +237,50 @@ app.get('/api/maintenance', (req, res) => {
     res.json({ maintenance: isMaintenance, message, countdownMs, endsAt, scheduled: scheduledMaintenance });
 });
 
-// Auto-check scheduled maintenance every 10 seconds
+// Auto-check scheduled + daily maintenance every 10 seconds
 setInterval(() => {
     try {
         const settings = loadSettings();
-        const schedule = settings.maintenanceSchedule;
-        if (!schedule || !schedule.enabled || !schedule.start || !schedule.end) return;
         const now = new Date();
-        const start = new Date(schedule.start);
-        const end = new Date(schedule.end);
-        if (now >= start && now <= end) {
-            if (!settings.maintenanceMode) {
-                settings.maintenanceMode = true;
-                settings.maintenanceMessage = schedule.messageTemplate || 'Under maintenance';
-                saveSettings(settings);
-                console.log('[MAINTENANCE] Scheduled maintenance ON');
-                if (!schedule.notified && schedule.notifyUsers) {
-                    schedule.notified = true;
+        const schedule = settings.maintenanceSchedule;
+        const scheduleActive = schedule && schedule.enabled && schedule.start && schedule.end;
+
+        // 1. Scheduled maintenance check
+        if (scheduleActive) {
+            const start = new Date(schedule.start);
+            const end = new Date(schedule.end);
+            const nowMs = now.getTime(), startMs = start.getTime(), endMs = end.getTime();
+            if (nowMs >= startMs && nowMs <= endMs) {
+                if (!settings.maintenanceMode) {
+                    settings.maintenanceMode = true;
+                    settings.maintenanceMessage = schedule.messageTemplate || 'Under maintenance';
                     saveSettings(settings);
-                    const users = loadUsers();
-                    const notifMsg = (schedule.messageTemplate || '🔧 BearFighter Trading System is under scheduled maintenance. We will be back soon!').replace('{start}', start.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).replace('{end}', end.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
-                    users.users.forEach(u => {
-                        if (!u.notifications) u.notifications = [];
-                        u.notifications.unshift({ id: 'mnt_' + Date.now(), type: 'maintenance', title: '🔧 Maintenance Scheduled', message: notifMsg, time: now.toISOString(), read: false });
-                        if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
-                    });
-                    const data = { users: users.users };
-                    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+                    console.log('[MAINTENANCE] Scheduled maintenance ON — start:', start.toISOString(), 'end:', end.toISOString(), 'now:', now.toISOString());
+                    if (!schedule.notified && schedule.notifyUsers) {
+                        schedule.notified = true;
+                        saveSettings(settings);
+                        const users = loadUsers();
+                        const notifMsg = (schedule.messageTemplate || '🔧 BearFighter Trading System is under scheduled maintenance. We will be back soon!').replace('{start}', start.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).replace('{end}', end.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+                        users.users.forEach(u => {
+                            if (!u.notifications) u.notifications = [];
+                            u.notifications.unshift({ id: 'mnt_' + Date.now(), type: 'maintenance', title: '🔧 Maintenance Scheduled', message: notifMsg, time: now.toISOString(), read: false });
+                            if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
+                        });
+                        const data = { users: users.users };
+                        fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+                    }
+                }
+            } else if (now > end) {
+                if (settings.maintenanceMode) {
+                    settings.maintenanceMode = false;
+                    settings.maintenanceSchedule.notified = false;
+                    saveSettings(settings);
+                    console.log('[MAINTENANCE] Scheduled maintenance OFF (ended)');
                 }
             }
-        } else if (now > end) {
-            if (settings.maintenanceMode) {
-                settings.maintenanceMode = false;
-                settings.maintenanceSchedule.notified = false;
-                saveSettings(settings);
-                console.log('[MAINTENANCE] Scheduled maintenance OFF (ended)');
-            }
         }
-        // Daily recurring maintenance check
+
+        // 2. Daily recurring maintenance check (runs independently!)
         const dm = settings.dailyMaintenance;
         if (dm && dm.enabled) {
             const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
@@ -282,12 +288,13 @@ setInterval(() => {
             const startMin = (dm.startHour || 2) * 60 + (dm.startMin || 0);
             const endMin = (dm.endHour || 7) * 60 + (dm.endMin || 0);
             const inWindow = startMin < endMin ? (curMin >= startMin && curMin < endMin) : (curMin >= startMin || curMin < endMin);
-            if (inWindow && !settings.maintenanceMode && !schedule.enabled) {
+            console.log('[MAINTENANCE] Daily check: IST=' + nowIST.toLocaleTimeString('en-IN') + ' inWindow=' + inWindow + ' mntMode=' + settings.maintenanceMode + ' schedActive=' + scheduleActive);
+            if (inWindow && !settings.maintenanceMode && !scheduleActive) {
                 settings.maintenanceMode = true;
                 settings.maintenanceMessage = dm.message || '🔧 Daily maintenance in progress. We will be back shortly!';
                 saveSettings(settings);
                 console.log('[MAINTENANCE] Daily maintenance ON (' + dm.startHour + ':' + String(dm.startMin||0).padStart(2,'0') + '-' + dm.endHour + ':' + String(dm.endMin||0).padStart(2,'0') + ')');
-            } else if (!inWindow && settings.maintenanceMode && !schedule.enabled) {
+            } else if (!inWindow && settings.maintenanceMode && !scheduleActive) {
                 settings.maintenanceMode = false;
                 saveSettings(settings);
                 console.log('[MAINTENANCE] Daily maintenance OFF');
