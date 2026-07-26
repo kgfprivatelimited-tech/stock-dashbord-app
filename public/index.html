@@ -2221,35 +2221,36 @@ input[type="color"] {
 
         <!-- Stats -->
         <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(7, 1fr);">
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('allUsers')" style="cursor:pointer;" title="Click to view all users">
             <div class="admin-stat-label">Total Users</div>
             <div class="admin-stat-value" id="dashTotalUsers">0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('active')" style="cursor:pointer;" title="Click to view active users">
             <div class="admin-stat-label">Active</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashActiveUsers">0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('expired')" style="cursor:pointer;" title="Click to view expired users">
             <div class="admin-stat-label">Expired</div>
             <div class="admin-stat-value" style="color: #ef4444;" id="dashExpiredUsers">0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('expiringSoon')" style="cursor:pointer;" title="Click to view expiring soon">
             <div class="admin-stat-label">Expiring Soon</div>
             <div class="admin-stat-value" style="color: #eab308;" id="dashExpiringSoon">0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('online')" style="cursor:pointer;" title="Click to view online users">
             <div class="admin-stat-label">🟢 Online</div>
             <div class="admin-stat-value" style="color: #00e676;" id="dashOnlineCount">0</div>
           </div>
-          <div class="admin-stat-card">
+          <div class="admin-stat-card" onclick="showStatPopup('birthdays')" style="cursor:pointer;" title="Click to view birthdays">
             <div class="admin-stat-label">🎂 Birthdays</div>
             <div class="admin-stat-value" style="color: #f59e0b;" id="dashBirthdayCount">0</div>
           </div>
         </div>
+        <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
 
         <!-- ═══ DASHBOARD SECTION ═══ -->
         <div id="section-dashboard">
@@ -2265,15 +2266,7 @@ input[type="color"] {
           </div>
         </div>
 
-        <!-- Pending Password Changes -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">🔑 Pending Password Changes</div>
-          </div>
-          <div id="pendingPasswordList">
-            <div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No pending requests</div>
-          </div>
-        </div>
+        <!-- Pending Password Changes — removed (auto-approved) -->
 
         <!-- Login History -->
         <div class="admin-card">
@@ -3883,7 +3876,6 @@ async function loadAdminData() {
             loadDashSettings();
             loadApiKeys();
             loadBanners();
-            loadPendingPasswords();
             loadAdminBirthdays();
             loadOnlineUsers();
             loadRegisterRequests();
@@ -3893,38 +3885,6 @@ async function loadAdminData() {
     }
 }
 
-async function loadPendingPasswords() {
-    try {
-        const r = await fetch(API + '/api/admin/pending-password-changes', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
-        const div = document.getElementById('pendingPasswordList');
-        if (!r.success || r.pending.length === 0) {
-            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No pending requests</div>';
-            return;
-        }
-        div.innerHTML = r.pending.map(p => {
-            const t = p.requestedAt ? new Date(p.requestedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
-            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">
-                <div><span style="color:#f59e0b;font-weight:600;font-size:12px;">${p.username}</span><br><span style="font-size:10px;color:#71717a;">${t}</span></div>
-                <div style="display:flex;gap:6px;">
-                    <button class="admin-btn admin-btn-primary" style="padding:4px 10px;font-size:10px;" onclick="approvePassword('${p.id}', true)">✅ Approve</button>
-                    <button class="admin-btn admin-btn-danger" style="padding:4px 10px;font-size:10px;" onclick="approvePassword('${p.id}', false)">❌ Reject</button>
-                </div>
-            </div>`;
-        }).join('');
-    } catch (e) {}
-}
-
-async function approvePassword(userId, approve) {
-    try {
-        const r = await fetch(API + '/api/admin/approve-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ userId, approve })
-        }).then(r => r.json());
-        if (r.success) customAlert(r.message, approve ? '✅' : '❌');
-        loadPendingPasswords();
-    } catch (e) {}
-}
 
 async function loadRegisterRequests() {
     try {
@@ -4063,6 +4023,75 @@ async function adminResetPassword() {
         if (r.success) { msg.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; document.getElementById('editResetPassword').value = ''; }
         else { msg.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
     } catch (e) { msg.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+let _lastDashboardUsers = [];
+function showStatPopup(type) {
+    const p = document.getElementById('statPopup');
+    if (p.style.display === 'block') { p.style.display = 'none'; return; }
+    if (!_lastDashboardUsers.length) {
+        fetch(API + '/api/admin/users', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(data => {
+            _lastDashboardUsers = data.users || [];
+            showStatPopup(type);
+        });
+        return;
+    }
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#e4e4e7;font-size:12px;">';
+    let list = [];
+    if (type === 'online') {
+        html += '🟢 Online Users';
+        list = _lastDashboardUsers.filter(u => {
+            if (!u.lastLogin) return false;
+            return (now - new Date(u.lastLogin)) < 300000;
+        });
+    } else if (type === 'birthdays') {
+        html += '🎂 Birthdays Today';
+        list = _lastDashboardUsers.filter(u => u.dob && u.dob.slice(5) === todayStr.slice(5));
+    } else if (type === 'active') {
+        html += '✅ Active Users';
+        list = _lastDashboardUsers.filter(u => u.active);
+    } else if (type === 'expired') {
+        html += '❌ Expired Users';
+        list = _lastDashboardUsers.filter(u => !u.active);
+    } else if (type === 'expiringSoon') {
+        html += '⏰ Expiring Soon (7 days)';
+        const wk = new Date(); wk.setDate(wk.getDate() + 7);
+        list = _lastDashboardUsers.filter(u => {
+            if (!u.subscriptionExpiry) return false;
+            const ex = new Date(u.subscriptionExpiry);
+            return ex > now && ex < wk;
+        });
+    } else if (type === 'revenue') {
+        html += '💰 Revenue Details';
+        list = _lastDashboardUsers.filter(u => u.paymentAmount > 0);
+    } else if (type === 'allUsers') {
+        html += '👥 All Users (' + _lastDashboardUsers.length + ')';
+        list = _lastDashboardUsers;
+    }
+    html += '</div><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+    if (type === 'revenue') {
+        let total = list.reduce((a, b) => a + (b.paymentAmount || 0), 0);
+        html += '<div style="font-size:11px;color:#22c55e;margin-bottom:6px;">Total: ₹' + total.toLocaleString() + '</div>';
+    }
+    if (!list.length) {
+        html += '<div style="color:#555;text-align:center;padding:12px;font-size:11px;">No users in this category</div>';
+    } else {
+        list.forEach(u => {
+            const name = u.fullName || u.username || 'Unknown';
+            const cat = u.category || '';
+            const badge = u.active ? '#22c55e' : '#ef4444';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid #222;font-size:11px;">' +
+                '<div><span style="color:#e4e4e7;font-weight:600;">' + name + '</span>' +
+                ' <span style="color:#71717a;">' + cat + '</span></div>' +
+                '<div><span style="width:6px;height:6px;border-radius:50%;background:' + badge + ';display:inline-block;"></span> ' + (u.active ? 'Active' : 'Expired') +
+                (type === 'revenue' && u.paymentAmount ? ' <span style="color:#22c55e;">₹' + u.paymentAmount.toLocaleString() + '</span>' : '') +
+                '</div></div>';
+        });
+    }
+    p.innerHTML = html;
+    p.style.display = 'block';
 }
 
 function refreshAdminData() {
@@ -5964,6 +5993,7 @@ async function loadDashboardSettingsAndApply() {
         dashboardSettings = r;
         applyDashboardSections();
         const bg = r.bgColor || '#0a0a0a';
+        document.documentElement.style.setProperty('--bg-primary', bg);
         document.body.style.background = bg;
         const appC = document.getElementById('appContainer');
         if (appC) appC.style.background = bg;
@@ -6150,13 +6180,18 @@ async function loadOffers() {
         if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">No offers yet</div>'; return; }
         el.innerHTML = r.offers.map(o => {
             const isExpired = o.expiry && new Date(o.expiry) < new Date();
-            const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:2px 6px;border-radius:4px;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 6px;border-radius:4px;">Off</span>';
-            return '<div style="padding:10px;border:1px solid #2a2a35;border-radius:8px;margin-bottom:6px;background:#1a1a24;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<div style="font-size:12px;color:#e4e4e7;font-weight:600;">' + o.title + ' ' + badge + '</div>' +
-                '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="deleteOffer(\'' + o.id + '\')">🗑️</button></div>' +
-                (o.description ? '<div style="font-size:10px;color:#a1a1aa;margin-top:4px;">' + o.description + '</div>' : '') +
-                '<div style="font-size:9px;color:#555;margin-top:4px;">' + (o.code ? 'Code: ' + o.code + ' | ' : '') + 'Target: ' + o.target + (o.expiry ? ' | Until: ' + o.expiry : '') + '</div></div>';
+            const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:2px 8px;border-radius:10px;">Off</span>';
+            return '<div style="padding:14px;border:1px solid #2a2a35;border-radius:12px;margin-bottom:8px;background:linear-gradient(135deg,#1a1a2e,#16213e);position:relative;overflow:hidden;">' +
+                '<div style="position:absolute;top:0;right:0;width:60px;height:60px;background:linear-gradient(135deg,#f59e0b,#ff6b35);border-radius:0 12px 0 60px;display:flex;align-items:center;justify-content:center;font-size:22px;">🎁</div>' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+                '<div style="flex:1;padding-right:40px;"><strong style="color:#f59e0b;font-size:13px;">' + o.title + '</strong> ' + badge + '</div>' +
+                '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;flex-shrink:0;" onclick="deleteOffer(\'' + o.id + '\')">🗑️</button></div>' +
+                (o.description ? '<div style="font-size:11px;color:#a1a1aa;margin-top:6px;line-height:1.4;">' + o.description + '</div>' : '') +
+                '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">' +
+                (o.code ? '<span style="font-size:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">Code: ' + o.code + '</span>' : '') +
+                '<span style="font-size:10px;background:rgba(255,255,255,0.08);color:#a1a1aa;padding:3px 10px;border-radius:6px;">👤 ' + o.target + '</span>' +
+                (o.expiry ? '<span style="font-size:10px;background:rgba(255,255,255,0.08);color:#a1a1aa;padding:3px 10px;border-radius:6px;">📅 Until: ' + o.expiry + '</span>' : '') +
+                '</div></div>';
         }).join('');
     } catch (e) {}
 }
@@ -6648,8 +6683,11 @@ async function loadSignals() {
         if (fresh === _lastSignalsJSON) return;
         _lastSignalsJSON = fresh;
         if (!data || !data.length) {
+            const mkMsg = isMarketHours()
+                ? 'Analyzing market data... Signals appear once enough data is collected.'
+                : 'Market closed. Signals will resume during market hours (8am-4pm).';
             document.getElementById("signals-body").innerHTML =
-                '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">Analyzing market data... Signals appear once enough data is collected.</td></tr>';
+                '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">' + mkMsg + '</td></tr>';
             return;
         }
         document.getElementById("signals-body").innerHTML = data.map(d => {
@@ -6687,6 +6725,14 @@ function handleAuthError(data) {
 /* ══════ AUTO REFRESH MANAGEMENT ══════ */
 let refreshIntervals = [];
 
+function isMarketHours() {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const day = now.getDay();
+    if (day === 0 || day === 6) return false;
+    const h = now.getHours();
+    return h >= 8 && h < 16;
+}
+
 function startAutoRefresh() {
     // Clear any existing intervals
     refreshIntervals.forEach(id => clearInterval(id));
@@ -6694,33 +6740,22 @@ function startAutoRefresh() {
     
     // Start new intervals only if user is logged in
     if (currentUser) {
-        // Live data — every 1s
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) loadIndices();
-        }, 1000));
-        
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) { loadGL(); loadFO(); loadFNOAll(); loadHeatmap(); }
-        }, 1000));
-        
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) loadSignals();
-        }, 1000));
+        const fastInterval = () => isMarketHours() ? 1000 : 30000;
+        const medInterval = () => isMarketHours() ? 1000 : 60000;
 
-        // Message + Tips — every 1s
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) checkMessageUpdate();
-        }, 1000));
-        
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) loadDashboardStockTips();
-        }, 1000));
-        
-        // Settings + Disclaimer — every 1m
-        refreshIntervals.push(setInterval(() => {
-            if (currentUser) loadDashboardSettingsAndApply();
-        }, 60000));
-        
+        function startDynamicIntervals() {
+            refreshIntervals.forEach(id => clearInterval(id));
+            refreshIntervals = [];
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadIndices(); }, fastInterval()));
+            refreshIntervals.push(setInterval(() => { if (currentUser) { loadGL(); loadFO(); loadFNOAll(); loadHeatmap(); } }, medInterval()));
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadSignals(); }, fastInterval()));
+            refreshIntervals.push(setInterval(() => { if (currentUser) checkMessageUpdate(); }, fastInterval()));
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardStockTips(); }, medInterval()));
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardSettingsAndApply(); }, 60000));
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadDisclaimer(); }, 60000));
+            refreshIntervals.push(setInterval(() => { startDynamicIntervals(); }, 300000));
+        }
+        startDynamicIntervals();
         refreshIntervals.push(setInterval(() => {
             if (currentUser) loadDisclaimer();
         }, 60000));
