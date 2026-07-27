@@ -145,40 +145,42 @@ body {
     z-index: 2;
 }
 .splash-title {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 900;
-    letter-spacing: 5px;
+    letter-spacing: 6px;
     background: linear-gradient(135deg, #ff6b35, #ffaa70, #ff6b35);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     opacity: 0;
     animation: splashTitleIn 0.7s ease-out 1.1s forwards;
     z-index: 2;
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 .splash-subtitle {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--accent);
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     text-transform: uppercase;
     font-weight: 700;
     margin-bottom: 6px;
     opacity: 0;
     animation: splashSubIn 0.6s ease-out 1.5s forwards;
     z-index: 2;
+    text-align: center;
 }
 .splash-by {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-dim);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 36px;
     opacity: 0;
     animation: splashByIn 0.6s ease-out 1.7s forwards;
     z-index: 2;
+    text-align: center;
 }
 .splash-go-btn {
     padding: 16px 48px;
@@ -1838,6 +1840,13 @@ header {
     .login-box input { padding: 12px; font-size: 14px; }
     .login-box button { padding: 12px; font-size: 13px; }
 
+    /* SPLASH */
+    .splash-bear { font-size: 64px; }
+    .splash-title { font-size: 26px; letter-spacing: 4px; }
+    .splash-subtitle { font-size: 13px; letter-spacing: 4px; }
+    .splash-by { font-size: 11px; letter-spacing: 2px; }
+    .splash-go-btn { padding: 14px 40px; font-size: 14px; }
+
     /* INDICES */
     #indices-row {
         grid-template-columns: repeat(3, 1fr);
@@ -2361,8 +2370,8 @@ input[type="color"] {
     <div class="splash-orb orb3"></div>
     <div class="splash-bear">🐻</div>
     <div class="splash-line"></div>
-    <div class="splash-title">BEAR FIGHTER<br>TRADING ACADEMY</div>
-    <div class="splash-subtitle">Live Market Dashboard</div>
+    <div class="splash-title">BEAR FIGHTER</div>
+    <div class="splash-subtitle">TRADING ACADEMY</div>
     <div class="splash-by">By Vaibhav</div>
     <div class="splash-particles">
         <span></span><span></span><span></span><span></span><span></span>
