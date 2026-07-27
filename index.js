@@ -142,27 +142,40 @@ app.put('/api/admin/settings', checkAdmin, (req, res) => {
     }
 });
 
-// Admin: Toggle maintenance mode
+// Admin: Toggle maintenance mode (manual ON/OFF)
 app.post('/api/admin/maintenance', checkAdmin, (req, res) => {
     try {
         const { enabled, message } = req.body;
         const settings = loadSettings();
         settings.maintenanceMode = enabled;
-        if (message !== undefined) settings.maintenanceMessage = message;
+        settings.maintenanceSource = 'manual'; // Mark as manual
+        if (message !== undefined && message !== '') settings.maintenanceMessage = message;
         if (!enabled) {
-            // Admin turned OFF — set override flag so interval won't fight back
             settings.maintenanceManualOff = Date.now();
-            console.log('[MAINTENANCE] Admin MANUAL OFF — override flag set');
+            console.log('[MAINTENANCE] Admin MANUAL OFF');
         } else {
-            // Admin turned ON — clear any override
             delete settings.maintenanceManualOff;
-            console.log('[MAINTENANCE] Admin MANUAL ON — override cleared');
+            console.log('[MAINTENANCE] Admin MANUAL ON — msg:', (message || '').substring(0, 40));
         }
         saveSettings(settings);
-        // Also force immediate DB save for critical maintenance toggle
-        if (db.isConnected()) { db.immediateSave('settings', settings); }
+        if (db.isConnected()) db.immediateSave('settings', settings);
         logActivity('maintenance_' + (enabled ? 'on' : 'off'), message || '');
         res.json({ success: true, maintenance: settings.maintenanceMode });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: Save maintenance message only (without toggling)
+app.post('/api/admin/maintenance/message', checkAdmin, (req, res) => {
+    try {
+        const { message } = req.body;
+        const settings = loadSettings();
+        settings.maintenanceMessage = message || '';
+        saveSettings(settings);
+        if (db.isConnected()) db.immediateSave('settings', settings);
+        console.log('[MAINTENANCE] Message updated:', (message || '').substring(0, 60));
+        res.json({ success: true });
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
     }
@@ -216,11 +229,6 @@ app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
             endMin: parseInt(endMin) || 0,
             message: message || '🔧 Daily maintenance in progress. We will be back shortly!'
         };
-        // When admin re-enables daily, clear manual override so auto can resume
-        if (enabled && settings.maintenanceManualOff) {
-            delete settings.maintenanceManualOff;
-            console.log('[MAINTENANCE] Manual override cleared (daily re-enabled)');
-        }
         saveSettings(settings);
         logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
         console.log('[MAINTENANCE] Daily settings saved:', JSON.stringify(settings.dailyMaintenance));
@@ -253,6 +261,7 @@ app.get('/api/admin/maintenance/debug', checkAdmin, (req, res) => {
         }
         res.json({
             maintenanceMode: settings.maintenanceMode,
+            maintenanceSource: settings.maintenanceSource || 'none',
             nowUTC: now.toISOString(),
             nowIST: nowIST.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
             schedule: { enabled: schedule.enabled, start: schedule.start, end: schedule.end, active: scheduleActive },
@@ -294,20 +303,20 @@ app.get('/api/maintenance', (req, res) => {
 });
 
 // Auto-check scheduled + daily maintenance every 10 seconds
+// Rule: If source is 'manual' → NEVER auto-touch. Admin's word is law.
+//       If source is 'schedule' → auto-OFF when schedule ends
+//       If source is 'daily' → auto-OFF when daily window ends
+//       Auto-ON only when source is undefined/other (first time)
 setInterval(() => {
     try {
         const settings = loadSettings();
         const now = new Date();
+        const source = settings.maintenanceSource || '';
         const schedule = settings.maintenanceSchedule;
         const scheduleActive = schedule && schedule.enabled && schedule.start && schedule.end;
         const dm = settings.dailyMaintenance;
 
-        // Check if admin manually turned off maintenance (24hr cooldown)
-        const manualOff = settings.maintenanceManualOff || 0;
-        const manualCooldownMs = 24 * 60 * 60 * 1000;
-        const manualOverrideActive = manualOff && (Date.now() - manualOff < manualCooldownMs);
-
-        // Calculate daily window
+        // Daily window calc
         let dmInWindow = false;
         if (dm && dm.enabled) {
             const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
@@ -317,77 +326,86 @@ setInterval(() => {
             dmInWindow = startMin < endMin ? (curMin >= startMin && curMin < endMin) : (curMin >= startMin || curMin < endMin);
         }
 
-        // Calculate schedule window
+        // Schedule window calc
         let schedInWindow = false;
         let schedEnded = false;
         if (scheduleActive) {
-            const start = new Date(schedule.start);
-            const end = new Date(schedule.end);
-            schedInWindow = now >= start && now <= end;
-            schedEnded = now > end;
+            const s = new Date(schedule.start);
+            const e = new Date(schedule.end);
+            schedInWindow = now >= s && now <= e;
+            schedEnded = now > e;
         }
 
-        console.log('[MN] mode=' + settings.maintenanceMode + ' sched=' + (schedInWindow ? 'IN' : (schedEnded ? 'END' : 'OFF')) + ' dm=' + (dm && dm.enabled ? (dmInWindow ? 'IN' : 'OFF') : 'DIS') + ' override=' + (manualOverrideActive ? 'YES' : 'no'));
+        console.log('[MN] mode=' + settings.maintenanceMode + ' src=' + source + ' sched=' + (schedInWindow ? 'IN' : (schedEnded ? 'END' : 'OFF')) + ' dm=' + (dm && dm.enabled ? (dmInWindow ? 'IN' : 'OFF') : 'DIS'));
 
-        // ADMIN MANUAL OVERRIDE: admin turned off — respect it for 24 hours
-        if (manualOverrideActive) {
-            // Only exception: a HARD scheduled maintenance that is currently in window can force ON
-            // But if admin manually cancelled, it should respect that too
-            // For now, just do NOTHING — admin's word is law
-            console.log('[MN] Manual override active — skipping auto-check');
+        // === RULE 1: Manual mode → DO NOTHING ===
+        if (source === 'manual') {
             return;
         }
 
-        // NO OVERRIDE — normal auto-checks
-
-        // 1. Scheduled maintenance: FORCE ON/OFF
-        if (scheduleActive) {
-            if (schedInWindow && !settings.maintenanceMode) {
+        // === RULE 2: Schedule active & in window → AUTO ON ===
+        if (scheduleActive && schedInWindow) {
+            if (!settings.maintenanceMode) {
                 settings.maintenanceMode = true;
-                settings.maintenanceMessage = schedule.messageTemplate || 'Under maintenance';
+                settings.maintenanceMessage = schedule.messageTemplate || '🔧 Under scheduled maintenance';
+                settings.maintenanceSource = 'schedule';
                 saveSettings(settings);
-                console.log('[MAINTENANCE] Scheduled maintenance AUTO ON');
-                // Notify users
-                if (!schedule.notified && schedule.notifyUsers) {
-                    schedule.notified = true;
-                    saveSettings(settings);
-                    const users = loadUsers();
-                    const startD = new Date(schedule.start);
-                    const endD = new Date(schedule.end);
-                    const notifMsg = (schedule.messageTemplate || '🔧 Maintenance scheduled').replace('{start}', startD.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).replace('{end}', endD.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
-                    users.users.forEach(u => {
-                        if (!u.notifications) u.notifications = [];
-                        u.notifications.unshift({ id: 'mnt_' + Date.now(), type: 'maintenance', title: '🔧 Maintenance Scheduled', message: notifMsg, time: now.toISOString(), read: false });
-                        if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
-                    });
-                    const data = { users: users.users };
-                    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
-                }
-            } else if (schedEnded && settings.maintenanceMode) {
-                settings.maintenanceMode = false;
-                settings.maintenanceSchedule.notified = false;
-                saveSettings(settings);
-                console.log('[MAINTENANCE] Scheduled maintenance AUTO OFF (ended)');
+                console.log('[MN] Schedule AUTO ON');
             }
+            // Notify once
+            if (!schedule.notified && schedule.notifyUsers) {
+                schedule.notified = true;
+                saveSettings(settings);
+                const users = loadUsers();
+                const notifMsg = (schedule.messageTemplate || '🔧 Maintenance scheduled').replace('{start}', new Date(schedule.start).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).replace('{end}', new Date(schedule.end).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+                users.users.forEach(u => {
+                    if (!u.notifications) u.notifications = [];
+                    u.notifications.unshift({ id: 'mnt_' + Date.now(), type: 'maintenance', title: '🔧 Maintenance Scheduled', message: notifMsg, time: now.toISOString(), read: false });
+                    if (u.notifications.length > 50) u.notifications = u.notifications.slice(0, 50);
+                });
+                fs.writeFileSync(USERS_FILE, JSON.stringify({ users: users.users }, null, 2));
+            }
+            return;
         }
 
-        // 2. Daily recurring: AUTO ON/OFF
-        if (dm && dm.enabled && dmInWindow && !settings.maintenanceMode && !scheduleActive) {
-            settings.maintenanceMode = true;
-            settings.maintenanceMessage = dm.message || '🔧 Daily maintenance in progress. We will be back shortly!';
-            saveSettings(settings);
-            console.log('[MAINTENANCE] Daily maintenance AUTO ON');
-        } else if (dm && dm.enabled && !dmInWindow && settings.maintenanceMode && !scheduleActive) {
+        // === RULE 3: Schedule ended → AUTO OFF ===
+        if (schedEnded && settings.maintenanceMode && source === 'schedule') {
             settings.maintenanceMode = false;
-            // Window ended — clear manual override so fresh start next window
-            if (settings.maintenanceManualOff) {
-                delete settings.maintenanceManualOff;
-                console.log('[MAINTENANCE] Manual override cleared (window ended)');
-            }
+            settings.maintenanceSource = '';
+            settings.maintenanceSchedule.notified = false;
             saveSettings(settings);
-            console.log('[MAINTENANCE] Daily maintenance AUTO OFF');
+            console.log('[MN] Schedule AUTO OFF (ended)');
+            return;
         }
-    } catch (e) { console.log('[MAINTENANCE] Interval error:', e.message); }
+
+        // === RULE 4: Daily in window → AUTO ON ===
+        if (dm && dm.enabled && dmInWindow && !settings.maintenanceMode) {
+            settings.maintenanceMode = true;
+            settings.maintenanceMessage = dm.message || '🔧 Daily maintenance in progress';
+            settings.maintenanceSource = 'daily';
+            saveSettings(settings);
+            console.log('[MN] Daily AUTO ON');
+            return;
+        }
+
+        // === RULE 5: Daily window ended → AUTO OFF (only if source was daily) ===
+        if (!dmInWindow && settings.maintenanceMode && source === 'daily') {
+            settings.maintenanceMode = false;
+            settings.maintenanceSource = '';
+            saveSettings(settings);
+            console.log('[MN] Daily AUTO OFF (window ended)');
+            return;
+        }
+
+        // === RULE 6: Daily disabled but was ON from daily → AUTO OFF ===
+        if (dm && !dm.enabled && settings.maintenanceMode && source === 'daily') {
+            settings.maintenanceMode = false;
+            settings.maintenanceSource = '';
+            saveSettings(settings);
+            console.log('[MN] Daily AUTO OFF (disabled)');
+            return;
+        }
+    } catch (e) { console.log('[MN] Interval error:', e.message); }
 }, 10000);
 
 // ========================================

@@ -5885,14 +5885,13 @@ async function toggleMaintenance() {
 
 async function saveMaintenanceMsg() {
     const msg = document.getElementById('maintenanceMsg').value;
-    const enabled = document.getElementById('maintenanceToggle').classList.contains('active');
     const status = document.getElementById('maintenanceStatus');
     status.innerHTML = '<span style="color:#ffab00;">⏳ Saving...</span>';
     try {
-        const r = await fetch(API + '/api/admin/maintenance', {
+        const r = await fetch(API + '/api/admin/maintenance/message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ enabled, message: msg })
+            body: JSON.stringify({ message: msg })
         }).then(r => r.json());
         if (r.success) {
             status.innerHTML = '<span style="color:#00c853;">✅ Message saved</span>';
@@ -5989,7 +5988,7 @@ async function testDailyMaintenance() {
         const fmtH = h => { const hr12 = h % 12 || 12; return hr12 + ':00 ' + (h < 12 ? 'AM' : 'PM'); };
         let html = '';
         html += '🕐 Server Time: ' + r.nowIST + ' IST<br>';
-        html += '🔧 Maintenance Mode: ' + (r.maintenanceMode ? '🟢 ON' : '⚪ OFF') + '<br>';
+        html += '🔧 Maintenance Mode: ' + (r.maintenanceMode ? '🟢 ON' : '⚪ OFF') + ' <span style="font-size:9px;color:#555;">(src: ' + (r.maintenanceSource || 'none') + ')</span><br>';
         if (r.schedule && r.schedule.enabled) {
             html += '📅 Schedule: ' + (r.schedule.active ? '🟢 ACTIVE' : '⚪ Inactive') + '<br>';
         }
