@@ -41,6 +41,104 @@ body {
     min-height: 100vh;
 }
 
+/* ═══════ LOGIN BOOM EFFECT ═══════ */
+@keyframes boomFlash {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes boomRing {
+    0% { transform: translate(-50%,-50%) scale(0); opacity: 1; border-width: 4px; }
+    100% { transform: translate(-50%,-50%) scale(4); opacity: 0; border-width: 1px; }
+}
+@keyframes boomRing2 {
+    0% { transform: translate(-50%,-50%) scale(0); opacity: 0.8; border-width: 3px; }
+    100% { transform: translate(-50%,-50%) scale(5); opacity: 0; border-width: 0.5px; }
+}
+@keyframes boomRing3 {
+    0% { transform: translate(-50%,-50%) scale(0); opacity: 0.6; border-width: 2px; }
+    100% { transform: translate(-50%,-50%) scale(6); opacity: 0; border-width: 0.5px; }
+}
+@keyframes boomShard {
+    0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); }
+}
+@keyframes boomText {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(3); filter: blur(10px); }
+    20% { opacity: 1; transform: translate(-50%,-50%) scale(1); filter: blur(0); }
+    80% { opacity: 1; transform: translate(-50%,-50%) scale(1); filter: blur(0); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); filter: blur(5px); }
+}
+@keyframes boomScreenShake {
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-4px, 2px); }
+    20% { transform: translate(4px, -3px); }
+    30% { transform: translate(-3px, 4px); }
+    40% { transform: translate(3px, -2px); }
+    50% { transform: translate(-2px, 3px); }
+    60% { transform: translate(2px, -1px); }
+    70% { transform: translate(-1px, 2px); }
+    80% { transform: translate(1px, -1px); }
+}
+#boomOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10010;
+    pointer-events: none;
+}
+#boomOverlay.active { display: block; }
+#boomOverlay .boom-flash {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255,107,53,0.9) 0%, rgba(255,60,30,0.6) 30%, rgba(0,0,0,0) 70%);
+    animation: boomFlash 0.6s ease-out forwards;
+}
+#boomOverlay .boom-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,107,53,0.8);
+    animation: boomRing 0.7s ease-out forwards;
+}
+#boomOverlay .boom-ring2 {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,180,100,0.6);
+    animation: boomRing2 0.8s ease-out 0.05s forwards;
+}
+#boomOverlay .boom-ring3 {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,60,30,0.4);
+    animation: boomRing3 0.9s ease-out 0.1s forwards;
+}
+#boomOverlay .boom-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: white;
+    text-shadow: 0 0 40px rgba(255,107,53,0.8), 0 0 80px rgba(255,60,30,0.5);
+    animation: boomText 1s ease-out forwards;
+    white-space: nowrap;
+}
+#boomOverlay .boom-shard {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: boomShard 0.8s ease-out forwards;
+}
+
 /* ═══════ SPLASH SCREEN ═══════ */
 @keyframes splashBgOrbs {
     0% { transform: translate(0, 0) scale(1); }
@@ -2363,6 +2461,9 @@ input[type="color"] {
 </head>
 <body>
 
+<!-- ═══════ BOOM EFFECT ═══════ -->
+<div id="boomOverlay"></div>
+
 <!-- ═══════ SPLASH SCREEN ═══════ -->
 <div id="splashScreen">
     <div class="splash-orb orb1"></div>
@@ -3767,16 +3868,74 @@ let currentUser = null;
 let isAdmin = false;
 
 /* ═══════ SPLASH SCREEN ═══════ */
+function triggerBoom(callback) {
+    const overlay = document.getElementById('boomOverlay');
+    overlay.innerHTML = '';
+    overlay.classList.add('active');
+
+    // Flash
+    const flash = document.createElement('div');
+    flash.className = 'boom-flash';
+    overlay.appendChild(flash);
+
+    // Rings
+    for (let i = 0; i < 3; i++) {
+        const ring = document.createElement('div');
+        ring.className = 'boom-ring' + (i > 0 ? (i+1) : '');
+        overlay.appendChild(ring);
+    }
+
+    // Shards (particles flying out)
+    const shardCount = 20;
+    for (let i = 0; i < shardCount; i++) {
+        const shard = document.createElement('div');
+        shard.className = 'boom-shard';
+        const angle = (360 / shardCount) * i;
+        const dist = 80 + Math.random() * 120;
+        const tx = Math.cos(angle * Math.PI / 180) * dist;
+        const ty = Math.sin(angle * Math.PI / 180) * dist;
+        const rot = Math.random() * 720 - 360;
+        shard.style.setProperty('--tx', tx + 'px');
+        shard.style.setProperty('--ty', ty + 'px');
+        shard.style.setProperty('--rot', rot + 'deg');
+        shard.style.background = ['#ff6b35','#ffaa70','#ff4500','#ff8c5a','#ffd700'][Math.floor(Math.random()*5)];
+        shard.style.width = (3 + Math.random()*5) + 'px';
+        shard.style.height = (3 + Math.random()*5) + 'px';
+        shard.style.animationDelay = (Math.random()*0.1) + 's';
+        shard.style.animationDuration = (0.5 + Math.random()*0.4) + 's';
+        overlay.appendChild(shard);
+    }
+
+    // Text
+    const text = document.createElement('div');
+    text.className = 'boom-text';
+    text.textContent = '🐻 WELCOME';
+    overlay.appendChild(text);
+
+    // Screen shake
+    document.body.style.animation = 'boomScreenShake 0.4s ease-out';
+
+    // Cleanup after animation
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.innerHTML = '';
+        document.body.style.animation = '';
+        if (callback) callback();
+    }, 1200);
+}
+
 function closeSplash() {
     const splash = document.getElementById('splashScreen');
+    if (splash.dataset.exiting) return;
+    splash.dataset.exiting = '1';
     splash.classList.add('splash-exit');
     setTimeout(() => {
         splash.style.display = 'none';
         document.getElementById('loginScreen').style.display = 'flex';
-        // Focus first input
         setTimeout(() => document.getElementById('username').focus(), 300);
     }, 500);
 }
+setTimeout(closeSplash, 30000);
 
 /* ═══════ AUTH ═══════ */
 
@@ -3854,14 +4013,9 @@ async function doLogin() {
         
         if (r.success) {
             currentUser = r.user;
-            // Store in sessionStorage (not localStorage for security)
             sessionStorage.setItem('userId', r.user.id);
             sessionStorage.setItem('username', r.user.username);
-            showDashboard();
-            // Store in sessionStorage (not localStorage for security)
-            sessionStorage.setItem('userId', r.user.id);
-            sessionStorage.setItem('username', r.user.username);
-            showDashboard();
+            triggerBoom(() => showDashboard());
         } else if (r.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('maintenancePageMsg').innerHTML = (r.message || 'We are currently performing scheduled maintenance.').replace(/\n/g, '<br>');
