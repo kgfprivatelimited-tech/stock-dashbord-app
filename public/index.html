@@ -421,7 +421,7 @@ body {
 
 .login-box input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 14px 16px 14px 40px;
     margin-bottom: 12px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
@@ -430,7 +430,7 @@ body {
     font-size: 14px;
     outline: none;
     transition: all 0.3s ease;
-    text-align: center;
+    text-align: left;
     font-family: 'Inter', sans-serif;
 }
 
@@ -2488,12 +2488,12 @@ input[type="color"] {
         <p style="margin-bottom:28px;margin-top:2px;">By Vaibhav</p>
         
         <div style="position:relative;margin-bottom:12px;">
-            <input type="text" id="username" placeholder="Username" autocomplete="off" style="padding-left:36px;text-align:left;">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;">👤</span>
+            <input type="text" id="username" placeholder="Username" autocomplete="off">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;pointer-events:none;">👤</span>
         </div>
         <div style="position:relative;margin-bottom:12px;">
-            <input type="password" id="password" placeholder="Password" autocomplete="off" style="padding-left:36px;text-align:left;">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;">🔒</span>
+            <input type="password" id="password" placeholder="Password" autocomplete="off">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;pointer-events:none;">🔒</span>
         </div>
         
         <button onclick="doLogin()" id="loginBtn">LOGIN</button>
