@@ -237,6 +237,11 @@ app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
             settings.maintenanceSource = 'daily';
         } else if (settings.maintenanceSource === 'daily') {
             settings.maintenanceSource = '';
+            // Daily OFF karte waqt → maintenance bhi OFF karo (was ON from daily)
+            if (settings.maintenanceMode) {
+                settings.maintenanceMode = false;
+                console.log('[MAINTENANCE] Daily disabled → maintenance OFF');
+            }
         }
         saveSettings(settings);
         logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
@@ -285,6 +290,7 @@ app.get('/api/maintenance', (req, res) => {
     const settings = loadSettings();
     const now = new Date();
     const schedule = settings.maintenanceSchedule || {};
+    const dm = settings.dailyMaintenance || {};
     let scheduledMaintenance = false;
     let countdownMs = null;
     let endsAt = null;
@@ -304,6 +310,26 @@ app.get('/api/maintenance', (req, res) => {
         } else if (now < start) {
             countdownMs = start.getTime() - now.getTime();
         }
+    }
+    // Daily maintenance endsAt — calculate window end in IST
+    if (settings.maintenanceMode && settings.maintenanceSource === 'daily' && dm.enabled && !endsAt) {
+        const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        const curMin = nowIST.getHours() * 60 + nowIST.getMinutes();
+        const endMin = (dm.endHour || 7) * 60 + (dm.endMin || 0);
+        const startMin = (dm.startHour || 2) * 60 + (dm.startMin || 0);
+        // Build end time in IST today
+        const endIST = new Date(nowIST);
+        endIST.setHours(dm.endHour || 7, dm.endMin || 0, 0, 0);
+        // If window wraps midnight and we're in the wrap part (e.g. 10PM-6AM, curMin > endMin), end is tomorrow
+        if (startMin >= endMin && curMin >= startMin) {
+            endIST.setDate(endIST.getDate() + 1);
+        }
+        const endUTC = new Date(endIST.toLocaleString('en-US', { timeZone: 'UTC' }));
+        // Adjust: the above gives IST time labeled as UTC, we need actual UTC
+        // IST = UTC + 5:30, so UTC = IST - 5:30
+        const endReal = new Date(endIST.getTime() - (5.5 * 60 * 60 * 1000));
+        endsAt = endReal.toISOString();
+        countdownMs = endReal.getTime() - now.getTime();
     }
     // Only use maintenanceMode from DB — don't add scheduledMaintenance if admin manually turned off
     const isMaintenance = settings.maintenanceMode;

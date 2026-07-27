@@ -3542,7 +3542,7 @@ async function doLogin() {
             showDashboard();
         } else if (r.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('maintenancePageMsg').textContent = r.message || 'We are currently performing scheduled maintenance.';
+            document.getElementById('maintenancePageMsg').innerHTML = (r.message || 'We are currently performing scheduled maintenance.').replace(/\n/g, '<br>');
             document.getElementById('maintenancePage').style.display = 'flex';
             if (r.endsAt) { startMaintenanceCountdown(r.endsAt); } else { document.getElementById('maintenanceCountdown').style.display = 'none'; }
         } else if (r.pending) {
@@ -3665,7 +3665,7 @@ async function checkSession() {
         const m = await fetch(API + '/api/maintenance').then(r => r.json());
         if (m.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('maintenancePageMsg').textContent = m.message || 'We are currently performing scheduled maintenance.';
+            document.getElementById('maintenancePageMsg').innerHTML = (m.message || 'We are currently performing scheduled maintenance.').replace(/\n/g, '<br>');
             document.getElementById('maintenancePage').style.display = 'flex';
             if (m.endsAt) { startMaintenanceCountdown(m.endsAt); } else { document.getElementById('maintenanceCountdown').style.display = 'none'; }
             return;
