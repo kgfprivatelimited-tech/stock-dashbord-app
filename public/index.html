@@ -4311,7 +4311,8 @@ async function userChangePassword() {
 
 // Logout
 function doLogout() {
-    stopAutoRefresh(); // Stop auto-refresh when logging out
+    stopAutoRefresh();
+    disableScreenshotBlock();
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('isAdmin');
@@ -4377,10 +4378,46 @@ async function checkSession() {
 }
 
 // ═══════ DASHBOARD ═══════
+/* ═══════ SCREENSHOT BLOCK ═══════ */
+function enableScreenshotBlock() {
+    // Disable right-click
+    document.addEventListener('contextmenu', _blockContext);
+    // Block keyboard shortcuts
+    document.addEventListener('keydown', _blockKeys);
+    // CSS overlay for screen capture
+    if (!document.getElementById('ssBlockStyle')) {
+        const s = document.createElement('style');
+        s.id = 'ssBlockStyle';
+        s.textContent = '#appContainer {-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}';
+        document.head.appendChild(s);
+    }
+}
+function disableScreenshotBlock() {
+    document.removeEventListener('contextmenu', _blockContext);
+    document.removeEventListener('keydown', _blockKeys);
+    const s = document.getElementById('ssBlockStyle');
+    if (s) s.remove();
+}
+function _blockContext(e) { e.preventDefault(); return false; }
+function _blockKeys(e) {
+    // Print Screen
+    if (e.key === 'PrintScreen') { navigator.clipboard.writeText(''); return false; }
+    // Ctrl+Shift+S / Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C / Ctrl+U
+    if (e.ctrlKey && e.shiftKey && ['S','I','J','C','U'].includes(e.key.toUpperCase())) { e.preventDefault(); return false; }
+    // Ctrl+S (save), Ctrl+P (print), Ctrl+U (view source)
+    if (e.ctrlKey && ['s','p','u'].includes(e.key.toLowerCase())) { e.preventDefault(); return false; }
+    // Cmd+Shift+3/4/5 (Mac screenshot)
+    if (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key)) { e.preventDefault(); return false; }
+    // F12 devtools
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+}
+
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
+    
+    enableScreenshotBlock();
     
     // Request notification permission
     requestNotificationPermission();
