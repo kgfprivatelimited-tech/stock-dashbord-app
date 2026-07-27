@@ -3931,6 +3931,7 @@ function closeSplash() {
     splash.classList.add('splash-exit');
     setTimeout(() => {
         splash.style.display = 'none';
+        if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') return;
         document.getElementById('loginScreen').style.display = 'flex';
         setTimeout(() => document.getElementById('username').focus(), 300);
     }, 500);
