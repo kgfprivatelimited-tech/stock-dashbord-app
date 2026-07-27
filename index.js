@@ -2079,7 +2079,7 @@ function saveMarketCache(cacheData) {
 
 let marketCache = loadMarketCache();
 const INDICES_CACHE_TTL = 1000;   // 1 second (server background refreshes every 1s)
-const STOCKS_CACHE_TTL = 30000;   // 30 seconds
+const STOCKS_CACHE_TTL = 5000;    // 5 seconds
 
 // ========================================
 // REAL-TIME SIGNAL ENGINE
@@ -2512,41 +2512,6 @@ async function fetchIndicesData() {
 }
 
 // Fetch stock data - try V2 first, fallback to V3 ISIN, with caching
-// Background refresh — re-fetch and update cache without blocking the caller
-let _bgFetchPending = false;
-async function fetchStockQuoteBackground(symbols, symbolsKey) {
-    if (_bgFetchPending) return;
-    _bgFetchPending = true;
-    try {
-        const isinKeys = symbols.map(s => STOCK_ISIN_KEYS[s]).filter(k => k);
-        if (isinKeys.length === 0) return;
-        const data = await fetchUpstoxLTP(isinKeys);
-        if (data && Object.keys(data).length > 0) {
-            const result = {};
-            Object.keys(data).forEach(key => {
-                const symbol = ISIN_TO_SYMBOL[key] || key.split(/[:|]/).pop();
-                if (STOCK_ISIN_KEYS[symbol]) {
-                    const q = data[key];
-                    const ltp = q.last_price || q.ltp || 0;
-                    const cp = q.cp || q.close_price || ltp;
-                    const change = ltp - cp;
-                    const pct = cp > 0 ? (change / cp) * 100 : 0;
-                    result[symbol] = { symbol, ltp, change, pct: parseFloat(pct.toFixed(2)), volume: q.volume || 0 };
-                }
-            });
-            if (Object.keys(result).length > 0) {
-                const merged = { ...(marketCache.stocks.data || {}), ...result };
-                marketCache.stocks = { data: merged, timestamp: Date.now(), symbols: symbolsKey };
-                saveMarketCache(marketCache);
-            }
-        }
-    } catch (e) {
-        console.log('⚠️ Background fetch error:', e.message);
-    } finally {
-        _bgFetchPending = false;
-    }
-}
-
 async function fetchStockQuote(symbols) {
     const symbolsKey = symbols.sort().join(',');
     const now = Date.now();
@@ -2557,15 +2522,11 @@ async function fetchStockQuote(symbols) {
     }
     
     // Check if we have all these symbols individually cached (merged from previous fetches)
-    if (marketCache.stocks && marketCache.stocks.data) {
-        const allCached = symbols.every(s => marketCache.stocks.data[s]);
-        if (allCached) {
+    if (marketCache.stocks.data) {
+        const allCached = symbols.every(s => marketCache.stocks.data[s] && marketCache.stocks.data[s].ltp > 0);
+        if (allCached && (now - marketCache.stocks.timestamp) < STOCKS_CACHE_TTL) {
             const filtered = {};
             symbols.forEach(s => { filtered[s] = marketCache.stocks.data[s]; });
-            // If cache is fresh enough, return immediately
-            if ((now - marketCache.stocks.timestamp) < STOCKS_CACHE_TTL) return filtered;
-            // Stale but complete — return and refresh in background
-            fetchStockQuoteBackground(symbols, symbolsKey);
             return filtered;
         }
     }
@@ -2603,17 +2564,13 @@ async function fetchStockQuote(symbols) {
         return result;
     }
     
-    // API failed — return stale cache data (never lose data we already have)
-    if (marketCache.stocks && marketCache.stocks.data) {
+    // Return whatever we have from cache
+    if (marketCache.stocks.data) {
         const filtered = {};
         symbols.forEach(s => { if (marketCache.stocks.data[s]) filtered[s] = marketCache.stocks.data[s]; });
-        if (Object.keys(filtered).length > 0) {
-            console.log('📦 Returning', Object.keys(filtered).length, 'stale cached stocks for', symbols.length, 'requested');
-            return filtered;
-        }
+        if (Object.keys(filtered).length > 0) return filtered;
     }
     
-    console.log('⚠️ fetchStockQuote: no data and no cache for', symbols.length, 'symbols');
     return null;
 }
 
