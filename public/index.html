@@ -42,93 +42,162 @@ body {
 }
 
 /* ═══════ LOGIN SCREEN ═══════ */
+@keyframes loginBgPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+@keyframes loginFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+@keyframes loginGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,107,53,0.15), 0 20px 60px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 0 40px rgba(255,107,53,0.25), 0 20px 60px rgba(0,0,0,0.5); }
+}
+@keyframes inputFocusGlow {
+    0% { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,53,0.15); }
+    50% { border-color: #ff8c5a; box-shadow: 0 0 0 5px rgba(255,107,53,0.1); }
+    100% { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,53,0.15); }
+}
+@keyframes btnShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .login-screen {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+    background: #0a0a0a;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
+    overflow: hidden;
+}
+.login-screen::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,107,53,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(255,60,60,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255,140,90,0.04) 0%, transparent 60%);
+    animation: loginBgPulse 8s ease-in-out infinite;
 }
 
 .login-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 36px;
+    position: relative;
+    background: rgba(18,18,26,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,107,53,0.12);
+    border-radius: 20px;
+    padding: 44px 36px 36px;
     width: 380px;
     text-align: center;
+    animation: loginGlow 4s ease-in-out infinite, fadeInUp 0.6s ease-out;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 .login-box .logo {
-    font-size: 56px;
-    margin-bottom: 12px;
+    font-size: 52px;
+    margin-bottom: 10px;
+    animation: loginFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(255,107,53,0.3));
 }
 
 .login-box h1 {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #ff6b35, #ff8c5a, #ff6b35);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    animation: btnShimmer 4s linear infinite;
 }
 
 .login-box p {
     color: var(--text-dim);
     font-size: 11px;
-    margin-bottom: 24px;
-    letter-spacing: 1px;
+    margin-bottom: 28px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.6;
 }
 
 .login-box input {
     width: 100%;
-    padding: 14px;
+    padding: 14px 16px;
     margin-bottom: 12px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
     color: white;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.3s;
+    transition: all 0.3s ease;
     text-align: center;
     font-family: 'Inter', sans-serif;
 }
 
 .login-box input:focus {
     border-color: var(--accent);
+    animation: inputFocusGlow 2s ease-in-out infinite;
+    background: rgba(255,107,53,0.03);
 }
 
 .login-box input::placeholder {
     color: var(--text-mute);
+    font-size: 13px;
 }
 
 .login-box button {
     width: 100%;
-    padding: 14px;
+    padding: 15px;
     border: none;
-    border-radius: 8px;
-    background: linear-gradient(90deg, var(--green), #00a844);
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--green), #00a844, var(--green));
+    background-size: 200% auto;
     color: white;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.3s;
-    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
     margin-top: 4px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-box button::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    background-size: 200% 100%;
+    animation: btnShimmer 3s linear infinite;
 }
 
 .login-box button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0, 200, 83, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 200, 83, 0.35);
+    background-position: right center;
+}
+
+.login-box button:active {
+    transform: translateY(0);
 }
 
 .login-box button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
@@ -150,7 +219,9 @@ body {
 .login-hint {
     color: var(--text-mute);
     font-size: 10px;
-    margin-top: 16px;
+    margin-top: 18px;
+    line-height: 1.6;
+}
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
@@ -2100,18 +2171,26 @@ input[type="color"] {
     <div class="login-box">
         <div class="logo">🐻</div>
         <h1 style="margin-bottom:2px;">BEAR FIGHTER</h1>
-        <p style="margin-bottom:24px;margin-top:2px;">By Vaibhav</p>
+        <p style="margin-bottom:28px;margin-top:2px;">By Vaibhav</p>
         
-        <input type="text" id="username" placeholder="Username" autocomplete="off">
-        <input type="password" id="password" placeholder="Password" autocomplete="off">
+        <div style="position:relative;margin-bottom:12px;">
+            <input type="text" id="username" placeholder="Username" autocomplete="off" style="padding-left:36px;text-align:left;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;">👤</span>
+        </div>
+        <div style="position:relative;margin-bottom:12px;">
+            <input type="password" id="password" placeholder="Password" autocomplete="off" style="padding-left:36px;text-align:left;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;">🔒</span>
+        </div>
         
         <button onclick="doLogin()" id="loginBtn">LOGIN</button>
         
         <div class="error-msg" id="loginError"></div>
         
+        <div style="width:60px;height:1px;background:rgba(255,255,255,0.08);margin:18px auto 14px;border-radius:1px;"></div>
+        
         <div class="login-hint">
             Don't have an account? <br>
-            <a href="/register" style="color:#f59e0b;font-weight:700;text-decoration:none;font-size:13px;">Get Access →</a>
+            <a href="/register" style="color:#ff6b35;font-weight:700;text-decoration:none;font-size:13px;letter-spacing:0.5px;">Get Access →</a>
         </div>
     </div>
 </div>
