@@ -28,7 +28,7 @@ self.addEventListener('fetch', e => {
 });
 
 self.addEventListener('push', e => {
-    const data = e.data ? e.data.json() : { title: 'BearFighter', body: 'New update!' };
+    const data = e.data ? e.data.json() : { title: 'Bear Fighter', body: 'New update!' };
     e.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,

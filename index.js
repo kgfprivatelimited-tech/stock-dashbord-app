@@ -190,7 +190,7 @@ app.post('/api/admin/maintenance/schedule', checkAdmin, (req, res) => {
             enabled: true,
             start: scheduleStart || null,
             end: scheduleEnd || null,
-            messageTemplate: messageTemplate || '🔧 BearFighter Trading System is under scheduled maintenance from {start} to {end}. We will be back soon!',
+            messageTemplate: messageTemplate || '🔧 Bear Fighter Trading System is under scheduled maintenance from {start} to {end}. We will be back soon!',
             notifyUsers: !!notifyUsers,
             notified: false
         };
@@ -728,7 +728,7 @@ async function sendStockTipToTelegram(tip) {
     if (tip.target) msg += `🎯 <b>Target:</b> ${tip.target}\n`;
     if (tip.sl) msg += `🛑 <b>SL:</b> ${tip.sl}\n`;
     if (tip.note) msg += `📝 ${tip.note}\n`;
-    msg += `\n<i>By Vaibhav | BearFighter Trading</i>`;
+    msg += `\n<i>By Vaibhav | Bear Fighter Trading</i>`;
     return await sendToTelegram(msg);
 }
 
@@ -740,7 +740,7 @@ async function sendTipStatusToTelegram(tip, status) {
     if (tip.entry) msg += `Entry: ${tip.entry}\n`;
     if (tip.target) msg += `Target: ${tip.target}\n`;
     if (tip.sl) msg += `SL: ${tip.sl}\n`;
-    msg += `\n<i>By Vaibhav | BearFighter Trading</i>`;
+    msg += `\n<i>By Vaibhav | Bear Fighter Trading</i>`;
     return await sendToTelegram(msg);
 }
 
@@ -774,7 +774,7 @@ async function sendStockTipToUser(tip, user) {
     if (tip.target) msg += `🎯 <b>Target:</b> ${tip.target}\n`;
     if (tip.sl) msg += `🛑 <b>SL:</b> ${tip.sl}\n`;
     if (tip.note) msg += `📝 ${tip.note}\n`;
-    msg += `\n<i>By Vaibhav | BearFighter Trading</i>`;
+    msg += `\n<i>By Vaibhav | Bear Fighter Trading</i>`;
     return await sendToTelegramChat(user.telegramChatId, msg);
 }
 
@@ -783,7 +783,7 @@ async function sendBroadcastToUser(message, user) {
     if (!user.telegramChatId) return false;
     let msg = `<b>📢 Broadcast Message</b>\n\n`;
     msg += `${message}\n`;
-    msg += `\n<i>By Vaibhav | BearFighter Trading</i>`;
+    msg += `\n<i>By Vaibhav | Bear Fighter Trading</i>`;
     return await sendToTelegramChat(user.telegramChatId, msg);
 }
 
@@ -805,13 +805,13 @@ function getStockTipWhatsAppMsg(tip) {
     if (tip.target) msg += `Target: ${tip.target}\n`;
     if (tip.sl) msg += `SL: ${tip.sl}\n`;
     if (tip.note) msg += `📝 ${tip.note}\n`;
-    msg += `\nBy Vaibhav | BearFighter Trading`;
+    msg += `\nBy Vaibhav | Bear Fighter Trading`;
     return msg;
 }
 
 // Generate WhatsApp message for broadcast
 function getBroadcastWhatsAppMsg(message) {
-    return `📢 Broadcast Message\n\n${message}\n\nBy Vaibhav | BearFighter Trading`;
+    return `📢 Broadcast Message\n\n${message}\n\nBy Vaibhav | Bear Fighter Trading`;
 }
 
 // Middleware: Check if user is logged in and active
@@ -971,7 +971,7 @@ app.post('/api/register/payment', (req, res) => {
         }
         // Also notify user via Telegram if they have chat ID
         if (settings.telegramBotToken && reg.telegram && reg.telegram !== 'NA') {
-            const userMsg = `✅ *Payment Received!*\n\nHi ${reg.fullName}, your payment of Txn ID: ${transactionId} has been received.\nAdmin will verify and approve your account shortly.\n\n🐻 BearFighter Trading`;
+            const userMsg = `✅ *Payment Received!*\n\nHi ${reg.fullName}, your payment of Txn ID: ${transactionId} has been received.\nAdmin will verify and approve your account shortly.\n\n🐻 Bear Fighter Trading`;
             if (cleanScreenshot && cleanScreenshot.startsWith('data:image')) {
                 const ext = cleanScreenshot.match(/^data:image\/(\w+);/)?.[1] || 'jpeg';
                 const base64Data = cleanScreenshot.replace(/^data:image\/\w+;base64,/, '');
@@ -1059,7 +1059,7 @@ app.post('/api/admin/approve-register', checkAdmin, (req, res) => {
         saveRegisterRequests(reqData);
         logActivity('Registration Approved', reg.username);
         if (settings.telegramBotToken && reg.telegram) {
-            const msg = `🎉 *Welcome to BearFighter Trading!*\n\nHi ${reg.fullName}, your account has been approved!\n\n🔑 Username: ${reg.username}\n📅 Expiry: ${new Date(newUser.subscriptionExpiry).toLocaleDateString('en-IN')}\n\nLogin now: https://bearfighter.in`;
+            const msg = `🎉 *Welcome to Bear Fighter Trading!*\n\nHi ${reg.fullName}, your account has been approved!\n\n🔑 Username: ${reg.username}\n📅 Expiry: ${new Date(newUser.subscriptionExpiry).toLocaleDateString('en-IN')}\n\nLogin now: https://bearfighter.in`;
             axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
                 chat_id: reg.telegram, text: msg, parse_mode: 'Markdown'
             }).catch(() => {});
@@ -2694,7 +2694,7 @@ app.post('/api/admin/send-reminders', checkAdmin, async (req, res) => {
             } else {
                 if (days < 0 || days > 30) continue;
             }
-            const defaultMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBearFighter Trading`;
+            const defaultMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\n\nYour subscription expires in ${days} day(s).\nRenew now to continue getting stock tips.\n\nContact: Vaibhav\nBear Fighter Trading`;
             const reminderMsg = customMsg ? customMsg.replace(/\{name\}/g, u.fullName || u.username).replace(/\{days\}/g, days) : defaultMsg;
 
             if (doTG && u.telegramChatId) {
@@ -2765,7 +2765,7 @@ setInterval(async () => {
         if (!u.approved) continue;
         const days = getDaysUntilExpiry(u);
         if (days === 3 || days === 1) {
-            const reminderMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\nYour subscription expires in ${days} day(s). Renew now!\n\n— Vaibhav, BearFighter Trading`;
+            const reminderMsg = `⚠️ Payment Reminder\n\nHi ${u.fullName || u.username},\nYour subscription expires in ${days} day(s). Renew now!\n\n— Vaibhav, Bear Fighter Trading`;
             if (u.telegramChatId) {
                 await sendToTelegramChat(u.telegramChatId, reminderMsg);
             }
@@ -3323,7 +3323,7 @@ async function startServer() {
         settings.holidayBanners = [{
             id: 'banner_demo_1',
             title: 'Happy Diwali! 🪔',
-            message: 'BearFighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
+            message: 'Bear Fighter Trading ki taraf se sabhi ko Diwali ki hardik shubhkamnaye!',
             bgColor: '#ff6b00',
             textColor: '#ffffff',
             imageUrl: 'https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200&h=300&dpr=1',
