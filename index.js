@@ -622,6 +622,7 @@ function saveActivityLog(data) {
 
 function logActivity(action, details) {
     const log = loadActivityLog();
+    if (!log.activities) log.activities = [];
     log.activities.unshift({ id: 'act_' + Date.now(), action, details, timestamp: new Date().toISOString() });
     if (log.activities.length > 100) log.activities = log.activities.slice(0, 100);
     saveActivityLog(log);
@@ -642,6 +643,7 @@ function saveLoginHistory(data) {
 
 function logLogin(username, success) {
     const log = loadLoginHistory();
+    if (!log.logins) log.logins = [];
     log.logins.unshift({ id: 'login_' + Date.now(), username, success, timestamp: new Date().toISOString() });
     if (log.logins.length > 50) log.logins = log.logins.slice(0, 50);
     saveLoginHistory(log);
