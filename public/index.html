@@ -2802,6 +2802,7 @@ input[type="color"] {
               <div><span style="color:#f59e0b;">🖥️ Device:</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">📡 Platform:</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
               <div style="grid-column:1/2;"><span style="color:#f59e0b;">📍 Location:</span> <span id="infoLocation" style="color:#e4e4e7;"></span></div>
+              <div style="grid-column:1/2;"><span style="color:#f59e0b;">✅ Verified:</span> <span id="infoVerified" style="color:#e4e4e7;"></span></div>
             </div>
             <button onclick="toggleEditForm()" class="admin-btn admin-btn-primary" style="width:100%;margin-top:12px;padding:8px;">✏️ Edit This User</button>
           </div>
@@ -3677,7 +3678,7 @@ input[type="color"] {
             <div class="logo-box">🐻</div>
         </div>
         <div class="hdr-center">
-            <div class="brand-name">BEAR FIGHTER TRADING</div>
+            <div class="brand-name">BEAR FIGHTER</div>
             <div class="brand-sub">By Vaibhav</div>
             <div id="headerHighlightBadge" style="display: none; margin-top: 4px; padding: 2px 8px; background: linear-gradient(135deg, #1a1a2e, #2a1a1a); border: 1px solid #ff6b3566; border-radius: 6px; font-size: 8px; font-weight: 700; color: #ff6b35; letter-spacing: 1.5px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 0 8px #ff6b3520;">⭐ PREMIUM</div>
         </div>
@@ -3690,7 +3691,7 @@ input[type="color"] {
             <span class="market-status" id="mkt-badge">--</span>
             <span id="countdown"></span>
             <div class="header-btns">
-                <a class="header-btn" onclick="showUserPasswordPopup()" title="Change Password" style="cursor:pointer;">⚙️</a>
+                <a class="header-btn" onclick="showUserProfile()" title="Profile" style="cursor:pointer;">👤</a>
                 <a class="header-btn" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.053 5.56-5.022c.242-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/></svg></a>
                 <a class="header-btn" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.8 13.7c-.24.68-1.41 1.32-1.94 1.37-.5.05-1.14.07-1.84-.18-.42-.15-.97-.35-1.67-.7-2.95-1.45-4.87-4.15-5.02-4.36-.15-.2-1.22-1.62-1.22-3.1 0-1.48.78-2.2 1.05-2.5.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.56.82 1.92.89 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.17-.29.38-.41.51-.14.14-.28.3-.12.59.17.29.74 1.22 1.58 1.98 1.1.97 2.02 1.27 2.31 1.41.3.14.47.12.64-.07.17-.19.74-.86.94-1.16.2-.29.39-.24.66-.15.27.1 1.71.81 2 .96.29.15.48.22.55.34.07.12.07.68-.17 1.36z"/></svg></a>
                 <a class="header-btn" onclick="toggleNotifPanel()" title="Notifications" style="cursor:pointer;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px;">0</span></a>
@@ -3859,6 +3860,86 @@ input[type="color"] {
         <button class="admin-btn admin-btn-primary" onclick="submitPasswordChange()" style="width:100%;">🔒 Update Password</button>
         <button class="admin-btn admin-btn-secondary" onclick="closePasswordPopup()" style="width:100%; margin-top:8px;">✖ Cancel</button>
         <div id="popPassStatus" style="font-size:11px; margin-top:8px; text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ═══════ USER PROFILE POPUP ═══════ -->
+    <div id="userProfilePopup" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:9999; display:none; align-items:center; justify-content:center;">
+      <div style="background:#12121c; border:1px solid #2a2a3a; border-radius:16px; padding:0; width:380px; max-width:92vw; max-height:85vh; overflow-y:auto;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#1a1030,#0d1b2a); padding:20px; text-align:center; border-radius:16px 16px 0 0; border-bottom:1px solid #2a2a3a; position:relative;">
+          <div onclick="closeUserProfile()" style="position:absolute; top:12px; right:14px; font-size:18px; color:#666; cursor:pointer;">✕</div>
+          <div id="profileAvatar" style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg,#ff6b35,#ff8c5a); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 10px; border:3px solid #ff6b3544; box-shadow:0 0 20px #ff6b3520;">👤</div>
+          <div style="font-size:16px; font-weight:700; color:#fff;" id="profileDisplayName">User</div>
+          <div id="profileBlueTick" style="display:none; margin:6px auto 0; padding:3px 12px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); border-radius:20px; font-size:10px; font-weight:700; color:#22c55e; width:fit-content;">✅ Verified Account</div>
+          <div id="profileUnverified" style="display:none; margin:6px auto 0; padding:3px 12px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:20px; font-size:10px; color:#f59e0b; width:fit-content;">⚠ Not Verified</div>
+        </div>
+        <!-- Body -->
+        <div style="padding:16px 20px;">
+          <!-- Full Name -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600;">👤 FULL NAME</div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="profileFullName" class="admin-form-input" placeholder="Enter full name" style="flex:1;">
+              <button class="admin-btn admin-btn-primary" onclick="saveProfileName()" style="white-space:nowrap; font-size:11px; padding:8px 12px;">Save</button>
+            </div>
+            <div id="profileNameStatus" style="font-size:10px; margin-top:4px;"></div>
+          </div>
+          <!-- Email Verify -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600;">📧 EMAIL VERIFICATION</div>
+            <div id="profileEmailSection">
+              <div id="profileEmailVerified" style="display:none; padding:10px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:10px; font-size:12px; color:#22c55e;">✅ <span id="profileEmailText">email@example.com</span></div>
+              <div id="profileEmailUnverified">
+                <div style="display:flex; gap:8px;">
+                  <input type="email" id="profileEmailInput" class="admin-form-input" placeholder="your@gmail.com" style="flex:1;">
+                  <button class="admin-btn admin-btn-primary" onclick="sendEmailOtp()" id="sendEmailOtpBtn" style="white-space:nowrap; font-size:11px; padding:8px 12px;">Send OTP</button>
+                </div>
+                <div id="profileEmailOtpRow" style="display:none; margin-top:8px;">
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" id="profileEmailOtpInput" class="admin-form-input" placeholder="Enter OTP" maxlength="6" style="flex:1;">
+                    <button class="admin-btn admin-btn-primary" onclick="verifyEmailOtp()" style="white-space:nowrap; font-size:11px; padding:8px 12px;">Verify</button>
+                  </div>
+                </div>
+                <div id="profileEmailStatus" style="font-size:10px; margin-top:4px;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Mobile Verify -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600;">📱 MOBILE VERIFICATION</div>
+            <div id="profileMobileSection">
+              <div id="profileMobileVerified" style="display:none; padding:10px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:10px; font-size:12px; color:#22c55e;">✅ <span id="profileMobileText">+91 XXXXX</span></div>
+              <div id="profileMobileUnverified">
+                <div style="display:flex; gap:8px;">
+                  <input type="tel" id="profileMobileInput" class="admin-form-input" placeholder="+91 98765 43210" style="flex:1;">
+                  <button class="admin-btn admin-btn-primary" onclick="sendMobileOtp()" id="sendMobileOtpBtn" style="white-space:nowrap; font-size:11px; padding:8px 12px;">Send OTP</button>
+                </div>
+                <div id="profileMobileOtpRow" style="display:none; margin-top:8px;">
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" id="profileMobileOtpInput" class="admin-form-input" placeholder="Enter OTP" maxlength="6" style="flex:1;">
+                    <button class="admin-btn admin-btn-primary" onclick="verifyMobileOtp()" style="white-space:nowrap; font-size:11px; padding:8px 12px;">Verify</button>
+                  </div>
+                </div>
+                <div id="profileMobileStatus" style="font-size:10px; margin-top:4px;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Change Password -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600;">🔒 CHANGE PASSWORD</div>
+            <input type="password" id="popCurrentPass" class="admin-form-input" placeholder="Current Password" style="margin-bottom:8px;">
+            <input type="password" id="popNewPass" class="admin-form-input" placeholder="New Password (min 4 chars)" style="margin-bottom:8px;">
+            <input type="password" id="popConfirmPass" class="admin-form-input" placeholder="Confirm New Password" style="margin-bottom:10px;">
+            <button class="admin-btn admin-btn-primary" onclick="submitPasswordChange()" style="width:100%;">🔒 Update Password</button>
+            <div id="popPassStatus" style="font-size:11px; margin-top:8px; text-align:center;"></div>
+          </div>
+          <!-- Subscription Info -->
+          <div style="padding:10px; background:rgba(255,107,53,0.05); border:1px solid rgba(255,107,53,0.15); border-radius:10px; text-align:center;">
+            <div style="font-size:10px; color:#888; margin-bottom:4px;">SUBSCRIPTION</div>
+            <div style="font-size:13px; font-weight:700; color:#ff6b35;" id="profileExpiry">—</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4058,6 +4139,130 @@ function showUserPasswordPopup() {
     document.getElementById('popCurrentPass').focus();
 }
 function closePasswordPopup() { document.getElementById('passwordChangePopup').style.display = 'none'; }
+
+/* ═══════ USER PROFILE ═══════ */
+function showUserProfile() {
+    const popup = document.getElementById('userProfilePopup');
+    popup.style.display = 'flex';
+    document.getElementById('profileDisplayName').textContent = currentUser.username;
+    document.getElementById('profileFullName').value = currentUser.fullName || '';
+    document.getElementById('profileExpiry').textContent = currentUser.subscriptionExpiry ? new Date(currentUser.subscriptionExpiry).toLocaleDateString('en-IN') + ' (' + (currentUser.daysLeft || 0) + ' days left)' : '—';
+    loadProfileVerification();
+}
+function closeUserProfile() { document.getElementById('userProfilePopup').style.display = 'none'; }
+
+async function loadProfileVerification() {
+    try {
+        const r = await fetch(API + '/api/me/profile', { headers: { 'user-id': currentUser.id } }).then(r => r.json());
+        if (!r.success) return;
+        const u = r.user;
+        const allVerified = u.verifiedName && u.verifiedEmail && u.verifiedMobile;
+        const anyUnverified = !u.verifiedName || !u.verifiedEmail || !u.verifiedMobile;
+        document.getElementById('profileBlueTick').style.display = allVerified ? 'block' : 'none';
+        document.getElementById('profileUnverified').style.display = anyUnverified && allVerified === false ? 'block' : 'none';
+        // Name status
+        document.getElementById('profileNameStatus').innerHTML = u.verifiedName ? '<span style="color:#22c55e;">✅ Verified</span>' : '<span style="color:#f59e0b;">⚠ Not verified yet</span>';
+        // Email
+        if (u.verifiedEmail) {
+            document.getElementById('profileEmailVerified').style.display = 'block';
+            document.getElementById('profileEmailUnverified').style.display = 'none';
+            document.getElementById('profileEmailText').textContent = u.email || 'Verified';
+        } else {
+            document.getElementById('profileEmailVerified').style.display = 'none';
+            document.getElementById('profileEmailUnverified').style.display = 'block';
+            document.getElementById('profileEmailOtpRow').style.display = 'none';
+            document.getElementById('profileEmailStatus').innerHTML = '';
+        }
+        // Mobile
+        if (u.verifiedMobile) {
+            document.getElementById('profileMobileVerified').style.display = 'block';
+            document.getElementById('profileMobileUnverified').style.display = 'none';
+            document.getElementById('profileMobileText').textContent = u.mobile || 'Verified';
+        } else {
+            document.getElementById('profileMobileVerified').style.display = 'none';
+            document.getElementById('profileMobileUnverified').style.display = 'block';
+            document.getElementById('profileMobileOtpRow').style.display = 'none';
+            document.getElementById('profileMobileStatus').innerHTML = '';
+        }
+    } catch (e) {}
+}
+
+async function saveProfileName() {
+    const name = document.getElementById('profileFullName').value.trim();
+    const st = document.getElementById('profileNameStatus');
+    if (!name) { st.innerHTML = '<span style="color:#ef4444;">Enter a name</span>'; return; }
+    st.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/me/profile/name', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ fullName: name })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ Saved!</span>'; loadProfileVerification(); }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>'; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+async function sendEmailOtp() {
+    const email = document.getElementById('profileEmailInput').value.trim();
+    const st = document.getElementById('profileEmailStatus');
+    if (!email || !email.includes('@')) { st.innerHTML = '<span style="color:#ef4444;">Enter valid email</span>'; return; }
+    document.getElementById('sendEmailOtpBtn').disabled = true;
+    st.innerHTML = '<span style="color:#ffab00;">Sending OTP...</span>';
+    try {
+        const r = await fetch(API + '/api/me/profile/send-email-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ email })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ OTP sent!</span>'; document.getElementById('profileEmailOtpRow').style.display = 'block'; }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>'; document.getElementById('sendEmailOtpBtn').disabled = false; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; document.getElementById('sendEmailOtpBtn').disabled = false; }
+}
+
+async function verifyEmailOtp() {
+    const otp = document.getElementById('profileEmailOtpInput').value.trim();
+    const st = document.getElementById('profileEmailStatus');
+    if (!otp) { st.innerHTML = '<span style="color:#ef4444;">Enter OTP</span>'; return; }
+    st.innerHTML = '<span style="color:#ffab00;">Verifying...</span>';
+    try {
+        const r = await fetch(API + '/api/me/profile/verify-email-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ otp })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ Email verified!</span>'; loadProfileVerification(); }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Invalid OTP') + '</span>'; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+async function sendMobileOtp() {
+    const mobile = document.getElementById('profileMobileInput').value.trim();
+    const st = document.getElementById('profileMobileStatus');
+    if (!mobile || mobile.length < 10) { st.innerHTML = '<span style="color:#ef4444;">Enter valid mobile</span>'; return; }
+    document.getElementById('sendMobileOtpBtn').disabled = true;
+    st.innerHTML = '<span style="color:#ffab00;">Sending OTP...</span>';
+    try {
+        const r = await fetch(API + '/api/me/profile/send-mobile-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ mobile })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ OTP sent!</span>'; document.getElementById('profileMobileOtpRow').style.display = 'block'; }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Error') + '</span>'; document.getElementById('sendMobileOtpBtn').disabled = false; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; document.getElementById('sendMobileOtpBtn').disabled = false; }
+}
+
+async function verifyMobileOtp() {
+    const otp = document.getElementById('profileMobileOtpInput').value.trim();
+    const st = document.getElementById('profileMobileStatus');
+    if (!otp) { st.innerHTML = '<span style="color:#ef4444;">Enter OTP</span>'; return; }
+    st.innerHTML = '<span style="color:#ffab00;">Verifying...</span>';
+    try {
+        const r = await fetch(API + '/api/me/profile/verify-mobile-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ otp })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = '<span style="color:#22c55e;">✅ Mobile verified!</span>'; loadProfileVerification(); }
+        else { st.innerHTML = '<span style="color:#ef4444;">❌ ' + (r.message || 'Invalid OTP') + '</span>'; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
 async function submitPasswordChange() {
     const cur = document.getElementById('popCurrentPass').value;
     const nw = document.getElementById('popNewPass').value;
@@ -5500,7 +5705,7 @@ window.renderUsers = function(users) {
             <div class="admin-user-cell">
                 <div class="admin-user-avatar">${initials}</div>
                 <div>
-                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
+                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
                     <div class="admin-user-detail" style="font-size:10px;color:#71717a;">${u.fullName || ''} | ${u.email || ''}</div>
                     <div class="admin-user-detail" style="font-size:9px;color:#555;">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
                 </div>
@@ -5954,6 +6159,15 @@ async function editUser(username) {
         document.getElementById('infoLocation').innerHTML = '<a href="https://www.google.com/maps?q=' + user.lastLocation.lat + ',' + user.lastLocation.lng + '" target="_blank" style="color:#3b82f6;text-decoration:none;">' + user.lastLocation.lat.toFixed(4) + ',' + user.lastLocation.lng.toFixed(4) + ' 📍</a>';
     } else {
         document.getElementById('infoLocation').textContent = 'Not available';
+    }
+    if (user.isVerified) {
+        document.getElementById('infoVerified').innerHTML = '<span style="color:#22c55e;font-weight:700;">✅ Verified</span> <span style="color:#888;font-size:10px;">(Name + Email + Mobile)</span>';
+    } else {
+        const parts = [];
+        if (!user.fullName || user.fullName.trim().length < 2) parts.push('Name');
+        if (!user.verifiedEmail) parts.push('Email');
+        if (!user.verifiedMobile) parts.push('Mobile');
+        document.getElementById('infoVerified').innerHTML = '<span style="color:#f59e0b;">⚠ Not Verified</span> <span style="color:#888;font-size:10px;">(Missing: ' + parts.join(', ') + ')</span>';
     }
     document.getElementById('editFullName').value = user.fullName || user.username;
     document.getElementById('editCategory').value = user.category || 'Silver';

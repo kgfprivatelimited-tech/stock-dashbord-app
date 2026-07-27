@@ -1192,6 +1192,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         if (userAgent) user.lastUserAgent = userAgent;
         saveUsers(data);
         
+        const isVerified = !!(user.fullName && user.fullName.trim().length > 1 && user.verifiedEmail && user.verifiedMobile);
         res.json({ 
             success: true, 
             user: {
@@ -1199,7 +1200,11 @@ app.post('/api/login', loginLimiter, async (req, res) => {
                 username: user.username,
                 email: user.email,
                 subscriptionExpiry: user.subscriptionExpiry,
-                daysLeft: getDaysUntilExpiry(user)
+                daysLeft: getDaysUntilExpiry(user),
+                fullName: user.fullName || '',
+                verifiedEmail: user.verifiedEmail || '',
+                verifiedMobile: user.verifiedMobile || '',
+                isVerified: isVerified
             }
         });
     } catch (error) {
@@ -1293,6 +1298,108 @@ app.post('/api/me/change-password', (req, res) => {
     res.json({ success: true, message: 'Password updated successfully.' });
 });
 
+// ═══════ OTP Store (in-memory) ═══════
+const otpStore = new Map();
+function generateOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+// Get profile
+app.get('/api/me/profile', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    res.json({
+        success: true,
+        user: {
+            fullName: user.fullName || '',
+            email: user.verifiedEmail || '',
+            mobile: user.verifiedMobile || '',
+            verifiedName: !!(user.fullName && user.fullName.trim().length > 1),
+            verifiedEmail: !!user.verifiedEmail,
+            verifiedMobile: !!user.verifiedMobile
+        }
+    });
+});
+
+// Save full name
+app.post('/api/me/profile/name', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const { fullName } = req.body;
+    if (!fullName || fullName.trim().length < 2) return res.json({ success: false, message: 'Enter a valid name (min 2 chars)' });
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    user.fullName = fullName.trim();
+    saveUsers(data);
+    res.json({ success: true, message: 'Name updated' });
+});
+
+// Send email OTP
+app.post('/api/me/profile/send-email-otp', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const { email } = req.body;
+    if (!email || !email.includes('@')) return res.json({ success: false, message: 'Enter valid email' });
+    const otp = generateOtp();
+    otpStore.set('email_' + userId, { otp, email, expires: Date.now() + 5 * 60 * 1000 });
+    console.log('📧 Email OTP for ' + email + ': ' + otp);
+    logActivity('Email OTP Sent', email);
+    res.json({ success: true, message: 'OTP sent to ' + email });
+});
+
+// Verify email OTP
+app.post('/api/me/profile/verify-email-otp', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const { otp } = req.body;
+    const stored = otpStore.get('email_' + userId);
+    if (!stored) return res.json({ success: false, message: 'No OTP sent. Please send OTP first.' });
+    if (Date.now() > stored.expires) { otpStore.delete('email_' + userId); return res.json({ success: false, message: 'OTP expired. Send again.' }); }
+    if (stored.otp !== otp) return res.json({ success: false, message: 'Wrong OTP' });
+    otpStore.delete('email_' + userId);
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    user.verifiedEmail = stored.email;
+    saveUsers(data);
+    logActivity('Email Verified', stored.email);
+    res.json({ success: true, message: 'Email verified!' });
+});
+
+// Send mobile OTP
+app.post('/api/me/profile/send-mobile-otp', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const { mobile } = req.body;
+    if (!mobile || mobile.replace(/\D/g, '').length < 10) return res.json({ success: false, message: 'Enter valid mobile number' });
+    const otp = generateOtp();
+    otpStore.set('mobile_' + userId, { otp, mobile, expires: Date.now() + 5 * 60 * 1000 });
+    console.log('📱 Mobile OTP for ' + mobile + ': ' + otp);
+    logActivity('Mobile OTP Sent', mobile);
+    res.json({ success: true, message: 'OTP sent to ' + mobile });
+});
+
+// Verify mobile OTP
+app.post('/api/me/profile/verify-mobile-otp', (req, res) => {
+    const userId = req.headers['user-id'];
+    if (!userId) return res.json({ success: false, message: 'Not logged in' });
+    const { otp } = req.body;
+    const stored = otpStore.get('mobile_' + userId);
+    if (!stored) return res.json({ success: false, message: 'No OTP sent. Please send OTP first.' });
+    if (Date.now() > stored.expires) { otpStore.delete('mobile_' + userId); return res.json({ success: false, message: 'OTP expired. Send again.' }); }
+    if (stored.otp !== otp) return res.json({ success: false, message: 'Wrong OTP' });
+    otpStore.delete('mobile_' + userId);
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) return res.json({ success: false, message: 'User not found' });
+    user.verifiedMobile = stored.mobile;
+    saveUsers(data);
+    logActivity('Mobile Verified', stored.mobile);
+    res.json({ success: true, message: 'Mobile verified!' });
+});
+
 // Admin: list pending password changes
 app.get('/api/admin/pending-password-changes', checkAdmin, (req, res) => {
     const data = loadUsers();
@@ -1384,7 +1491,10 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
         highlight: u.highlight || false,
-        passwordPlain: u.passwordPlain || ''
+        passwordPlain: u.passwordPlain || '',
+        verifiedEmail: u.verifiedEmail || '',
+        verifiedMobile: u.verifiedMobile || '',
+        isVerified: !!(u.fullName && u.fullName.trim().length > 1 && u.verifiedEmail && u.verifiedMobile)
     }));
     res.json({ success: true, users });
 });
