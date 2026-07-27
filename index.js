@@ -194,6 +194,8 @@ app.post('/api/admin/maintenance/schedule', checkAdmin, (req, res) => {
             notifyUsers: !!notifyUsers,
             notified: false
         };
+        // Set source to schedule so interval takes over management
+        settings.maintenanceSource = 'schedule';
         saveSettings(settings);
         logActivity('maintenance_scheduled', `Start: ${scheduleStart}, End: ${scheduleEnd}`);
         res.json({ success: true, schedule: settings.maintenanceSchedule });
@@ -208,6 +210,7 @@ app.post('/api/admin/maintenance/cancel-schedule', checkAdmin, (req, res) => {
         const settings = loadSettings();
         settings.maintenanceSchedule = { enabled: false, start: null, end: null, messageTemplate: '', notifyUsers: false, notified: false };
         settings.maintenanceMode = false;
+        if (settings.maintenanceSource === 'schedule') settings.maintenanceSource = '';
         saveSettings(settings);
         logActivity('maintenance_schedule_cancelled', '');
         res.json({ success: true });
@@ -229,6 +232,12 @@ app.post('/api/admin/maintenance/daily', checkAdmin, (req, res) => {
             endMin: parseInt(endMin) || 0,
             message: message || '🔧 Daily maintenance in progress. We will be back shortly!'
         };
+        // Set source to daily when enabling, so interval takes over
+        if (enabled) {
+            settings.maintenanceSource = 'daily';
+        } else if (settings.maintenanceSource === 'daily') {
+            settings.maintenanceSource = '';
+        }
         saveSettings(settings);
         logActivity('daily_maintenance_updated', `Enabled: ${enabled}, ${startHour}:${String(startMin||0).padStart(2,'0')}-${endHour}:${String(endMin||0).padStart(2,'0')}`);
         console.log('[MAINTENANCE] Daily settings saved:', JSON.stringify(settings.dailyMaintenance));
@@ -338,14 +347,12 @@ setInterval(() => {
 
         console.log('[MN] mode=' + settings.maintenanceMode + ' src=' + source + ' sched=' + (schedInWindow ? 'IN' : (schedEnded ? 'END' : 'OFF')) + ' dm=' + (dm && dm.enabled ? (dmInWindow ? 'IN' : 'OFF') : 'DIS'));
 
-        // === RULE 1: Manual mode → DO NOTHING ===
-        if (source === 'manual') {
-            return;
-        }
+        // === RULE 1: Manual mode → NEVER auto-OFF, but allow auto-ON from schedule/daily ===
+        // (No return here — schedule/daily can still auto-ON below)
 
         // === RULE 2: Schedule active & in window → AUTO ON ===
         if (scheduleActive && schedInWindow) {
-            if (!settings.maintenanceMode) {
+            if (!settings.maintenanceMode || settings.maintenanceSource !== 'schedule') {
                 settings.maintenanceMode = true;
                 settings.maintenanceMessage = schedule.messageTemplate || '🔧 Under scheduled maintenance';
                 settings.maintenanceSource = 'schedule';
@@ -379,7 +386,7 @@ setInterval(() => {
         }
 
         // === RULE 4: Daily in window → AUTO ON ===
-        if (dm && dm.enabled && dmInWindow && !settings.maintenanceMode) {
+        if (dm && dm.enabled && dmInWindow && (!settings.maintenanceMode || settings.maintenanceSource !== 'daily')) {
             settings.maintenanceMode = true;
             settings.maintenanceMessage = dm.message || '🔧 Daily maintenance in progress';
             settings.maintenanceSource = 'daily';
