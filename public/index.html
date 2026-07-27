@@ -421,11 +421,9 @@ body {
 
 .login-box input {
     width: 100%;
-    padding: 14px 16px 14px 40px;
-    margin-bottom: 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
+    margin-bottom: 0;
+    background: none;
+    border: none;
     color: white;
     font-size: 14px;
     outline: none;
@@ -435,9 +433,8 @@ body {
 }
 
 .login-box input:focus {
-    border-color: var(--accent);
-    animation: inputFocusGlow 2s ease-in-out infinite;
-    background: rgba(255,107,53,0.03);
+    border-color: transparent;
+    background: transparent;
 }
 
 .login-box input::placeholder {
@@ -1935,7 +1932,7 @@ header {
     }
     .login-box .logo { font-size: 44px; }
     .login-box h1 { font-size: 18px; letter-spacing: 2px; }
-    .login-box input { padding: 12px 12px 12px 38px; font-size: 14px; }
+    .login-box input { padding: 0; font-size: 14px; }
     .login-box button { padding: 12px; font-size: 13px; }
 
     /* SPLASH */
@@ -2487,13 +2484,13 @@ input[type="color"] {
         <h1 style="margin-bottom:2px;">BEAR FIGHTER</h1>
         <p style="margin-bottom:28px;margin-top:2px;">By Vaibhav</p>
         
-        <div style="position:relative;margin-bottom:12px;">
-            <input type="text" id="username" placeholder="Username" autocomplete="off">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;pointer-events:none;">👤</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 14px;transition:all 0.3s ease;" onfocusin="this.style.borderColor='var(--accent)';this.style.animation='inputFocusGlow 2s ease-in-out infinite'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.animation='none'">
+            <span style="font-size:16px;opacity:0.5;flex-shrink:0;line-height:1;">👤</span>
+            <input type="text" id="username" placeholder="Username" autocomplete="off" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
         </div>
-        <div style="position:relative;margin-bottom:12px;">
-            <input type="password" id="password" placeholder="Password" autocomplete="off">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;pointer-events:none;">🔒</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 14px;transition:all 0.3s ease;" onfocusin="this.style.borderColor='var(--accent)';this.style.animation='inputFocusGlow 2s ease-in-out infinite'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.animation='none'">
+            <span style="font-size:16px;opacity:0.5;flex-shrink:0;line-height:1;">🔒</span>
+            <input type="password" id="password" placeholder="Password" autocomplete="off" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
         </div>
         
         <button onclick="doLogin()" id="loginBtn">LOGIN</button>
