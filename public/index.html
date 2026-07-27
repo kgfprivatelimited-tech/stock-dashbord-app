@@ -3936,7 +3936,13 @@ function closeSplash() {
         setTimeout(() => document.getElementById('username').focus(), 300);
     }, 500);
 }
-setTimeout(closeSplash, 30000);
+if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') {
+    document.getElementById('splashScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'none';
+} else {
+    setTimeout(closeSplash, 30000);
+}
 
 /* ═══════ AUTH ═══════ */
 
@@ -4016,7 +4022,7 @@ async function doLogin() {
             currentUser = r.user;
             sessionStorage.setItem('userId', r.user.id);
             sessionStorage.setItem('username', r.user.username);
-            triggerBoom(() => showDashboard());
+            showDashboard();
         } else if (r.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('maintenancePageMsg').innerHTML = (r.message || 'We are currently performing scheduled maintenance.').replace(/\n/g, '<br>');
