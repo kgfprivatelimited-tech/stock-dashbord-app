@@ -2588,6 +2588,7 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('maintenance', this)">🔧 Maintenance Mode</div>
       <div class="admin-nav-item" onclick="showAdminSection('changePass', this)">🔐 Change Password</div>
       <div class="admin-nav-item" onclick="showAdminSection('apiKeys', this)">🔑 API Keys</div>
+      <div class="admin-nav-item" onclick="showAdminSection('heatmapStocks', this)">📊 Heatmap Stocks</div>
     </div>
     <div class="admin-nav-section">
       <div class="admin-nav-label">Analytics</div>
@@ -3299,6 +3300,19 @@ input[type="color"] {
             <div id="apiKeyStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
         </div>
+
+      <!-- ═══ HEATMAP STOCKS SECTION ═══ -->
+      <div id="section-heatmapStocks" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">📊 Heatmap Stock Settings</div>
+                <button class="admin-btn admin-btn-secondary" onclick="resetHeatmapStocks()" style="font-size:10px;padding:6px 12px;">↩ Reset Defaults</button>
+            </div>
+            <div style="font-size:11px;color:#888;margin-bottom:12px;">NSE symbol name dalo (jaise TCS, INFY). Comma ya Enter se separate karo. Heatmap automatically live data lega.</div>
+            <div id="heatmapStocksContainer">Loading...</div>
+            <div id="heatmapStocksStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+        </div>
+      </div>
 
       <!-- ═══ BROADCAST SECTION ═══ -->
       <div id="section-broadcast" style="display:none;">
@@ -4688,6 +4702,7 @@ function showAdminSection(section, navEl) {
     if (section === 'offers') { loadOffers(); }
     if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
     if (section === 'reminders') loadReminderList();
+    if (section === 'heatmapStocks') loadHeatmapStockSettings();
 }
 
 async function loadAdminData() {
@@ -7381,6 +7396,59 @@ function loadOffersPreviewListeners() {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', updateOfferPreview);
     });
+}
+
+/* ═══════ HEATMAP STOCK SETTINGS ═══════ */
+async function loadHeatmapStockSettings() {
+    const container = document.getElementById('heatmapStocksContainer');
+    container.innerHTML = '<div style="color:#888;font-size:11px;padding:12px;">Loading...</div>';
+    try {
+        const r = await fetch(API + '/api/admin/sector-stocks', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (!r.success) { container.innerHTML = '<div style="color:#ef4444;">Failed to load</div>'; return; }
+        const current = r.sectorStocks || r.defaults;
+        const sectors = Object.keys(r.defaults);
+        container.innerHTML = sectors.map(sector => {
+            const stocks = (current[sector] || []).join(', ');
+            return `<div style="margin-bottom:14px;background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div style="font-size:12px;font-weight:700;color:#c0a843;">📁 ${sector}</div>
+                    <span style="font-size:9px;color:#555;">${(current[sector] || []).length} stocks</span>
+                </div>
+                <div style="display:flex;gap:6px;">
+                    <input type="text" class="admin-form-input sector-stocks-input" data-sector="${sector}" value="${stocks}" placeholder="TCS, INFY, WIPRO..." style="flex:1;font-size:11px;">
+                    <button class="admin-btn admin-btn-primary" onclick="saveSectorStock('${sector}')" style="white-space:nowrap;font-size:10px;padding:8px 12px;">Save</button>
+                </div>
+                <div class="sector-save-status" id="sectorStatus_${sector.replace(/[^a-zA-Z0-9]/g,'')}" style="font-size:10px;margin-top:4px;"></div>
+            </div>`;
+        }).join('');
+    } catch (e) { container.innerHTML = '<div style="color:#ef4444;">Error loading</div>'; }
+}
+
+async function saveSectorStock(sector) {
+    const input = document.querySelector(`.sector-stocks-input[data-sector="${sector}"]`);
+    const st = document.getElementById('sectorStatus_' + sector.replace(/[^a-zA-Z0-9]/g,''));
+    if (!input || !st) return;
+    const stocks = input.value.split(/[,\n]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+    if (stocks.length === 0) { st.innerHTML = '<span style="color:#ef4444;">Enter at least 1 stock</span>'; return; }
+    st.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/sector-stocks', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ sector, stocks })
+        }).then(r => r.json());
+        if (r.success) { st.innerHTML = `<span style="color:#22c55e;">✅ ${stocks.length} stocks saved</span>`; }
+        else { st.innerHTML = `<span style="color:#ef4444;">❌ ${r.message || 'Error'}</span>`; }
+    } catch (e) { st.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+
+async function resetHeatmapStocks() {
+    if (!confirm('Reset all sectors to default stocks?')) return;
+    try {
+        const r = await fetch(API + '/api/admin/sector-stocks/reset', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        if (r.success) { loadHeatmapStockSettings(); document.getElementById('heatmapStocksStatus').innerHTML = '<span style="color:#22c55e;">✅ Reset to defaults</span>'; }
+    } catch (e) {}
 }
 
 async function loadOffers() {

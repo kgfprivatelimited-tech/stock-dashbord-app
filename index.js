@@ -474,7 +474,8 @@ const DEFAULT_SETTINGS = {
     headerWhatsAppLink: '',
     birthdayWishes: {
         1: 'Happy Birthday! 🎉 Wishing you a wonderful year ahead filled with success, happiness and profits! 📈🎂'
-    }
+    },
+    sectorStocks: null
 };
 
 function createDefaultAdmin() {
@@ -2641,18 +2642,25 @@ const SECTOR_STOCKS = {
 };
 
 // Heatmap with live data (updates every 30s)
+function getActiveSectorStocks() {
+    const settings = loadSettings();
+    if (settings.sectorStocks && Object.keys(settings.sectorStocks).length > 0) return settings.sectorStocks;
+    return SECTOR_STOCKS;
+}
+
 async function getHeatmapData() {
     const now = Date.now();
     if (marketCache.heatmap.data && (now - marketCache.heatmap.timestamp) < 30000) return marketCache.heatmap.data;
 
-    const allSymbols = [...new Set(Object.values(SECTOR_STOCKS).flat())].filter(Boolean);
+    const activeStocks = getActiveSectorStocks();
+    const allSymbols = [...new Set(Object.values(activeStocks).flat())].filter(Boolean);
     if (allSymbols.length === 0) return SECTORS.map(s => ({ name: s, pct: 0 }));
 
     const stockData = await fetchStockQuote(allSymbols);
     if (!stockData) return SECTORS.map(s => ({ name: s, pct: 0 }));
 
     const data = SECTORS.map(sector => {
-        const stocks = SECTOR_STOCKS[sector] || [];
+        const stocks = activeStocks[sector] || [];
         const validStocks = stocks.filter(s => stockData[s] && stockData[s].pct !== undefined);
         if (validStocks.length === 0) return { name: sector, pct: 0 };
         const avgPct = validStocks.reduce((sum, s) => sum + stockData[s].pct, 0) / validStocks.length;
@@ -2670,7 +2678,8 @@ app.get('/api/heatmap', checkUserAuth, async (req, res) => {
 
 app.get('/api/heatmap/sector-stocks', checkUserAuth, async (req, res) => {
     const sector = String(req.query.sector || '').trim().toUpperCase();
-    const symbols = SECTOR_STOCKS[sector] || [];
+    const activeStocks = getActiveSectorStocks();
+    const symbols = activeStocks[sector] || [];
     if (!symbols.length) return res.json([]);
     const data = await fetchStockQuote(symbols);
     if (!data) return res.json([]);
@@ -3305,6 +3314,43 @@ app.delete('/api/admin/offers/:id', checkAdmin, (req, res) => {
     } catch (e) { res.json({ success: false }); }
 });
 
+// ========================================
+// HEATMAP STOCK SETTINGS (Admin)
+// ========================================
+
+app.get('/api/admin/sector-stocks', checkAdmin, (req, res) => {
+    const settings = loadSettings();
+    const sectorStocks = settings.sectorStocks || null;
+    res.json({ success: true, sectorStocks, defaults: SECTOR_STOCKS });
+});
+
+app.post('/api/admin/sector-stocks', checkAdmin, (req, res) => {
+    try {
+        const { sector, stocks } = req.body;
+        if (!sector || !Array.isArray(stocks)) return res.json({ success: false, message: 'Invalid data' });
+        const settings = loadSettings();
+        if (!settings.sectorStocks) settings.sectorStocks = JSON.parse(JSON.stringify(SECTOR_STOCKS));
+        settings.sectorStocks[sector.toUpperCase()] = stocks.map(s => s.trim().toUpperCase()).filter(Boolean);
+        saveSettings(settings);
+        marketCache.heatmap = { data: null, timestamp: 0 };
+        logActivity('Sector Stocks Updated', sector + ': ' + stocks.join(', '));
+        res.json({ success: true, message: 'Sector stocks updated', stocks: settings.sectorStocks[sector.toUpperCase()] });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+app.post('/api/admin/sector-stocks/reset', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.sectorStocks = null;
+        saveSettings(settings);
+        marketCache.heatmap = { data: null, timestamp: 0 };
+        logActivity('Sector Stocks Reset', 'All sectors reset to defaults');
+        res.json({ success: true, message: 'Reset to defaults' });
+    } catch (e) { res.json({ success: false }); }
+});
+
+// ========================================
+// HOLIDAY/FESTIVAL BANNERS
 // ========================================
 // HOLIDAY/FESTIVAL BANNERS
 // ========================================
