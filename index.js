@@ -6,6 +6,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const moment = require('moment-timezone');
 const axios = require('axios');
 const compression = require('compression');
@@ -20,16 +21,31 @@ const PORT = process.env.PORT || 3000;
 
 app.use(compression());
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(express.static('public', { maxAge: '1d', etag: true, lastModified: true }));
+app.use(express.static('public', {
+    maxAge: '1d',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.htm') || filePath.includes('sw.js')) {
+            res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.set('Pragma', 'no-cache');
+            res.set('Expires', '0');
+        }
+    }
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // Rate limiters
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Too many attempts. Try again in 15 minutes.' } });
 const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, message: { success: false, message: 'Too many registrations. Try again later.' } });
-const apiLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 200, message: { success: false, message: 'Too many requests. Slow down.' } });
+const apiLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 500, message: { success: false, message: 'Too many requests. Slow down.' } });
 
-app.use('/api', apiLimiter);
+const SKIP_RATE_LIMIT_PATHS = ['/api/indices', '/api/heatmap', '/api/heatmap/sector-stocks'];
+app.use('/api', (req, res, next) => {
+    if (SKIP_RATE_LIMIT_PATHS.includes(req.path)) return next();
+    apiLimiter(req, res, next);
+});
 
 // Prevent API caching on mobile browsers
 app.use('/api', (req, res, next) => {
@@ -44,14 +60,17 @@ console.log('🐻 BEAR FIGHTER TRADING - Starting...');
 // ROUTES - ADMIN & DASHBOARD
 // ========================================
 app.get('/admin', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/register', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 app.get('/', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -74,7 +93,8 @@ app.get('/api/settings', (req, res) => {
         birthdayWishes: settings.birthdayWishes || { 1: 'Happy Birthday! 🎉' },
         plans: settings.plans || [{ id: 'standard', name: 'Standard Plan', days: 30, price: 0 }],
         upiQrImage: settings.upiQrImage || '',
-        upiPaymentId: settings.upiPaymentId || ''
+        upiPaymentId: settings.upiPaymentId || '',
+        telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME || ''
     });
 });
 
@@ -1164,21 +1184,22 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         console.log('✅ Login successful:', username);
         logLogin(username, true);
         
-        // Device lock check
+        // Device lock check — only 1 device allowed at a time, every switch needs fresh approval
         const deviceFingerprint = (device || '') + '|' + (platform || '') + '|' + (userAgent || '').substring(0, 80);
         if (!user.approvedDevices) user.approvedDevices = [];
         if (!user.pendingDevice) user.pendingDevice = null;
         
         let deviceApproved = true;
         if (deviceFingerprint && deviceFingerprint !== '|') {
-            if (user.approvedDevices.length > 0 && !user.approvedDevices.includes(deviceFingerprint)) {
-                deviceApproved = false;
-                user.pendingDevice = { fingerprint: deviceFingerprint, device: device || '', platform: platform || '', userAgent: (userAgent || '').substring(0, 150), requestedAt: new Date().toISOString() };
-                saveUsers(data);
-                return res.json({ success: false, deviceApproval: true, message: 'New device detected. Waiting for admin approval.' });
-            }
-            if (user.approvedDevices.length === 0) {
-                user.approvedDevices.push(deviceFingerprint);
+            if (user.approvedDevices.length > 0) {
+                if (user.approvedDevices[0] !== deviceFingerprint) {
+                    deviceApproved = false;
+                    user.pendingDevice = { fingerprint: deviceFingerprint, device: device || '', platform: platform || '', userAgent: (userAgent || '').substring(0, 150), requestedAt: new Date().toISOString() };
+                    saveUsers(data);
+                    return res.json({ success: false, deviceApproval: true, message: 'New device detected. Waiting for admin approval.' });
+                }
+            } else {
+                user.approvedDevices = [deviceFingerprint];
             }
         }
         
@@ -1217,6 +1238,149 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 // Logout
 app.post('/api/logout', (req, res) => {
     res.json({ success: true });
+});
+
+// ========================================
+// GOOGLE OAUTH LOGIN
+// ========================================
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
+const GOOGLE_SUCCESS_REDIRECT = process.env.GOOGLE_SUCCESS_REDIRECT || 'http://localhost:3000/';
+
+// Step 1: Redirect user to Google consent screen (link mode — requires uid)
+app.get('/api/auth/google/link', (req, res) => {
+    if (!GOOGLE_CLIENT_ID) {
+        return res.status(503).send('<h2>Google not configured yet.</h2><p>Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env</p><a href="/">← Back</a>');
+    }
+    const uid = req.query.uid;
+    if (!uid) {
+        return res.status(400).send('<h2>Missing user ID</h2><a href="/">← Back</a>');
+    }
+    const state = Buffer.from(JSON.stringify({ uid })).toString('base64url');
+    const params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: GOOGLE_REDIRECT_URI,
+        response_type: 'code',
+        scope: 'openid email profile',
+        access_type: 'offline',
+        prompt: 'consent',
+        state: state
+    });
+    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+});
+
+// Step 2: Handle Google callback — link to existing user
+app.get('/api/auth/google/callback', async (req, res) => {
+    try {
+        const { code, error, state } = req.query;
+        let uid = '';
+        try { uid = JSON.parse(Buffer.from(state, 'base64url').toString()).uid; } catch(e) {}
+        if (error || !code) {
+            return res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_error&reason=${error || 'no_code'}`);
+        }
+        const tokenRes = await axios.post('https://oauth2.googleapis.com/token', null, {
+            params: {
+                code,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: GOOGLE_REDIRECT_URI,
+                grant_type: 'authorization_code'
+            },
+            timeout: 15000
+        });
+        const { id_token } = tokenRes.data;
+        if (!id_token) {
+            return res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_error&reason=no_token`);
+        }
+        const payload = JSON.parse(Buffer.from(id_token.split('.')[1], 'base64url').toString());
+        const googleEmail = payload.email || '';
+        const googleName = payload.name || '';
+        const googlePhoto = payload.picture || '';
+        const googleSub = payload.sub || '';
+        if (!googleEmail) {
+            return res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_error&reason=no_email`);
+        }
+        console.log('🟢 Google link:', uid, googleEmail, googleName);
+        const data = loadUsers();
+        const user = data.users.find(u => u.id === uid);
+        if (!user) {
+            return res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_error&reason=user_not_found`);
+        }
+        user.googleSub = googleSub;
+        user.email = googleEmail;
+        user.verifiedEmail = googleEmail;
+        if (googlePhoto) user.profilePhoto = googlePhoto;
+        if (googleName && !user.fullName) user.fullName = googleName;
+        saveUsers(data);
+        console.log('✅ Google linked to:', user.username, googleEmail);
+        res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_linked`);
+    } catch (error) {
+        console.error('❌ Google link error:', error.message);
+        res.redirect(`${GOOGLE_SUCCESS_REDIRECT}?auth=google_error&reason=server`);
+    }
+});
+
+// ========================================
+// TELEGRAM LINK (via Telegram Login Widget)
+// ========================================
+
+// Verify Telegram and link to existing user
+app.post('/api/auth/telegram/link', async (req, res) => {
+    try {
+        const userId = req.headers['user-id'];
+        if (!userId) return res.json({ success: false, message: 'Not logged in' });
+        const { id, first_name, last_name, username, photo_url, auth_date, hash } = req.body;
+        if (!id || !hash || !auth_date) {
+            return res.json({ success: false, message: 'Incomplete Telegram auth data' });
+        }
+        const authTimestamp = parseInt(auth_date);
+        const now = Math.floor(Date.now() / 1000);
+        if (now - authTimestamp > 300) {
+            return res.json({ success: false, message: 'Telegram auth expired. Please try again.' });
+        }
+        const settings = loadSettings();
+        const botToken = TELEGRAM_BOT_TOKEN || settings.telegramBotToken || '';
+        if (!botToken) {
+            return res.json({ success: false, message: 'Telegram bot not configured on server' });
+        }
+        const checkString = Object.keys(req.body)
+            .filter(k => k !== 'hash')
+            .sort()
+            .map(k => `${k}=${req.body[k]}`)
+            .join('\n');
+        const secretKey = crypto.createHash('sha256').update(botToken).digest();
+        const hmac = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
+        if (hmac !== hash) {
+            console.log('❌ Telegram hash mismatch for uid:', userId);
+            return res.json({ success: false, message: 'Invalid Telegram auth. Please try again.' });
+        }
+        const telegramId = String(id);
+        const telegramUsername = username || '';
+        console.log('✈️ Telegram link:', userId, telegramId, telegramUsername);
+        const data = loadUsers();
+        const user = data.users.find(u => u.id === userId);
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+        user.telegramId = telegramId;
+        user.telegramUsername = telegramUsername;
+        user.telegramChatId = telegramId;
+        if (photo_url && !user.profilePhoto) user.profilePhoto = photo_url;
+        saveUsers(data);
+        console.log('✅ Telegram linked to:', user.username, telegramId);
+        res.json({
+            success: true,
+            user: {
+                telegramLinked: true,
+                telegramUsername: telegramUsername,
+                profilePhoto: user.profilePhoto || ''
+            }
+        });
+    } catch (error) {
+        console.error('❌ Telegram link error:', error.message);
+        res.json({ success: false, message: 'Server error during Telegram linking' });
+    }
 });
 
 // Check session
@@ -1260,7 +1424,12 @@ app.get('/api/me', (req, res) => {
             dob: user.dob || '',
             isBirthday: !!isBirthday,
             userAge: userAge,
-            birthdayWish: isBirthday ? bdayWishText : ''
+            birthdayWish: isBirthday ? bdayWishText : '',
+            profilePhoto: user.profilePhoto || '',
+            isVerified: !!(user.fullName && user.fullName.trim().length > 1 && user.verifiedEmail && user.verifiedMobile),
+            googleLinked: !!user.googleSub,
+            telegramLinked: !!user.telegramId,
+            classApproved: !!user.classApproved
         }
     });
 });
@@ -1318,7 +1487,13 @@ app.get('/api/me/profile', (req, res) => {
             mobile: user.verifiedMobile || '',
             verifiedName: !!(user.fullName && user.fullName.trim().length > 1),
             verifiedEmail: !!user.verifiedEmail,
-            verifiedMobile: !!user.verifiedMobile
+            verifiedMobile: !!user.verifiedMobile,
+            googleLinked: !!user.googleSub,
+            googleEmail: user.email || '',
+            telegramLinked: !!user.telegramId,
+            telegramUsername: user.telegramUsername || '',
+            profilePhoto: user.profilePhoto || '',
+            isVerified: !!(user.fullName && user.fullName.trim().length > 1 && user.verifiedEmail && user.verifiedMobile)
         }
     });
 });
@@ -1495,7 +1670,12 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         passwordPlain: u.passwordPlain || '',
         verifiedEmail: u.verifiedEmail || '',
         verifiedMobile: u.verifiedMobile || '',
-        isVerified: !!(u.fullName && u.fullName.trim().length > 1 && u.verifiedEmail && u.verifiedMobile)
+        isVerified: !!(u.fullName && u.fullName.trim().length > 1 && u.verifiedEmail && u.verifiedMobile),
+        authProvider: u.authProvider || 'password',
+        telegramId: u.telegramId || '',
+        telegramUsername: u.telegramUsername || '',
+        profilePhoto: u.profilePhoto || '',
+        classApproved: !!u.classApproved
     }));
     res.json({ success: true, users });
 });
@@ -1588,8 +1768,8 @@ app.post('/api/admin/renew', checkAdmin, (req, res) => {
             const settings = loadSettings();
             const matchedOffer = (settings.offers || []).find(o => o.active && o.code && o.code.toLowerCase() === offerCode.toLowerCase() && (!o.expiry || new Date(o.expiry) >= new Date()));
             if (matchedOffer) {
-                extraDays = 7;
-                offerApplied = matchedOffer.title + ' (+7 bonus days)';
+                extraDays = matchedOffer.bonusDays || 7;
+                offerApplied = matchedOffer.title + ' (+' + extraDays + ' bonus days)';
             }
         }
         
@@ -2078,8 +2258,8 @@ function saveMarketCache(cacheData) {
 }
 
 let marketCache = loadMarketCache();
-const INDICES_CACHE_TTL = 1000;   // 1 second (server background refreshes every 1s)
-const STOCKS_CACHE_TTL = 30000;   // 30 seconds
+const INDICES_CACHE_TTL = 3000;   // 3 seconds — background refresher keeps cache fresh
+const STOCKS_CACHE_TTL = 30000;   // 30 seconds — background refresher keeps cache fresh
 
 // ========================================
 // REAL-TIME SIGNAL ENGINE
@@ -2388,7 +2568,9 @@ Object.entries(STOCK_ISIN_KEYS).forEach(([sym, isin]) => {
 });
 
 // Fetch LTP from Upstox V3 API
+let _upstox429Until = 0;
 async function fetchUpstoxLTP(instrumentKeys) {
+    if (Date.now() < _upstox429Until) return null;
     const settings = loadSettings();
     const apiKey = settings.upstoxApiKey || process.env.UPSTOX_API_KEY || '';
     const accessToken = settings.upstoxAccessToken || process.env.UPSTOX_ACCESS_TOKEN || '';
@@ -2414,7 +2596,8 @@ async function fetchUpstoxLTP(instrumentKeys) {
         return null;
     } catch (error) {
         if (error.response?.status === 429) {
-            console.log('⚠️ Upstox rate limited - will retry later');
+            _upstox429Until = Date.now() + 10000;
+            console.log('⚠️ Upstox rate limited — backing off 10s');
         } else {
             console.log('❌ Upstox API error:', error.response?.status, error.response?.data?.message || error.message);
         }
@@ -2472,43 +2655,12 @@ async function fetchStockQuoteV2(symbols) {
     }
 }
 
-// Fetch index data from Upstox with caching
+// Fetch index data — serve ONLY from cache (background refresher handles Upstox calls)
 async function fetchIndicesData() {
-    const now = Date.now();
-    if (marketCache.indices.data && (now - marketCache.indices.timestamp) < INDICES_CACHE_TTL) {
+    if (marketCache.indices.data && marketCache.indices.data.length > 0) {
         return marketCache.indices.data;
     }
-    
-    const data = await fetchUpstoxLTP(INDEX_KEYS);
-    
-    if (data && Object.keys(data).length > 0) {
-        const mapped = {};
-        Object.keys(data).forEach(key => {
-            const q = data[key];
-            const cp = q.cp || 0;
-            const ltp = q.last_price || 0;
-            const change = ltp - cp;
-            const pct = cp > 0 ? (change / cp) * 100 : 0;
-            mapped[key] = {
-                name: INDEX_DISPLAY_NAMES[key] || key.replace('NSE_INDEX:', '').replace('BSE_INDEX:', ''),
-                ltp: ltp.toFixed(2),
-                change: change.toFixed(2),
-                pct: parseFloat(pct.toFixed(2))
-            };
-        });
-        // Return in INDEX_KEYS order, matching pipe or colon format
-        const result = INDEX_KEYS.map(ik => {
-            const colonKey = ik.replace('|', ':');
-            return mapped[ik] || mapped[colonKey] || null;
-        }).filter(Boolean);
-        if (result.length > 0) {
-            marketCache.indices = { data: result, timestamp: now };
-            saveMarketCache(marketCache);
-            return result;
-        }
-    }
-    
-    return marketCache.indices.data || null;
+    return null;
 }
 
 // Fetch stock data - try V2 first, fallback to V3 ISIN, with caching
@@ -2551,69 +2703,20 @@ async function fetchStockQuote(symbols) {
     const symbolsKey = symbols.sort().join(',');
     const now = Date.now();
     
-    // Check if we already have this exact set cached
-    if (marketCache.stocks.data && marketCache.stocks.symbols === symbolsKey && (now - marketCache.stocks.timestamp) < STOCKS_CACHE_TTL) {
-        return marketCache.stocks.data;
-    }
-    
     // Check if we have all these symbols individually cached (merged from previous fetches)
     if (marketCache.stocks && marketCache.stocks.data) {
         const allCached = symbols.every(s => marketCache.stocks.data[s]);
         if (allCached) {
             const filtered = {};
             symbols.forEach(s => { filtered[s] = marketCache.stocks.data[s]; });
-            // If cache is fresh enough, return immediately
-            if ((now - marketCache.stocks.timestamp) < STOCKS_CACHE_TTL) return filtered;
-            // Stale but complete — return and refresh in background
-            fetchStockQuoteBackground(symbols, symbolsKey);
             return filtered;
         }
-    }
-    
-    // Try V2 API first (simpler, uses symbol names)
-    let result = await fetchStockQuoteV2(symbols);
-    
-    // Fallback to V3 with ISIN keys
-    if (!result || Object.keys(result).length === 0) {
-        const isinKeys = symbols.map(s => STOCK_ISIN_KEYS[s]).filter(k => k);
-        if (isinKeys.length > 0) {
-            const data = await fetchUpstoxLTP(isinKeys);
-            if (data && Object.keys(data).length > 0) {
-                result = {};
-                Object.keys(data).forEach(key => {
-                    const symbol = ISIN_TO_SYMBOL[key] || key.split(/[:|]/).pop();
-                    if (STOCK_ISIN_KEYS[symbol]) {
-                        const q = data[key];
-                        const ltp = q.last_price || 0;
-                        const cp = q.cp || 0;
-                        const change = ltp - cp;
-                        const pct = cp > 0 ? (change / cp) * 100 : 0;
-                        result[symbol] = { symbol, ltp, change, pct: parseFloat(pct.toFixed(2)), volume: q.volume || 0 };
-                    }
-                });
-            }
-        }
-    }
-    
-    if (result && Object.keys(result).length > 0) {
-        // Merge with existing cache data
-        const merged = { ...(marketCache.stocks.data || {}), ...result };
-        marketCache.stocks = { data: merged, timestamp: now, symbols: symbolsKey };
-        saveMarketCache(marketCache);
-        return result;
-    }
-    
-    // API failed — return stale cache data (never lose data we already have)
-    if (marketCache.stocks && marketCache.stocks.data) {
+        // Partial cache — return what we have, background refresher will fill the rest
         const filtered = {};
         symbols.forEach(s => { if (marketCache.stocks.data[s]) filtered[s] = marketCache.stocks.data[s]; });
-        if (Object.keys(filtered).length > 0) {
-            console.log('📦 Returning', Object.keys(filtered).length, 'stale cached stocks for', symbols.length, 'requested');
-            return filtered;
-        }
+        if (Object.keys(filtered).length > 0) return filtered;
     }
     
-    console.log('⚠️ fetchStockQuote: no data and no cache for', symbols.length, 'symbols');
     return null;
 }
 
@@ -3197,11 +3300,28 @@ async function refreshIndicesBackground() {
 async function refreshStocksBackground() {
     try {
         const allSymbols = [...new Set([...TOP_GAINERS, ...TOP_LOSERS, ...FO_STOCKS])];
-        const result = await fetchStockQuote(allSymbols);
-        if (result && Object.keys(result).length > 0) {
-            marketCache.stocks = { data: result, timestamp: Date.now(), symbols: allSymbols.sort().join(',') };
-            Object.entries(result).forEach(([sym, data]) => {
-                if (data.ltp > 0) appendToHistory(sym, data.ltp, data.volume || 0);
+        const isinKeys = allSymbols.map(s => STOCK_ISIN_KEYS[s]).filter(Boolean);
+        if (isinKeys.length === 0) return;
+        const data = await fetchUpstoxLTP(isinKeys);
+        if (!data || Object.keys(data).length === 0) return;
+        const result = {};
+        Object.keys(data).forEach(key => {
+            const symbol = ISIN_TO_SYMBOL[key] || key.split(/[:|]/).pop();
+            if (STOCK_ISIN_KEYS[symbol]) {
+                const q = data[key];
+                const ltp = q.last_price || q.ltp || 0;
+                const cp = q.cp || q.close_price || ltp;
+                const change = ltp - cp;
+                const pct = cp > 0 ? (change / cp) * 100 : 0;
+                result[symbol] = { symbol, ltp, change, pct: parseFloat(pct.toFixed(2)), volume: q.volume || 0 };
+            }
+        });
+        if (Object.keys(result).length > 0) {
+            const merged = { ...(marketCache.stocks.data || {}), ...result };
+            marketCache.stocks = { data: merged, timestamp: Date.now(), symbols: allSymbols.sort().join(',') };
+            saveMarketCache(marketCache);
+            Object.entries(result).forEach(([sym, d]) => {
+                if (d.ltp > 0) appendToHistory(sym, d.ltp, d.volume || 0);
             });
         }
     } catch (e) {}
@@ -3235,7 +3355,7 @@ app.get('/api/admin/offers', checkAdmin, (req, res) => {
 
 app.post('/api/admin/offers', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, theme, bgImage } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses } = req.body;
         if (!title) return res.json({ success: false, message: 'Title required' });
         const settings = loadSettings();
         if (!settings.offers) settings.offers = [];
@@ -3245,6 +3365,9 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
             description: (description || '').trim(),
             code: (code || '').trim(),
             expiry: expiry || null,
+            bonusDays: parseInt(bonusDays) || 7,
+            maxUses: parseInt(maxUses) || 0,
+            usedCount: 0,
             target: target || 'all',
             selectedUsers: (selectedUsers || []),
             theme: (theme || 'golden'),
@@ -3296,8 +3419,7 @@ app.post('/api/admin/device/:username/approve', checkAdmin, (req, res) => {
         const data = loadUsers();
         const user = data.users.find(u => u.username === req.params.username);
         if (!user || !user.pendingDevice) return res.json({ success: false, message: 'No pending device' });
-        if (!user.approvedDevices) user.approvedDevices = [];
-        user.approvedDevices.push(user.pendingDevice.fingerprint);
+        user.approvedDevices = [user.pendingDevice.fingerprint];
         logActivity('device_approved', `Device approved for ${user.username}: ${user.pendingDevice.device}`);
         user.pendingDevice = null;
         saveUsers(data);
@@ -3317,6 +3439,18 @@ app.post('/api/admin/device/:username/reject', checkAdmin, (req, res) => {
     } catch (e) { res.json({ success: false }); }
 });
 
+app.post('/api/admin/user/:username/class-access', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const user = data.users.find(u => u.username === req.params.username);
+        if (!user) return res.json({ success: false, message: 'User not found' });
+        user.classApproved = !user.classApproved;
+        logActivity('class_access_toggled', `Class access ${user.classApproved ? 'granted' : 'revoked'} for ${user.username}`);
+        saveUsers(data);
+        res.json({ success: true, classApproved: user.classApproved, message: user.classApproved ? 'Class access granted' : 'Class access revoked' });
+    } catch (e) { res.json({ success: false }); }
+});
+
 app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
     try {
         const settings = loadSettings();
@@ -3330,7 +3464,7 @@ app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
 
 app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, theme, bgImage } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses } = req.body;
         const settings = loadSettings();
         const offer = (settings.offers || []).find(o => o.id === req.params.id);
         if (!offer) return res.json({ success: false, message: 'Offer not found' });
@@ -3338,6 +3472,8 @@ app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
         if (description !== undefined) offer.description = description.trim();
         if (code !== undefined) offer.code = code.trim();
         if (expiry !== undefined) offer.expiry = expiry || null;
+        if (bonusDays !== undefined) offer.bonusDays = parseInt(bonusDays) || 7;
+        if (maxUses !== undefined) offer.maxUses = parseInt(maxUses) || 0;
         if (target !== undefined) offer.target = target;
         if (selectedUsers !== undefined) offer.selectedUsers = selectedUsers;
         if (theme !== undefined) offer.theme = theme;
@@ -3352,6 +3488,291 @@ app.delete('/api/admin/offers/:id', checkAdmin, (req, res) => {
     try {
         const settings = loadSettings();
         settings.offers = (settings.offers || []).filter(o => o.id !== req.params.id);
+        saveSettings(settings);
+        res.json({ success: true });
+    } catch (e) { res.json({ success: false }); }
+});
+
+// ========================================
+// PROMO CODE VALIDATION (User-side)
+// ========================================
+app.post('/api/validate-promo', (req, res) => {
+    try {
+        const userId = req.headers['user-id'];
+        if (!userId) return res.status(401).json({ valid: false, message: 'Not logged in' });
+        const { code } = req.body;
+        if (!code || !code.trim()) return res.json({ valid: false, message: 'Enter a promo code' });
+        const settings = loadSettings();
+        const matched = (settings.offers || []).find(o =>
+            o.active && o.code && o.code.toLowerCase() === code.trim().toLowerCase() &&
+            (!o.expiry || new Date(o.expiry) >= new Date())
+        );
+        if (!matched) return res.json({ valid: false, message: 'Invalid or expired promo code' });
+        const bonusDays = matched.bonusDays || 7;
+        res.json({
+            valid: true,
+            offer: { id: matched.id, title: matched.title, description: matched.description, bonusDays, code: matched.code },
+            message: matched.title + ' — +' + bonusDays + ' bonus days on renewal!'
+        });
+    } catch (e) { res.json({ valid: false, message: 'Server error' }); }
+});
+
+// ========================================
+// RENEWAL REQUESTS (User submits, Admin approves)
+// ========================================
+app.post('/api/renewal-request', (req, res) => {
+    try {
+        const userId = req.headers['user-id'];
+        if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
+        const data = loadUsers();
+        const user = data.users.find(u => u.id === userId);
+        if (!user) return res.status(401).json({ success: false, message: 'User not found' });
+
+        const { code, amount, category, planName, days, txnId } = req.body;
+        let bonusDays = 0;
+        let offerTitle = '';
+        if (code) {
+            const settings = loadSettings();
+            const matched = (settings.offers || []).find(o =>
+                o.active && o.code && o.code.toLowerCase() === code.trim().toLowerCase() &&
+                (!o.expiry || new Date(o.expiry) >= new Date())
+            );
+            if (matched) {
+                bonusDays = matched.bonusDays || 7;
+                offerTitle = matched.title;
+            }
+        }
+
+        const settings = loadSettings();
+        if (!settings.renewalRequests) settings.renewalRequests = [];
+        const request = {
+            id: 'rr_' + Date.now(),
+            userId: user.id,
+            username: user.username,
+            fullName: user.fullName || user.username,
+            promoCode: code || null,
+            offerTitle: offerTitle || null,
+            bonusDays,
+            amount: parseFloat(amount) || 0,
+            category: category || user.category || 'Silver',
+            planName: planName || null,
+            planDays: parseInt(days) || 0,
+            txnId: txnId || null,
+            status: 'pending',
+            requestedAt: new Date().toISOString()
+        };
+        settings.renewalRequests.push(request);
+        saveSettings(settings);
+        logActivity('renewal_request', `${user.username} requested renewal — Code: ${code || 'none'}, Bonus: ${bonusDays}d`);
+
+        res.json({ success: true, message: 'Renewal request sent! Admin will process it shortly.', requestId: request.id });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Get all renewal requests
+app.get('/api/admin/renewal-requests', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const status = req.query.status || 'all';
+        let requests = settings.renewalRequests || [];
+        if (status !== 'all') requests = requests.filter(r => r.status === status);
+        requests.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+        res.json({ success: true, requests });
+    } catch (e) { res.json({ success: false, requests: [] }); }
+});
+
+// Admin: Approve renewal request
+app.post('/api/admin/renewal-requests/:id/approve', checkAdmin, (req, res) => {
+    try {
+        const { days } = req.body;
+        const settings = loadSettings();
+        const request = (settings.renewalRequests || []).find(r => r.id === req.params.id);
+        if (!request) return res.json({ success: false, message: 'Request not found' });
+        if (request.status !== 'pending') return res.json({ success: false, message: 'Already processed' });
+
+        const extendDays = parseInt(days) || request.planDays || 30;
+        const totalDays = extendDays + (request.bonusDays || 0);
+
+        const data = loadUsers();
+        const user = data.users.find(u => u.id === request.userId || u.username === request.username);
+        if (!user) return res.json({ success: false, message: 'User not found' });
+
+        const currentExpiry = new Date(user.subscriptionExpiry);
+        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+        user.subscriptionExpiry = new Date(baseDate.getTime() + totalDays * 24 * 60 * 60 * 1000).toISOString();
+        user.approved = true;
+        if (request.amount) user.paymentAmount = (parseFloat(user.paymentAmount) || 0) + request.amount;
+        user.lastRenewDate = new Date().toISOString();
+        saveUsers(data);
+
+        request.status = 'approved';
+        request.approvedAt = new Date().toISOString();
+        request.approvedDays = totalDays;
+        saveSettings(settings);
+        logActivity('renewal_approved', `${request.username} — ${extendDays}d + ${request.bonusDays || 0} bonus = ${totalDays}d`);
+
+        res.json({ success: true, message: `${request.username} renewed for ${totalDays} days (${extendDays} + ${request.bonusDays || 0} bonus)` });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Reject renewal request
+app.post('/api/admin/renewal-requests/:id/reject', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const request = (settings.renewalRequests || []).find(r => r.id === req.params.id);
+        if (!request) return res.json({ success: false, message: 'Request not found' });
+        request.status = 'rejected';
+        request.rejectedAt = new Date().toISOString();
+        saveSettings(settings);
+        logActivity('renewal_rejected', `${request.username} — Code: ${request.promoCode || 'none'}`);
+        res.json({ success: true, message: 'Request rejected' });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Delete renewal request
+app.delete('/api/admin/renewal-requests/:id', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.renewalRequests = (settings.renewalRequests || []).filter(r => r.id !== req.params.id);
+        saveSettings(settings);
+        res.json({ success: true });
+    } catch (e) { res.json({ success: false }); }
+});
+
+// ========================================
+// STUDENT TRADING CLASS (Admin CRUD + User access)
+// ========================================
+
+// Helper: check if user has class access
+function hasClassAccess(user, classItem) {
+    if (!classItem.access || classItem.access.type === 'all') return true;
+    if (classItem.access.type === 'category') {
+        const cats = Array.isArray(classItem.access.categories) ? classItem.access.categories : (classItem.access.categories || '').split(',').map(s => s.trim());
+        return cats.includes((user.category || '').toLowerCase());
+    }
+    if (classItem.access.type === 'specific') {
+        const users = Array.isArray(classItem.access.users) ? classItem.access.users : (classItem.access.users || '').split(',').map(s => s.trim());
+        return users.includes(user.username);
+    }
+    return false;
+}
+
+// User: Get all classes they have access to
+app.get('/api/classes', checkUserAuth, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const classes = (settings.classes || []).filter(c => c.active && hasClassAccess(req.user, c));
+        res.json({ success: true, classes });
+    } catch (e) { res.json({ success: false, classes: [] }); }
+});
+
+// User: Get single class by id
+app.get('/api/classes/:id', checkUserAuth, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.id);
+        if (!cls || !cls.active) return res.status(404).json({ success: false, message: 'Not found' });
+        if (!hasClassAccess(req.user, cls)) return res.status(403).json({ success: false, message: 'Access denied' });
+        res.json({ success: true, class: cls });
+    } catch (e) { res.json({ success: false }); }
+});
+
+// Admin: Get all classes
+app.get('/api/admin/classes', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        res.json({ success: true, classes: settings.classes || [] });
+    } catch (e) { res.json({ success: false, classes: [] }); }
+});
+
+// Admin: Create class/module
+app.post('/api/admin/classes', checkAdmin, (req, res) => {
+    try {
+        const { title, description, order, access, thumbnail } = req.body;
+        if (!title) return res.json({ success: false, message: 'Title required' });
+        const settings = loadSettings();
+        if (!settings.classes) settings.classes = [];
+        const cls = {
+            id: 'class_' + Date.now(),
+            title: title.trim(),
+            description: (description || '').trim(),
+            thumbnail: (thumbnail || '').trim(),
+            order: parseInt(order) || settings.classes.length + 1,
+            videos: [],
+            access: access || { type: 'all', categories: [], users: [] },
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+        settings.classes.push(cls);
+        saveSettings(settings);
+        logActivity('class_created', `Title: ${title}`);
+        res.json({ success: true, message: 'Class created!', class: cls });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Update class
+app.put('/api/admin/classes/:id', checkAdmin, (req, res) => {
+    try {
+        const { title, description, order, access, thumbnail, active } = req.body;
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.id);
+        if (!cls) return res.json({ success: false, message: 'Not found' });
+        if (title !== undefined) cls.title = title.trim();
+        if (description !== undefined) cls.description = description.trim();
+        if (thumbnail !== undefined) cls.thumbnail = thumbnail.trim();
+        if (order !== undefined) cls.order = parseInt(order) || cls.order;
+        if (access !== undefined) cls.access = access;
+        if (active !== undefined) cls.active = active;
+        cls.updatedAt = new Date().toISOString();
+        saveSettings(settings);
+        res.json({ success: true, message: 'Class updated', class: cls });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Delete class
+app.delete('/api/admin/classes/:id', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        settings.classes = (settings.classes || []).filter(c => c.id !== req.params.id);
+        saveSettings(settings);
+        res.json({ success: true });
+    } catch (e) { res.json({ success: false }); }
+});
+
+// Admin: Add video to class
+app.post('/api/admin/classes/:id/videos', checkAdmin, (req, res) => {
+    try {
+        const { title, youtubeUrl, url, duration } = req.body;
+        const videoUrl = (url || youtubeUrl || '').trim();
+        if (!title || !videoUrl) return res.json({ success: false, message: 'Title and URL required' });
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.id);
+        if (!cls) return res.json({ success: false, message: 'Class not found' });
+        if (!cls.videos) cls.videos = [];
+        const video = {
+            id: 'vid_' + Date.now(),
+            title: title.trim(),
+            url: videoUrl,
+            youtubeUrl: videoUrl,
+            duration: (duration || '').trim(),
+            order: cls.videos.length + 1,
+            createdAt: new Date().toISOString()
+        };
+        cls.videos.push(video);
+        cls.updatedAt = new Date().toISOString();
+        saveSettings(settings);
+        res.json({ success: true, message: 'Video added!', video });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Remove video from class
+app.delete('/api/admin/classes/:classId/videos/:videoId', checkAdmin, (req, res) => {
+    try {
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.classId);
+        if (!cls) return res.json({ success: false, message: 'Class not found' });
+        cls.videos = (cls.videos || []).filter(v => v.id !== req.params.videoId);
+        cls.updatedAt = new Date().toISOString();
         saveSettings(settings);
         res.json({ success: true });
     } catch (e) { res.json({ success: false }); }
@@ -3567,12 +3988,19 @@ app.delete('/api/admin/banners/:id', checkAdmin, async (req, res) => {
 
 // Start background refreshers
 updateIndexKeys(); // Load selected indices from settings first
-setInterval(refreshIndicesBackground, 1000);
-setInterval(refreshStocksBackground, 5000);
+function startIndicesRefresher() {
+    const delay = isMarketOpen() ? 2000 : 30000;
+    setTimeout(async () => {
+        await refreshIndicesBackground();
+        startIndicesRefresher();
+    }, delay);
+}
+startIndicesRefresher();
+setInterval(refreshStocksBackground, 15000);
 setInterval(saveSignalHistory, 60000);
 // Initial refresh
 setTimeout(refreshIndicesBackground, 2000);
-setTimeout(refreshStocksBackground, 5000);
+setTimeout(refreshStocksBackground, 3000);
 
 // ========================================
 // SERVER START
@@ -3649,7 +4077,7 @@ async function startServer() {
         console.log(`🌐 Dashboard: http://localhost:${PORT}`);
         console.log(`🔐 Admin: use panel to login`);
         console.log(`💾 Database: ${mongoConnected ? 'MongoDB Atlas ✅' : 'JSON files (local)'}`);
-        console.log(`📊 Background refresher: 1s (indices), 5s (stocks)`);
+        console.log(`📊 Background refresher: 2s indices (market hours) / 30s (closed), 15s stocks`);
         console.log(`${'='.repeat(50)}\n`);
     });
 }

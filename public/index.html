@@ -528,7 +528,7 @@ body {
 /* ═══════ HEADER ═══════ */
 header {
     background: linear-gradient(90deg, #0f0f0f, #1a1a2e);
-    padding: 12px 24px;
+    padding: 14px 24px;
     border-bottom: 2px solid #ff6b3544;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -538,21 +538,21 @@ header {
 
 .hdr-left { display: flex; align-items: center; gap: 12px; }
 .logo-box {
-    width: 48px; height: 48px; border-radius: 12px;
+    width: 60px; height: 60px; border-radius: 16px;
     background: linear-gradient(135deg, #1a1a2e, #2a1a1a);
     border: 1px solid #ff6b3566;
     display: flex; align-items: center; justify-content: center;
-    font-size: 26px; box-shadow: 0 0 10px #ff6b3520;
+    font-size: 34px; box-shadow: 0 0 10px #ff6b3520;
 }
 
 .hdr-center { text-align: center; }
 .brand-name {
-    font-size: 20px; font-weight: 800; letter-spacing: 3px;
+    font-size: 29px; font-weight: 800; letter-spacing: 3px;
     background: linear-gradient(90deg, #ff6b35, #f7c59f);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .brand-sub {
-    font-size: 10px; color: #888; letter-spacing: 4px; margin-top: 2px;
+    font-size: 13px; color: #888; letter-spacing: 4px; margin-top: 2px;
     animation: flashText 2s infinite;
 }
 @keyframes flashText {
@@ -632,6 +632,63 @@ header {
     transition: all 0.3s;
     text-decoration: none;
     border: 1px solid;
+}
+
+/* ICON NAV BAR */
+.icon-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 7px 6px;
+    background: linear-gradient(180deg, #0d0d16, #0a0a12);
+    border-bottom: 1px solid #1f1f2e;
+}
+.icon-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.15s;
+    position: relative;
+    white-space: nowrap;
+}
+.icon-nav-item:hover,
+.icon-nav-item:active {
+    background: rgba(168,85,247,0.15);
+}
+.icon-nav-emoji {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.icon-nav-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+.icon-nav-label {
+    font-size: 10px;
+    color: #999;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.icon-nav-item:hover .icon-nav-label,
+.icon-nav-item:active .icon-nav-label {
+    color: #e4e4e7;
+}
+.icon-nav-logout {
+    color: #ef4444;
+}
+.icon-nav-logout .icon-nav-label {
+    color: #ef4444;
 }
 
 .btn-admin {
@@ -879,6 +936,32 @@ header {
 .heatmap-stock-change.up { color: #00c853; }
 .heatmap-stock-change.down { color: #ff1744; }
 .heatmap-popup-empty { color: #71717a; font-size: 11px; padding: 24px 10px; text-align: center; }
+
+/* EXPIRY REMINDER POPUP */
+.expiry-popup-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:10008; align-items:center; justify-content:center; }
+.expiry-popup-overlay.show { display:flex; }
+.expiry-popup { background:linear-gradient(135deg,#1a1a2e,#16213e); border:1px solid #2a2a35; border-radius:16px; padding:24px; width:360px; max-width:92vw; box-shadow:0 20px 60px rgba(0,0,0,0.8); animation:expFadeIn .3s ease; }
+@keyframes expFadeIn { from{opacity:0;transform:scale(.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.expiry-popup-header { text-align:center; margin-bottom:16px; }
+.expiry-popup-icon { font-size:36px; margin-bottom:6px; }
+.expiry-popup-title { font-size:16px; font-weight:700; color:#e4e4e7; margin-bottom:4px; }
+.expiry-popup-subtitle { font-size:12px; color:#71717a; }
+.expiry-popup-timer { display:flex; justify-content:center; gap:10px; margin:12px 0; }
+.expiry-timer-block { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:8px 12px; text-align:center; min-width:52px; }
+.expiry-timer-val { font-size:20px; font-weight:800; color:#ef4444; font-family:'JetBrains Mono',monospace; }
+.expiry-timer-label { font-size:8px; color:#71717a; text-transform:uppercase; letter-spacing:1px; }
+.expiry-promo-section { margin-top:14px; }
+.expiry-promo-input-row { display:flex; gap:6px; }
+.expiry-promo-input { flex:1; padding:8px 12px; background:#0a0a12; border:1px solid #2a2a35; border-radius:8px; color:#e4e4e7; font-size:12px; outline:none; }
+.expiry-promo-input:focus { border-color:#f59e0b; }
+.expiry-promo-btn { padding:8px 14px; background:linear-gradient(135deg,#f59e0b,#d97706); border:none; border-radius:8px; color:#000; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.expiry-promo-msg { font-size:10px; margin-top:6px; min-height:14px; }
+.expiry-popup-actions { display:flex; gap:8px; margin-top:14px; }
+.expiry-popup-btn { flex:1; padding:10px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; text-align:center; }
+.expiry-popup-btn.renew { background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; }
+.expiry-popup-btn.contact { background:rgba(255,255,255,0.08); color:#e4e4e7; border:1px solid #2a2a35; }
+.expiry-popup-dismiss { text-align:center; margin-top:10px; font-size:10px; color:#555; cursor:pointer; }
+.expiry-popup-dismiss:hover { color:#888; }
 
 .hm-cell {
     border-radius: 4px;
@@ -1910,19 +1993,20 @@ header {
     .brand-sub { font-size: 8px; letter-spacing: 2px; }
     #headerHighlightBadge { display: none !important; }
     .hdr-right {
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        gap: 6px;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
     }
     .user-info { font-size: 10px; gap: 4px; }
     .sub-badge { font-size: 8px; padding: 1px 5px; }
-    #clock { font-size: 11px; }
+    #clock { font-size: 12px; }
     .market-status { font-size: 9px; padding: 2px 6px; }
     #countdown { font-size: 9px; }
-    .header-btns { gap: 4px; }
-    .header-btn { padding: 4px 8px; font-size: 10px; }
+    .icon-nav-bar { padding: 5px 4px; gap: 2px; }
+    .icon-nav-item { height: 32px; gap: 3px; }
+    .icon-nav-emoji { font-size: 14px; }
+    .icon-nav-img { width: 16px; height: 16px; }
+    .icon-nav-label { font-size: 9px; }
 
     /* LOGIN */
     .login-box {
@@ -2497,18 +2581,6 @@ input[type="color"] {
         
         <div class="error-msg" id="loginError"></div>
         
-        <div style="width:60px;height:1px;background:rgba(255,255,255,0.08);margin:18px auto 14px;border-radius:1px;"></div>
-        
-        <div style="display:flex;gap:10px;margin-bottom:14px;">
-            <button onclick="googleLogin()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(255,255,255,0.04);color:white;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif;" onmouseover="this.style.borderColor='rgba(66,133,244,0.5)';this.style.background='rgba(66,133,244,0.08)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.background='rgba(255,255,255,0.04)'">
-                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Google
-            </button>
-            <button onclick="otpLogin()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(255,255,255,0.04);color:white;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif;" onmouseover="this.style.borderColor='rgba(255,107,53,0.5)';this.style.background='rgba(255,107,53,0.08)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.background='rgba(255,255,255,0.04)'">
-                📱 OTP
-            </button>
-        </div>
-        
         <div class="login-hint">
             Don't have an account? <br>
             <a href="/register" style="color:#ff6b35;font-weight:700;text-decoration:none;font-size:13px;letter-spacing:0.5px;">Get Access →</a>
@@ -2579,7 +2651,9 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('offers', this)">🎁 Offers</div>
       <div class="admin-nav-item" onclick="showAdminSection('scheduled', this)">⏰ Scheduled</div>
       <div class="admin-nav-item" onclick="showAdminSection('reminders', this)">💳 Reminders</div>
+      <div class="admin-nav-item" onclick="showAdminSection('renewalRequests', this)">📋 Renewal Requests <span id="renewalReqBadge" style="display:none;background:#ef4444;color:#fff;font-size:8px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span></div>
       <div class="admin-nav-item" onclick="showAdminSection('holidayBanners', this)">🎉 Holiday Banners</div>
+      <div class="admin-nav-item" onclick="showAdminSection('tradingClass', this)">📚 Trading Class</div>
     </div>
     <div class="admin-nav-section">
       <div class="admin-nav-label">Settings</div>
@@ -2622,7 +2696,7 @@ input[type="color"] {
         </div>
 
         <!-- Stats -->
-        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(8, 1fr);">
+        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(9, 1fr);">
           <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
@@ -2654,6 +2728,10 @@ input[type="color"] {
           <div class="admin-stat-card" onclick="showStatPopup('pendingDevices')" style="cursor:pointer;background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.02));" title="Click to view pending device approvals">
             <div class="admin-stat-label">📱 Pending Devices</div>
             <div class="admin-stat-value" style="color: #ef4444;" id="dashPendingDevices">0</div>
+          </div>
+          <div class="admin-stat-card" onclick="showStatPopup('pendingRenewals')" style="cursor:pointer;background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.02));" title="Click to view pending renewal requests">
+            <div class="admin-stat-label">🔄 Renewal Requests</div>
+            <div class="admin-stat-value" style="color: #3b82f6;" id="dashRenewalReqs">0</div>
           </div>
         </div>
         <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
@@ -3471,6 +3549,10 @@ input[type="color"] {
                   <div class="admin-form-group"><label class="admin-form-label">🎟️ Promo Code</label><input type="text" id="offerCode" class="admin-form-input" placeholder="e.g. INDIE50"></div>
                   <div class="admin-form-group"><label class="admin-form-label">📅 Valid Until</label><input type="date" id="offerExpiry" class="admin-form-input"></div>
                 </div>
+                <div class="admin-form-row">
+                  <div class="admin-form-group"><label class="admin-form-label">🎁 Bonus Days</label><input type="number" id="offerBonusDays" class="admin-form-input" value="7" min="1" max="365" placeholder="7"></div>
+                  <div class="admin-form-group"><label class="admin-form-label">📊 Max Uses</label><input type="number" id="offerMaxUses" class="admin-form-input" value="0" min="0" placeholder="0 = unlimited"></div>
+                </div>
                 <div class="admin-form-group">
                   <label class="admin-form-label">🖼️ Background Image <span style="color:#555;font-weight:400;font-size:10px;">(Max 200KB | 800×400px best)</span></label>
                   <div style="display:flex;gap:6px;">
@@ -3624,6 +3706,88 @@ input[type="color"] {
         </div>
       </div>
 
+      <!-- ═══ RENEWAL REQUESTS SECTION ═══ -->
+      <div id="section-renewalRequests" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">📋 Renewal Requests</div>
+            <div style="display:flex;gap:6px;">
+              <select id="rrFilterStatus" class="admin-form-select" style="width:auto;font-size:10px;padding:4px 8px;" onchange="loadRenewalRequests()">
+                <option value="all">All</option>
+                <option value="pending" selected>Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button class="admin-btn admin-btn-secondary" onclick="loadRenewalRequests()" style="font-size:10px;">🔄</button>
+            </div>
+          </div>
+          <div id="renewalRequestsList" style="max-height:400px;overflow-y:auto;">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TRADING CLASS SECTION ═══ -->
+      <div id="section-tradingClass" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">📚 Trading Classes</div>
+            <button class="admin-btn admin-btn-primary" onclick="showClassForm()">+ New Module</button>
+          </div>
+          <div id="classesAdminList" style="max-height:500px;overflow-y:auto;">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">Loading...</div>
+          </div>
+        </div>
+        <!-- Class Create/Edit Form -->
+        <div id="classFormWrap" style="display:none;">
+          <div class="admin-card" style="border:1px solid #22c55e;">
+            <div class="admin-card-header">
+              <div class="admin-card-title" id="classFormTitle">✨ New Module</div>
+              <button class="admin-btn admin-btn-secondary" onclick="hideClassForm()">✕ Close</button>
+            </div>
+            <input type="hidden" id="classEditId" value="">
+            <div class="admin-form-group">
+              <label class="admin-form-label">📖 Module Title</label>
+              <input type="text" id="classTitle" class="admin-form-input" placeholder="e.g. Introduction to Trading">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">📝 Description</label>
+              <textarea id="classDesc" rows="2" class="admin-form-input" placeholder="Module description..." style="resize:vertical;"></textarea>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label class="admin-form-label">🔢 Order</label>
+                <input type="number" id="classOrder" class="admin-form-input" value="1" min="1">
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-form-label">🖼️ Thumbnail URL</label>
+                <input type="text" id="classThumb" class="admin-form-input" placeholder="Optional thumbnail">
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">🔒 Access Control</label>
+              <select id="classAccessType" class="admin-form-select" onchange="toggleClassAccess()">
+                <option value="all">All Users</option>
+                <option value="category">Category Based</option>
+                <option value="specific">Specific Users</option>
+              </select>
+              <div id="classAccessCategories" style="display:none;margin-top:6px;">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" class="class-cat-cb" value="silver" style="accent-color:#c0c0c0;"> Silver</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" class="class-cat-cb" value="gold" style="accent-color:#f59e0b;"> Gold</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" class="class-cat-cb" value="diamond" style="accent-color:#22c55e;"> Diamond</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;"><input type="checkbox" class="class-cat-cb" value="premium" style="accent-color:#a855f7;"> Premium</label>
+                </div>
+              </div>
+              <div id="classAccessUsers" style="display:none;margin-top:6px;">
+                <input type="text" id="classAccessUserInput" class="admin-form-input" placeholder="Enter username, comma separated" style="font-size:10px;">
+              </div>
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="saveClass()" style="width:100%;">💾 Save Module</button>
+          </div>
+        </div>
+      </div>
+
       </div><!-- /admin-left-panel -->
 
       <!-- ═══ RIGHT SIDEBAR ═══ -->
@@ -3696,22 +3860,27 @@ input[type="color"] {
             <div id="headerHighlightBadge" style="display: none; margin-top: 4px; padding: 2px 8px; background: linear-gradient(135deg, #1a1a2e, #2a1a1a); border: 1px solid #ff6b3566; border-radius: 6px; font-size: 8px; font-weight: 700; color: #ff6b35; letter-spacing: 1.5px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 0 8px #ff6b3520;">⭐ PREMIUM</div>
         </div>
         <div class="hdr-right">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="market-status" id="mkt-badge">--</span>
+            </div>
             <div class="user-info">
-                <span>👤 <strong id="displayUsername">user</strong></span>
+                <span><img id="headerProfilePic" src="" style="display:none;width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #c0a843;vertical-align:middle;margin-right:2px;" onerror="this.style.display='none';document.getElementById('headerUserEmoji').style.display='inline';"><span id="headerUserEmoji">👤</span> <strong id="displayUsername">user</strong><span id="headerBlueTick" style="display:none;color:#22c55e;font-size:13px;vertical-align:middle;" title="Verified Account">✅</span></span>
                 <span class="sub-badge" id="subBadge">30d left</span>
             </div>
-            <span id="clock">--:--:--</span>
-            <span class="market-status" id="mkt-badge">--</span>
             <span id="countdown"></span>
-            <div class="header-btns">
-                <a class="header-btn" onclick="showUserProfile()" title="Profile" style="cursor:pointer;">👤</a>
-                <a class="header-btn" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.053 5.56-5.022c.242-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/></svg></a>
-                <a class="header-btn" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp" style="cursor:pointer;display:none;padding:4px 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.8 13.7c-.24.68-1.41 1.32-1.94 1.37-.5.05-1.14.07-1.84-.18-.42-.15-.97-.35-1.67-.7-2.95-1.45-4.87-4.15-5.02-4.36-.15-.2-1.22-1.62-1.22-3.1 0-1.48.78-2.2 1.05-2.5.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.56.82 1.92.89 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.17-.29.38-.41.51-.14.14-.28.3-.12.59.17.29.74 1.22 1.58 1.98 1.1.97 2.02 1.27 2.31 1.41.3.14.47.12.64-.07.17-.19.74-.86.94-1.16.2-.29.39-.24.66-.15.27.1 1.71.81 2 .96.29.15.48.22.55.34.07.12.07.68-.17 1.36z"/></svg></a>
-                <a class="header-btn" onclick="toggleNotifPanel()" title="Notifications" style="cursor:pointer;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px;">0</span></a>
-                <a class="header-btn btn-logout" onclick="doLogout()">Logout</a>
-            </div>
         </div>
     </header>
+
+    <!-- ICON NAV BAR -->
+    <div class="icon-nav-bar" id="iconNavBar">
+        <div class="icon-nav-item" onclick="showUserProfile()" title="Profile"><img src="/icons/profile.png" class="icon-nav-img" alt="Profile"><span class="icon-nav-label">Profile</span></div>
+        <div class="icon-nav-item" onclick="openClassesPage()" title="Classes"><img src="/icons/class.png" class="icon-nav-img" alt="Class"><span class="icon-nav-label">Class</span></div>
+        <div class="icon-nav-item" onclick="openSelfRenewal()" title="Renew"><img src="/icons/renew.png" class="icon-nav-img" alt="Renew"><span class="icon-nav-label">Renew</span></div>
+        <div class="icon-nav-item" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram"><img src="/icons/telegram.png" class="icon-nav-img" alt="Telegram"><span class="icon-nav-label">Telegram</span></div>
+        <div class="icon-nav-item" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp"><img src="/icons/whatsapp.png" class="icon-nav-img" alt="WhatsApp"><span class="icon-nav-label">WhatsApp</span></div>
+        <div class="icon-nav-item" onclick="toggleNotifPanel()" title="Notifications" style="position:relative;"><span class="icon-nav-emoji">🔔<span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-6px;background:#ef4444;color:#fff;font-size:7px;font-weight:700;min-width:13px;height:13px;border-radius:7px;align-items:center;justify-content:center;padding:0 2px;line-height:13px;">0</span></span><span class="icon-nav-label">Alerts</span></div>
+        <div class="icon-nav-item icon-nav-logout" onclick="doLogout()" title="Logout"><img src="/icons/logout.png" class="icon-nav-img" alt="Logout"><span class="icon-nav-label">Logout</span></div>
+    </div>
 
     <!-- NOTIFICATION PANEL -->
     <div class="notif-panel" id="notifPanel">
@@ -3876,6 +4045,69 @@ input[type="color"] {
       </div>
     </div>
 
+    <!-- ═══════ EXPIRY REMINDER POPUP ═══════ -->
+    <div class="expiry-popup-overlay" id="expiryPopupOverlay">
+      <div class="expiry-popup">
+        <div class="expiry-popup-header">
+          <div class="expiry-popup-icon">⏰</div>
+          <div class="expiry-popup-title">Subscription Expiring!</div>
+          <div class="expiry-popup-subtitle">Renew now to keep getting stock tips</div>
+        </div>
+        <div class="expiry-popup-timer">
+          <div class="expiry-timer-block"><div class="expiry-timer-val" id="expDays">0</div><div class="expiry-timer-label">Days</div></div>
+          <div class="expiry-timer-block"><div class="expiry-timer-val" id="expHours">0</div><div class="expiry-timer-label">Hours</div></div>
+          <div class="expiry-timer-block"><div class="expiry-timer-val" id="expMins">0</div><div class="expiry-timer-label">Mins</div></div>
+          <div class="expiry-timer-block"><div class="expiry-timer-val" id="expSecs">0</div><div class="expiry-timer-label">Secs</div></div>
+        </div>
+        <div class="expiry-promo-section">
+          <div style="font-size:11px;color:#71717a;margin-bottom:6px;">🎟️ Have a promo code?</div>
+          <div class="expiry-promo-input-row">
+            <input type="text" class="expiry-promo-input" id="expiryPromoCode" placeholder="Enter promo code...">
+            <button class="expiry-promo-btn" onclick="applyExpiryPromo()">Apply</button>
+          </div>
+          <div class="expiry-promo-msg" id="expiryPromoMsg"></div>
+        </div>
+        <div class="expiry-popup-actions">
+          <button class="expiry-popup-btn renew" onclick="contactForRenewal()">🔄 Renew Now</button>
+          <button class="expiry-popup-btn contact" onclick="contactAdmin()">💬 Contact Vaibhav</button>
+        </div>
+        <div class="expiry-popup-dismiss" onclick="dismissExpiryPopup()">I'll renew later</div>
+      </div>
+    </div>
+
+    <!-- ═══════ SELF RENEWAL MODAL ═══════ -->
+    <div class="expiry-popup-overlay" id="selfRenewalOverlay">
+      <div class="expiry-popup" style="width:400px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="font-size:15px;font-weight:700;color:#22c55e;">🔄 Renew Subscription</div>
+          <div onclick="closeSelfRenewal()" style="font-size:18px;color:#666;cursor:pointer;">✕</div>
+        </div>
+        <div id="renewalCurrentInfo" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;"></div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;color:#71717a;margin-bottom:6px;font-weight:600;">📦 Select Plan</div>
+          <div id="renewalPlanList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;color:#71717a;margin-bottom:6px;font-weight:600;">🎟️ Promo Code (optional)</div>
+          <div class="expiry-promo-input-row">
+            <input type="text" class="expiry-promo-input" id="renewalPromoCode" placeholder="Enter promo code...">
+            <button class="expiry-promo-btn" onclick="applyRenewalPromo()">Apply</button>
+          </div>
+          <div class="expiry-promo-msg" id="renewalPromoMsg"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;color:#71717a;margin-bottom:6px;font-weight:600;">💳 UPI Payment</div>
+          <div id="renewalUpiSection" style="text-align:center;"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;color:#71717a;margin-bottom:4px;font-weight:600;">🔑 UPI Transaction ID</div>
+          <input type="text" class="expiry-promo-input" id="renewalTxnId" placeholder="Enter UPI transaction ID" style="width:100%;">
+        </div>
+        <button onclick="submitSelfRenewal()" style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">📤 Submit Renewal Request</button>
+        <div id="renewalStatus" style="font-size:11px;margin-top:8px;text-align:center;min-height:14px;"></div>
+      </div>
+    </div>
+
     <!-- ═══════ USER PROFILE POPUP ═══════ -->
     <div id="userProfilePopup" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:9999; display:none; align-items:center; justify-content:center;">
       <div style="background:#12121c; border:1px solid #c0a84322; border-radius:16px; padding:0; width:380px; max-width:92vw; max-height:85vh; overflow-y:auto; box-shadow:0 0 40px rgba(192,168,67,0.08);">
@@ -3935,6 +4167,34 @@ input[type="color"] {
                   </div>
                 </div>
                 <div id="profileMobileStatus" style="font-size:10px; margin-top:4px;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Social Verification -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600;">🔗 SOCIAL VERIFICATION</div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  <div>
+                    <div style="color:white;font-size:12px;font-weight:600;">Google</div>
+                    <div id="profileGoogleStatus" style="color:#888;font-size:10px;">Not linked</div>
+                  </div>
+                </div>
+                <button id="linkGoogleBtn" class="admin-btn admin-btn-primary" onclick="linkGoogle()" style="font-size:10px;padding:6px 12px;">Link</button>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <img src="/icons/telegram.png" alt="Telegram" style="width:22px;height:22px;object-fit:contain;">
+                  <div>
+                    <div style="color:white;font-size:12px;font-weight:600;">Telegram</div>
+                    <div id="profileTelegramStatus" style="color:#888;font-size:10px;">Not linked</div>
+                  </div>
+                </div>
+                <button id="linkTelegramBtn" class="admin-btn admin-btn-primary" onclick="linkTelegram()" style="font-size:10px;padding:6px 12px;">Link</button>
               </div>
             </div>
           </div>
@@ -4040,14 +4300,108 @@ if (window.location.pathname === '/admin' || window.location.pathname === '/admi
 
 /* ═══════ AUTH ═══════ */
 
-// Google Login (coming soon)
-function googleLogin() {
-    customAlert('Google Login coming soon! Feature in development. 🔧', 'info');
+// Link Google — redirects to server Google OAuth (requires login)
+function linkGoogle() {
+    if (!currentUser || !currentUser.id) { customAlert('Please login first.', 'error'); return; }
+    window.location.href = API + '/api/auth/google/link?uid=' + encodeURIComponent(currentUser.id);
 }
 
-// OTP Login (coming soon)
-function otpLogin() {
-    customAlert('Mobile OTP Login coming soon! Feature in development. 📱', 'info');
+// Link Telegram — opens Telegram Login Widget for linking
+function linkTelegram() {
+    if (!currentUser || !currentUser.id) { customAlert('Please login first.', 'error'); return; }
+    var tgBotUsername = window._tgBotUsername || '';
+    if (!tgBotUsername) {
+        fetch(API + '/api/settings').then(r => r.json()).then(d => {
+            window._tgBotUsername = d.telegramBotUsername || '';
+            openTelegramLinkWidget();
+        }).catch(() => { customAlert('Telegram not configured yet.', 'info'); });
+    } else {
+        openTelegramLinkWidget();
+    }
+}
+
+function openTelegramLinkWidget() {
+    var tgBotUsername = window._tgBotUsername || '';
+    if (!tgBotUsername) { customAlert('Telegram bot not configured.', 'info'); return; }
+    var existing = document.getElementById('tgLinkOverlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'tgLinkOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#1a1a2e;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;border:1px solid rgba(255,255,255,0.1);position:relative;">' +
+        '<button onclick="this.closest(\'#tgLinkOverlay\').remove()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:#666;font-size:20px;cursor:pointer;">\u2715</button>' +
+        '<div style="font-size:28px;margin-bottom:8px;">\u2708\uFE0F</div>' +
+        '<h3 style="color:white;font-size:16px;margin-bottom:4px;">Link Telegram Account</h3>' +
+        '<p style="color:#888;font-size:11px;margin-bottom:16px;">Verify your Telegram for market updates & blue tick</p>' +
+        '<div id="tgLinkWidget"></div>' +
+        '<p style="color:#555;font-size:10px;margin-top:12px;">Your Telegram ID will be linked to your account</p>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    var loadWidget = function() {
+        var container = document.getElementById('tgLinkWidget');
+        if (!container) return;
+        container.innerHTML = '';
+        var s = document.createElement('script');
+        s.src = 'https://telegram.org/js/telegram-widget.js?22';
+        s.setAttribute('data-telegram-login', tgBotUsername);
+        s.setAttribute('data-size', 'large');
+        s.setAttribute('data-radius', '8');
+        s.setAttribute('data-request-access', 'write');
+        s.setAttribute('data-onauth', 'onTelegramLink(user)');
+        container.appendChild(s);
+    };
+    if (!document.getElementById('tgWidgetScript')) {
+        var s = document.createElement('script');
+        s.id = 'tgWidgetScript';
+        s.src = 'https://telegram.org/js/telegram-widget.js?22';
+        loadWidget();
+    } else {
+        loadWidget();
+    }
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+}
+
+// Called by Telegram widget on successful link
+window.onTelegramLink = async function(user) {
+    try {
+        var overlay = document.getElementById('tgLinkOverlay');
+        if (overlay) overlay.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:24px;margin-bottom:8px;">\u23F3</div><div style="color:white;font-size:14px;">Linking account...</div></div>';
+        var res = await fetch(API + '/api/auth/telegram/link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify(user)
+        }).then(r => r.json());
+        if (overlay) overlay.remove();
+        if (res.success) {
+            customAlert('Telegram linked successfully! \u2705', 'success');
+            loadProfileVerification();
+            if (res.user) {
+                currentUser = Object.assign(currentUser, res.user);
+                updateHeaderProfile();
+            }
+        } else {
+            customAlert(res.message || 'Failed to link Telegram.', 'error');
+        }
+    } catch (err) {
+        var ov = document.getElementById('tgLinkOverlay');
+        if (ov) ov.remove();
+        customAlert('Server error. Please try again.', 'error');
+    }
+};
+
+function updateHeaderProfile() {
+    if (!currentUser) return;
+    var picEl = document.getElementById('headerProfilePic');
+    var emojiEl = document.getElementById('headerUserEmoji');
+    var tickEl = document.getElementById('headerBlueTick');
+    if (currentUser.profilePhoto && picEl) {
+        picEl.src = currentUser.profilePhoto;
+        picEl.style.display = 'inline-block';
+        if (emojiEl) emojiEl.style.display = 'none';
+    }
+    if (currentUser.isVerified && tickEl) {
+        tickEl.style.display = 'inline-block';
+    }
 }
 
 // Login
@@ -4116,6 +4470,8 @@ async function doLogin() {
             currentUser = r.user;
             sessionStorage.setItem('userId', r.user.id);
             sessionStorage.setItem('username', r.user.username);
+            localStorage.setItem('bf_uid', r.user.id);
+            localStorage.setItem('bf_uname', r.user.username);
             showDashboard();
         } else if (r.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
@@ -4197,6 +4553,29 @@ async function loadProfileVerification() {
             document.getElementById('profileMobileOtpRow').style.display = 'none';
             document.getElementById('profileMobileStatus').innerHTML = '';
         }
+        // Social verification
+        if (u.googleLinked) {
+            document.getElementById('profileGoogleStatus').innerHTML = '<span style="color:#22c55e;">✅ ' + (u.googleEmail || u.email || 'Linked') + '</span>';
+            document.getElementById('linkGoogleBtn').textContent = 'Linked';
+            document.getElementById('linkGoogleBtn').disabled = true;
+            document.getElementById('linkGoogleBtn').style.opacity = '0.5';
+            // Google linked = email auto-verified via Google, show email and hide OTP
+            if (u.googleEmail) {
+                document.getElementById('profileEmailVerified').style.display = 'block';
+                document.getElementById('profileEmailUnverified').style.display = 'none';
+                document.getElementById('profileEmailText').textContent = u.googleEmail;
+            }
+        }
+        if (u.telegramLinked) {
+            document.getElementById('profileTelegramStatus').innerHTML = '<span style="color:#22c55e;">✅ @' + (u.telegramUsername || 'Linked') + '</span>';
+            document.getElementById('linkTelegramBtn').textContent = 'Linked';
+            document.getElementById('linkTelegramBtn').disabled = true;
+            document.getElementById('linkTelegramBtn').style.opacity = '0.5';
+        }
+        // Update header
+        if (u.profilePhoto) currentUser.profilePhoto = u.profilePhoto;
+        if (u.isVerified !== undefined) currentUser.isVerified = u.isVerified;
+        updateHeaderProfile();
     } catch (e) {}
 }
 
@@ -4332,6 +4711,8 @@ function doLogout() {
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('isAdmin');
+    localStorage.removeItem('bf_uid');
+    localStorage.removeItem('bf_uname');
     currentUser = null;
     isAdmin = false;
     document.getElementById('appContainer').style.display = 'none';
@@ -4341,7 +4722,26 @@ function doLogout() {
 
 // Check if already logged in
 async function checkSession() {
-    const userId = sessionStorage.getItem('userId');
+    // Handle Google link callback redirect
+    var urlParams = new URLSearchParams(window.location.search);
+    var authResult = urlParams.get('auth');
+    if (authResult) {
+        var cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        if (authResult === 'google_linked') {
+            customAlert('Google account linked successfully! ✅', 'success');
+            loadProfileVerification();
+        } else if (authResult === 'google_error') {
+            customAlert('Google linking failed: ' + (urlParams.get('reason') || 'unknown'), 'error');
+        }
+    }
+
+    var userId = sessionStorage.getItem('userId') || localStorage.getItem('bf_uid');
+    if (userId && !sessionStorage.getItem('userId')) {
+        sessionStorage.setItem('userId', userId);
+        var uname = localStorage.getItem('bf_uname');
+        if (uname) sessionStorage.setItem('username', uname);
+    }
     
     // Show admin login screen if on /admin path, restore session if persisted
     if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') {
@@ -4357,7 +4757,7 @@ async function checkSession() {
             updateAdminSidebarClock();
             if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
             if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
-            if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 1000);
+            if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
         } else {
             document.getElementById('adminLoginScreen').classList.add('show');
         }
@@ -4376,20 +4776,37 @@ async function checkSession() {
         }
     } catch (e) {}
     
-    // Normal dashboard logic
+    // If we have stored session — IMMEDIATELY show dashboard, verify in background
     if (userId) {
+        currentUser = { id: userId, username: sessionStorage.getItem('username') || localStorage.getItem('bf_uname') || 'user' };
+        showDashboard();
+        // Background verification
         try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
             const r = await fetch(API + '/api/me', {
-                headers: { 'user-id': userId }
+                headers: { 'user-id': userId },
+                signal: controller.signal
             }).then(r => r.json());
-            
+            clearTimeout(timeout);
             if (r.loggedIn) {
                 currentUser = r.user;
-                showDashboard();
-                return;
+                document.getElementById('displayUsername').textContent = currentUser.username;
+                const badge = document.getElementById('subBadge');
+                badge.textContent = (currentUser.daysLeft > 0 ? currentUser.daysLeft : 0) + 'd left';
+                if (currentUser.highlight) { document.getElementById('headerHighlightBadge').style.display = 'block'; }
+                updateHeaderProfile();
+            } else {
+                // Server says not valid — force logout
+                doLogout();
             }
-        } catch (e) {}
+        } catch (e) {
+            // Network error — keep showing dashboard, will verify next time
+        }
+        return;
     }
+    
+    // No stored session at all — show login
     document.getElementById('loginScreen').style.display = 'flex';
 }
 
@@ -4446,7 +4863,7 @@ function showDashboard() {
         document.getElementById('displayUsername').textContent = currentUser.username;
         const badge = document.getElementById('subBadge');
         const daysLeft = currentUser.daysLeft > 0 ? currentUser.daysLeft : 0;
-        badge.textContent = `${daysLeft}d left`;
+        badge.textContent = currentUser.subscriptionExpiry ? `${daysLeft}d left` : 'Verifying...';
         
         if (daysLeft <= 7) {
             badge.classList.add('expired');
@@ -4455,10 +4872,14 @@ function showDashboard() {
         }
 
         // Expired user: hide stock tips + signals, show expiry message
-        applyExpiredRestrictions(daysLeft);
+        if (typeof daysLeft === 'number' && !isNaN(daysLeft)) {
+            applyExpiredRestrictions(daysLeft);
+        }
         
         // Show personal message banner if admin sent one
         updateMessageBanner();
+        
+        updateHeaderProfile();
         
         // Highlight badge in header
         const hlBadge = document.getElementById('headerHighlightBadge');
@@ -4484,6 +4905,7 @@ function showDashboard() {
     renderNotifBadge();
     startAutoRefresh();
     startCountdownTimer();
+    checkExpiryPopup();
 }
 
 function applyExpiredRestrictions(daysLeft) {
@@ -4530,6 +4952,204 @@ function startCountdownTimer() {
     }, 1000);
 }
 
+// ═══════ EXPIRY REMINDER POPUP ═══════
+let _expiryPopupTimer = null;
+function checkExpiryPopup() {
+    if (!currentUser || !currentUser.subscriptionExpiry) return;
+    const daysLeft = currentUser.daysLeft || 0;
+    if (daysLeft > 7 || daysLeft <= 0) return;
+    const dismissed = sessionStorage.getItem('expiryPopupDismissed_' + currentUser.id);
+    if (dismissed) return;
+    showExpiryPopup();
+}
+function showExpiryPopup() {
+    const overlay = document.getElementById('expiryPopupOverlay');
+    if (!overlay) return;
+    overlay.classList.add('show');
+    startExpiryTimer();
+}
+function dismissExpiryPopup() {
+    const overlay = document.getElementById('expiryPopupOverlay');
+    if (overlay) overlay.classList.remove('show');
+    if (currentUser) sessionStorage.setItem('expiryPopupDismissed_' + currentUser.id, '1');
+    if (_expiryPopupTimer) { clearInterval(_expiryPopupTimer); _expiryPopupTimer = null; }
+}
+function startExpiryTimer() {
+    if (_expiryPopupTimer) clearInterval(_expiryPopupTimer);
+    const exp = new Date(currentUser.subscriptionExpiry).getTime();
+    _expiryPopupTimer = setInterval(() => {
+        const diff = exp - Date.now();
+        if (diff <= 0) { clearInterval(_expiryPopupTimer); return; }
+        document.getElementById('expDays').textContent = Math.floor(diff / 86400000);
+        document.getElementById('expHours').textContent = Math.floor((diff % 86400000) / 3600000);
+        document.getElementById('expMins').textContent = Math.floor((diff % 3600000) / 60000);
+        document.getElementById('expSecs').textContent = Math.floor((diff % 60000) / 1000);
+    }, 1000);
+}
+async function applyExpiryPromo() {
+    const code = document.getElementById('expiryPromoCode').value.trim();
+    const msg = document.getElementById('expiryPromoMsg');
+    if (!code) { msg.innerHTML = '<span style="color:#ef4444;">Enter a promo code</span>'; return; }
+    msg.innerHTML = '<span style="color:#f59e0b;">Validating...</span>';
+    try {
+        const r = await fetch(API + '/api/validate-promo', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ code })
+        }).then(r => r.json());
+        if (r.valid) {
+            msg.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
+            const rr = await fetch(API + '/api/renewal-request', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+                body: JSON.stringify({ code, amount: 0, category: currentUser.category || 'Silver' })
+            }).then(r => r.json());
+            if (rr.success) {
+                msg.innerHTML = '<span style="color:#22c55e;">✅ Renewal request sent with promo code! Admin will approve shortly.</span>';
+                document.getElementById('expiryPromoCode').value = '';
+            } else {
+                msg.innerHTML = '<span style="color:#ef4444;">❌ ' + rr.message + '</span>';
+            }
+        } else {
+            msg.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>';
+        }
+    } catch (e) { msg.innerHTML = '<span style="color:#ef4444;">❌ Network error</span>'; }
+}
+function contactForRenewal() {
+    const daysLeft = currentUser ? (currentUser.daysLeft || 0) : 0;
+    const msg = encodeURIComponent('Hi Vaibhav, I want to renew my Bear Fighter subscription (' + daysLeft + ' days left). Please share payment details.');
+    window.open('https://wa.me/919876543210?text=' + msg, '_blank');
+}
+function contactAdmin() {
+    const msg = encodeURIComponent('Hi Vaibhav, regarding my Bear Fighter subscription...');
+    window.open('https://wa.me/919876543210?text=' + msg, '_blank');
+}
+
+// ═══════ SELF RENEWAL MODAL ═══════
+let _selectedRenewalPlan = null;
+let _appliedRenewalPromo = null;
+let _renewalPlans = [];
+async function openSelfRenewal() {
+    const overlay = document.getElementById('selfRenewalOverlay');
+    overlay.classList.add('show');
+    _appliedRenewalPromo = null;
+    _selectedRenewalPlan = null;
+    document.getElementById('renewalPromoCode').value = '';
+    document.getElementById('renewalPromoMsg').innerHTML = '';
+    document.getElementById('renewalTxnId').value = '';
+    document.getElementById('renewalStatus').innerHTML = '';
+    const info = document.getElementById('renewalCurrentInfo');
+    const expDate = currentUser.subscriptionExpiry ? new Date(currentUser.subscriptionExpiry).toLocaleDateString('en-IN') : '—';
+    info.innerHTML = '📅 Current Expiry: <strong style="color:#e4e4e7;">' + expDate + '</strong> | Days Left: <strong style="color:' + (currentUser.daysLeft <= 7 ? '#ef4444' : '#22c55e') + ';">' + (currentUser.daysLeft || 0) + '</strong>';
+    const planDiv = document.getElementById('renewalPlanList');
+    planDiv.innerHTML = '<div style="color:#71717a;font-size:11px;">Loading plans...</div>';
+    const upiDiv = document.getElementById('renewalUpiSection');
+    upiDiv.innerHTML = '';
+    try {
+        const r = await fetch(API + '/api/settings').then(r => r.json());
+        _renewalPlans = r.plans || [];
+        const upiId = r.upiPaymentId || '';
+        const upiQr = r.upiQrImage || '';
+        if (_renewalPlans.length > 0) {
+            planDiv.innerHTML = _renewalPlans.map((p, i) =>
+                '<div onclick="selectRenewalPlan(' + i + ',this)" style="padding:10px 12px;background:#0a0a12;border:1px solid #2a2a35;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s;">' +
+                '<div><div style="color:#e4e4e7;font-size:12px;font-weight:600;">' + (p.name || 'Plan') + '</div>' +
+                '<div style="color:#71717a;font-size:10px;">' + (p.days || 30) + ' days</div></div>' +
+                '<div style="color:#22c55e;font-size:14px;font-weight:700;">₹' + (p.price || 0) + '</div></div>'
+            ).join('');
+        } else {
+            planDiv.innerHTML = '<div style="color:#71717a;font-size:11px;">Contact admin for plans</div>';
+        }
+        if (upiQr || upiId) {
+            let upiHtml = '';
+            if (upiQr) upiHtml += '<img src="' + upiQr + '" style="max-width:180px;border-radius:8px;margin-bottom:8px;">';
+            if (upiId) {
+                window._renewalUpiId = upiId;
+                upiHtml += '<div style="margin-top:8px;padding:10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">' +
+                    '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">Send payment to:</div>' +
+                    '<div style="display:flex;align-items:center;justify-content:center;gap:8px;">' +
+                    '<span style="color:#22c55e;font-weight:700;font-size:14px;font-family:monospace;" id="renewalUpiIdText">' + upiId + '</span>' +
+                    '<button id="copyUpiBtn" onclick="copyUpiId()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ccc;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;white-space:nowrap;">Copy</button>' +
+                    '</div></div>';
+            }
+            upiDiv.innerHTML = upiHtml;
+        } else {
+            upiDiv.innerHTML = '<div style="color:#71717a;font-size:11px;">Contact admin for payment details</div>';
+        }
+    } catch (e) {
+        planDiv.innerHTML = '<div style="color:#ef4444;font-size:11px;">Error loading plans</div>';
+    }
+}
+function selectRenewalPlan(idx, el) {
+    _selectedRenewalPlan = _renewalPlans[idx];
+    document.querySelectorAll('#renewalPlanList > div').forEach(d => { d.style.borderColor = '#2a2a35'; d.style.background = '#0a0a12'; });
+    el.style.borderColor = '#22c55e';
+    el.style.background = 'rgba(34,197,94,0.08)';
+}
+async function applyRenewalPromo() {
+    const code = document.getElementById('renewalPromoCode').value.trim();
+    const msg = document.getElementById('renewalPromoMsg');
+    if (!code) { msg.innerHTML = '<span style="color:#ef4444;">Enter a code</span>'; return; }
+    msg.innerHTML = '<span style="color:#f59e0b;">Checking...</span>';
+    try {
+        const r = await fetch(API + '/api/validate-promo', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({ code })
+        }).then(r => r.json());
+        if (r.valid) { _appliedRenewalPromo = code; msg.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>'; }
+        else { _appliedRenewalPromo = null; msg.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
+    } catch (e) { msg.innerHTML = '<span style="color:#ef4444;">❌ Error</span>'; }
+}
+async function submitSelfRenewal() {
+    const status = document.getElementById('renewalStatus');
+    const txnId = document.getElementById('renewalTxnId').value.trim();
+    if (!_selectedRenewalPlan) { status.innerHTML = '<span style="color:#ef4444;">Select a plan first</span>'; return; }
+    if (!txnId) { status.innerHTML = '<span style="color:#ef4444;">Enter UPI transaction ID</span>'; return; }
+    status.innerHTML = '<span style="color:#f59e0b;">⏳ Submitting...</span>';
+    try {
+        const r = await fetch(API + '/api/renewal-request', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+            body: JSON.stringify({
+                code: _appliedRenewalPromo || null,
+                amount: _selectedRenewalPlan.price,
+                category: currentUser.category || 'Silver',
+                planName: _selectedRenewalPlan.name,
+                days: _selectedRenewalPlan.days,
+                txnId: txnId
+            })
+        }).then(r => r.json());
+        if (r.success) {
+            status.innerHTML = '<span style="color:#22c55e;">✅ ' + r.message + '</span>';
+            setTimeout(() => closeSelfRenewal(), 2000);
+        } else { status.innerHTML = '<span style="color:#ef4444;">❌ ' + r.message + '</span>'; }
+    } catch (e) { status.innerHTML = '<span style="color:#ef4444;">❌ Network error</span>'; }
+}
+function closeSelfRenewal() {
+    document.getElementById('selfRenewalOverlay').classList.remove('show');
+}
+
+function copyUpiId() {
+    var upiId = window._renewalUpiId || '';
+    if (!upiId) return;
+    var btn = document.getElementById('copyUpiBtn');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upiId).then(function() {
+            if (btn) { btn.textContent = 'Copied!'; btn.style.background = '#22c55e'; btn.style.color = '#fff'; }
+            setTimeout(function() { if (btn) { btn.textContent = 'Copy'; btn.style.background = 'rgba(255,255,255,0.08)'; btn.style.color = '#ccc'; } }, 2000);
+        }).catch(function() { copyFallback(); });
+    } else {
+        copyFallback();
+    }
+    function copyFallback() {
+        var ta = document.createElement('textarea');
+        ta.value = upiId;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); if (btn) { btn.textContent = 'Copied!'; btn.style.background = '#22c55e'; btn.style.color = '#fff'; } setTimeout(function() { if (btn) { btn.textContent = 'Copy'; btn.style.background = 'rgba(255,255,255,0.08)'; btn.style.color = '#ccc'; } }, 2000); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+}
+
 // Load disclaimer text from server
 async function loadDisclaimer() {
     try {
@@ -4561,8 +5181,8 @@ async function loadDisclaimer() {
             content.style.animation = `scroll-left ${speed}s linear infinite`;
         }
 
-        if (r.showHeaderTelegram) { document.getElementById('hdrTelegram').style.display = 'inline-block'; } else { document.getElementById('hdrTelegram').style.display = 'none'; }
-        if (r.showHeaderWhatsApp) { document.getElementById('hdrWhatsApp').style.display = 'inline-block'; } else { document.getElementById('hdrWhatsApp').style.display = 'none'; }
+        if (r.showHeaderTelegram) { document.getElementById('hdrTelegram').style.display = 'flex'; } else { document.getElementById('hdrTelegram').style.display = 'none'; }
+        if (r.showHeaderWhatsApp) { document.getElementById('hdrWhatsApp').style.display = 'flex'; } else { document.getElementById('hdrWhatsApp').style.display = 'none'; }
         window._hdrTelegramLink = r.headerTelegramLink || '';
         window._hdrWhatsAppLink = r.headerWhatsAppLink || '';
         window._showTipSebiText = r.showTipSebiText !== false;
@@ -4572,9 +5192,25 @@ async function loadDisclaimer() {
 
 // Enter key login
 document.addEventListener('DOMContentLoaded', () => {
-    // Register Service Worker for PWA
+    // Register Service Worker for PWA — force update to clear old cached HTML
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            // If new SW waiting, force activate it
+            if (reg.waiting) reg.waiting.postMessage('skipWaiting');
+            reg.addEventListener('updatefound', () => {
+                const sw = reg.installing;
+                if (sw) sw.addEventListener('statechange', () => {
+                    if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                        sw.postMessage('skipWaiting');
+                    }
+                });
+            });
+        }).catch(() => {});
+        // When new SW takes over, reload once to get fresh HTML
+        let reloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!reloaded) { reloaded = true; location.reload(); }
+        });
     }
 
     // Push Notification Permission
@@ -4654,7 +5290,7 @@ async function adminLogin() {
     updateAdminSidebarClock();
     if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
     if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
-    if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 1000);
+    if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
 }
 
 function adminLogout() {
@@ -4703,6 +5339,7 @@ function showAdminSection(section, navEl) {
     if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
     if (section === 'reminders') loadReminderList();
     if (section === 'heatmapStocks') loadHeatmapStockSettings();
+    if (section === 'tradingClass') loadClassesAdmin();
 }
 
 async function loadAdminData() {
@@ -4721,6 +5358,7 @@ async function loadAdminData() {
             renderShortcuts();
             loadMaintenanceStatus();
             loadExpiringAlert();
+            loadRenewalRequests();
             loadTipPerformance();
             loadLoginHistory();
             loadRevenueChart();
@@ -4955,6 +5593,31 @@ function showStatPopup(type) {
         });
         return;
     }
+    if (type === 'pendingRenewals') {
+        fetch(API + '/api/admin/renewal-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(d => {
+            let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#3b82f6;font-size:12px;">🔄 Pending Renewal Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+            const pending = (d.requests || []).filter(r => r.status === 'pending');
+            if (!pending.length) { h += '<div style="color:#555;text-align:center;padding:12px;font-size:11px;">No pending renewal requests</div>'; }
+            else {
+                pending.forEach(item => {
+                    h += '<div style="padding:8px;border:1px solid #2a2a35;border-radius:8px;margin-bottom:6px;background:#1a1a24;">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<div><strong style="color:#e4e4e7;font-size:12px;">' + (item.fullName || item.username) + '</strong> <span style="color:#71717a;font-size:10px;">@' + item.username + '</span>' +
+                        '<div style="font-size:10px;color:#aaa;margin-top:2px;">📦 ' + (item.planName || 'Plan') + ' | ₹' + (item.amount || 0) + ' | ' + (item.days || 30) + ' days</div>' +
+                        (item.txnId ? '<div style="font-size:9px;color:#555;margin-top:2px;">🆔 Txn: ' + item.txnId + '</div>' : '') +
+                        '<div style="font-size:9px;color:#555;margin-top:2px;">🕐 ' + new Date(item.createdAt).toLocaleString('en-IN') + '</div>' +
+                        '</div>' +
+                        '<div style="display:flex;gap:6px;">' +
+                        '<button onclick="approveRenewalReq(\'' + item.id + '\')" style="background:#22c55e;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">✅ Approve</button>' +
+                        '<button onclick="rejectRenewalReq(\'' + item.id + '\')" style="background:#ef4444;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;">❌ Reject</button>' +
+                        '</div></div></div>';
+                });
+            }
+            p.innerHTML = h;
+            p.style.display = 'block';
+        });
+        return;
+    }
     html += '</div><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
     if (type === 'revenue') {
         let total = list.reduce((a, b) => a + (b.paymentAmount || 0), 0);
@@ -5049,6 +5712,26 @@ async function rejectDevice(username) {
     });
 }
 
+async function approveRenewalReq(id) {
+    await fetch(API + '/api/admin/renewal-requests/' + id + '/approve', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+        body: JSON.stringify({ days: 30 })
+    }).then(r => r.json()).then(r => {
+        customAlert(r.message || 'Done', '✅');
+        showStatPopup('pendingRenewals');
+        loadDashboardData();
+    });
+}
+async function rejectRenewalReq(id) {
+    await fetch(API + '/api/admin/renewal-requests/' + id + '/reject', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }
+    }).then(r => r.json()).then(r => {
+        customAlert(r.message || 'Done', '❌');
+        showStatPopup('pendingRenewals');
+        loadDashboardData();
+    });
+}
+
 function refreshAdminData() {
     document.getElementById('usersListContainer').innerHTML = '<div class="loading">Loading users...</div>';
     loadAdminData();
@@ -5075,6 +5758,11 @@ async function loadDashboardData() {
 
         fetch(API + '/api/admin/register-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r2 => r2.json()).then(r2 => {
             if (r2.success && el('dashRegRequests')) el('dashRegRequests').textContent = (r2.pending || []).length;
+        }).catch(() => {});
+
+        // Load renewal requests count
+        fetch(API + '/api/admin/renewal-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r3 => r3.json()).then(r3 => {
+            if (r3.success && el('dashRenewalReqs')) el('dashRenewalReqs').textContent = (r3.requests || []).length;
         }).catch(() => {});
 
         // Load live indices
@@ -5733,6 +6421,246 @@ function deselectAllReminders() {
     document.querySelectorAll('.reminder-user-cb').forEach(cb => cb.checked = false);
 }
 
+// ═══════ RENEWAL REQUESTS ═══════
+async function loadRenewalRequests() {
+    const status = document.getElementById('rrFilterStatus').value;
+    const div = document.getElementById('renewalRequestsList');
+    div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Loading...</div>';
+    try {
+        const r = await fetch(API + '/api/admin/renewal-requests?status=' + status, { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (!r.success || !r.requests.length) {
+            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">No requests found ✅</div>';
+            updateRRBadge(0);
+            return;
+        }
+        const pending = r.requests.filter(x => x.status === 'pending').length;
+        updateRRBadge(pending);
+        div.innerHTML = r.requests.map(rr => {
+            const statusColor = rr.status === 'pending' ? '#eab308' : rr.status === 'approved' ? '#22c55e' : '#ef4444';
+            const statusIcon = rr.status === 'pending' ? '⏳' : rr.status === 'approved' ? '✅' : '❌';
+            const time = new Date(rr.requestedAt).toLocaleString('en-IN');
+            return '<div style="padding:10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                '<div><strong style="color:#e4e4e7;font-size:12px;">' + (rr.fullName || rr.username) + '</strong> <span style="color:#71717a;font-size:10px;">@' + rr.username + '</span></div>' +
+                '<span style="color:' + statusColor + ';font-size:10px;font-weight:700;">' + statusIcon + ' ' + rr.status.toUpperCase() + '</span></div>' +
+                '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">📅 ' + time + '</div>' +
+                (rr.promoCode ? '<div style="font-size:10px;margin-bottom:4px;">🎟️ Code: <span style="color:#f59e0b;font-weight:600;">' + rr.promoCode + '</span>' + (rr.offerTitle ? ' (' + rr.offerTitle + ')' : '') + ' — <span style="color:#22c55e;">+' + rr.bonusDays + ' bonus days</span></div>' : '') +
+                (rr.planName ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">📦 Plan: <span style="color:#e4e4e7;font-weight:600;">' + rr.planName + '</span> (' + (rr.planDays || '?') + ' days)</div>' : '') +
+                (rr.txnId ? '<div style="font-size:10px;margin-bottom:4px;">🔑 Txn: <span style="color:#22c55e;font-family:monospace;">' + rr.txnId + '</span></div>' : '') +
+                (rr.amount ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">💰 ₹' + rr.amount + ' | ' + rr.category + '</div>' : '') +
+                (rr.status === 'pending' ? '<div style="display:flex;gap:6px;margin-top:6px;">' +
+                    '<input type="number" id="rrDays_' + rr.id + '" value="30" min="1" style="width:60px;padding:4px 6px;background:#1a1a24;border:1px solid #2a2a35;border-radius:4px;color:#e4e4e7;font-size:10px;">' +
+                    '<button class="admin-btn admin-btn-primary" onclick="approveRR(\'' + rr.id + '\')" style="flex:1;font-size:10px;">✅ Approve</button>' +
+                    '<button class="admin-btn admin-btn-danger" onclick="rejectRR(\'' + rr.id + '\')" style="font-size:10px;">❌</button>' +
+                '</div>' : (rr.status === 'approved' ? '<div style="font-size:10px;color:#22c55e;margin-top:4px;">✅ Approved — ' + (rr.approvedDays || '?') + ' days</div>' : '')) +
+                '</div>';
+        }).join('');
+    } catch (e) { div.innerHTML = '<div style="color:#ef4444;font-size:11px;text-align:center;padding:12px;">Error loading</div>'; }
+}
+function updateRRBadge(count) {
+    const badge = document.getElementById('renewalReqBadge');
+    if (!badge) return;
+    if (count > 0) { badge.style.display = 'inline'; badge.textContent = count; } else { badge.style.display = 'none'; }
+}
+async function approveRR(id) {
+    const days = parseInt(document.getElementById('rrDays_' + id).value) || 30;
+    if (!await customConfirm('Approve this request for ' + days + ' days?', '✅', 'Approve')) return;
+    try {
+        const r = await fetch(API + '/api/admin/renewal-requests/' + id + '/approve', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ days })
+        }).then(r => r.json());
+        if (r.success) { customAlert(r.message, '✅'); loadRenewalRequests(); } else { customAlert(r.message, '❌'); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+async function rejectRR(id) {
+    if (!await customConfirm('Reject this request?', '❌', 'Reject')) return;
+    try {
+        const r = await fetch(API + '/api/admin/renewal-requests/' + id + '/reject', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        if (r.success) { customAlert('Rejected', '❌'); loadRenewalRequests(); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+
+// ═══════ TRADING CLASS (Admin) ═══════
+let allClassesData = [];
+async function loadClassesAdmin() {
+    const div = document.getElementById('classesAdminList');
+    if (!div) return;
+    div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Loading...</div>';
+    try {
+        const r = await fetch(API + '/api/admin/classes', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (!r.success || !r.classes.length) { div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">No modules yet 📚</div>'; return; }
+        allClassesData = r.classes;
+        div.innerHTML = r.classes.sort((a,b) => (a.order||0) - (b.order||0)).map(cls => {
+            const vidCount = (cls.videos || []).length;
+            const accessLabel = cls.access ? (cls.access.type === 'all' ? '🌐 All' : cls.access.type === 'category' ? '📁 ' + (cls.access.categories||[]).join(', ') : '🔒 ' + (cls.access.users||[]).length + ' users') : '🌐 All';
+            return '<div style="padding:10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                '<div><strong style="color:#e4e4e7;font-size:12px;">' + cls.title + '</strong> <span style="color:#71717a;font-size:10px;">#' + (cls.order||'-') + '</span></div>' +
+                '<div style="display:flex;gap:4px;">' +
+                    '<button class="admin-btn admin-btn-secondary" onclick="editClass(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">✏️ Edit</button>' +
+                    '<button class="admin-btn admin-btn-danger" onclick="deleteClass(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">🗑️</button>' +
+                '</div></div>' +
+                (cls.description ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">' + cls.description + '</div>' : '') +
+                '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;margin-bottom:6px;">' +
+                    '<span style="color:#22c55e;">🎬 ' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + '</span>' +
+                    '<span style="color:#71717a;">|</span>' +
+                    '<span style="color:#a855f7;">' + accessLabel + '</span>' +
+                '</div>' +
+                '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+                    '<button class="admin-btn admin-btn-primary" onclick="showAddVideoForm(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">🎬 Add Video</button>' +
+                    (vidCount > 0 ? '<button class="admin-btn admin-btn-secondary" onclick="listClassVideos(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">📋 View Videos</button>' : '') +
+                '</div>' +
+                '<div id="clsVids_' + cls.id + '" style="display:none;margin-top:8px;"></div>' +
+                '</div>';
+        }).join('');
+    } catch (e) { div.innerHTML = '<div style="color:#ef4444;font-size:11px;text-align:center;padding:12px;">Error loading</div>'; }
+}
+function showClassForm(editId) {
+    const wrap = document.getElementById('classFormWrap');
+    wrap.style.display = 'block';
+    document.getElementById('classFormTitle').textContent = editId ? '✏️ Edit Module' : '✨ New Module';
+    if (editId) {
+        document.getElementById('classEditId').value = editId;
+        const cls = allClassesData.find(c => c.id === editId);
+        if (cls) {
+            document.getElementById('classTitle').value = cls.title || '';
+            document.getElementById('classDesc').value = cls.description || '';
+            document.getElementById('classOrder').value = cls.order || 1;
+            document.getElementById('classThumb').value = cls.thumbnail || '';
+            if (cls.access) {
+                document.getElementById('classAccessType').value = cls.access.type || 'all';
+                toggleClassAccess();
+                if (cls.access.type === 'category') {
+                    (cls.access.categories || []).forEach(cat => { const cb = document.querySelector('.class-cat-cb[value="' + cat + '"]'); if (cb) cb.checked = true; });
+                }
+                if (cls.access.type === 'specific') {
+                    document.getElementById('classAccessUserInput').value = (cls.access.users || []).join(', ');
+                }
+            }
+        }
+    } else {
+        document.getElementById('classEditId').value = '';
+        document.getElementById('classTitle').value = '';
+        document.getElementById('classDesc').value = '';
+        document.getElementById('classOrder').value = 1;
+        document.getElementById('classThumb').value = '';
+        document.getElementById('classAccessType').value = 'all';
+        toggleClassAccess();
+    }
+    wrap.scrollIntoView({ behavior: 'smooth' });
+}
+function hideClassForm() {
+    document.getElementById('classFormWrap').style.display = 'none';
+    document.getElementById('classEditId').value = '';
+}
+function toggleClassAccess() {
+    const type = document.getElementById('classAccessType').value;
+    document.getElementById('classAccessCategories').style.display = type === 'category' ? 'block' : 'none';
+    document.getElementById('classAccessUsers').style.display = type === 'specific' ? 'block' : 'none';
+}
+function getClassAccessFromForm() {
+    const type = document.getElementById('classAccessType').value;
+    const access = { type };
+    if (type === 'category') {
+        access.categories = Array.from(document.querySelectorAll('.class-cat-cb:checked')).map(cb => cb.value);
+    } else if (type === 'specific') {
+        access.users = document.getElementById('classAccessUserInput').value.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return access;
+}
+async function saveClass() {
+    const editId = document.getElementById('classEditId').value;
+    const title = document.getElementById('classTitle').value.trim();
+    if (!title) { customAlert('Title required!', '❌'); return; }
+    const body = {
+        title,
+        description: document.getElementById('classDesc').value.trim(),
+        order: parseInt(document.getElementById('classOrder').value) || 1,
+        thumbnail: document.getElementById('classThumb').value.trim(),
+        access: getClassAccessFromForm()
+    };
+    try {
+        const url = editId ? API + '/api/admin/classes/' + editId : API + '/api/admin/classes';
+        const method = editId ? 'PUT' : 'POST';
+        const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY }, body: JSON.stringify(body) }).then(r => r.json());
+        if (r.success) { customAlert(r.message, '✅'); hideClassForm(); loadClassesAdmin(); } else { customAlert(r.message, '❌'); }
+    } catch (e) { customAlert('Error saving', '❌'); }
+}
+function editClass(id) { showClassForm(id); }
+async function deleteClass(id) {
+    if (!await customConfirm('Delete this module and all its videos?', '🗑️', 'Delete')) return;
+    try {
+        const r = await fetch(API + '/api/admin/classes/' + id, { method: 'DELETE', headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (r.success) { customAlert('Deleted', '🗑️'); loadClassesAdmin(); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+async function listClassVideos(classId) {
+    const div = document.getElementById('clsVids_' + classId);
+    if (div.style.display === 'block') { div.style.display = 'none'; return; }
+    const cls = allClassesData.find(c => c.id === classId);
+    if (!cls || !cls.videos || !cls.videos.length) { div.innerHTML = '<div style="color:#71717a;font-size:10px;">No videos</div>'; div.style.display = 'block'; return; }
+    div.innerHTML = cls.videos.sort((a,b) => (a.order||0)-(b.order||0)).map(v => {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#12121a;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
+            '<div style="flex:1;"><div style="color:#e4e4e7;font-size:11px;font-weight:600;">' + v.title + '</div>' +
+            '<div style="color:#71717a;font-size:9px;word-break:break-all;">' + v.youtubeUrl + '</div></div>' +
+            '<button class="admin-btn admin-btn-danger" onclick="deleteClassVideo(\'' + classId + '\',\'' + v.id + '\')" style="font-size:9px;padding:2px 6px;margin-left:6px;">🗑️</button>' +
+            '</div>';
+    }).join('');
+    div.style.display = 'block';
+}
+let currentAddVideoClassId = null;
+function showAddVideoForm(classId) {
+    currentAddVideoClassId = classId;
+    const cls = allClassesData.find(c => c.id === classId);
+    const modal = document.createElement('div');
+    modal.id = 'addVideoModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = '<div style="background:#1a1a24;border:1px solid #22c55e;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
+        '<h3 style="color:#22c55e;margin:0 0 12px 0;font-size:14px;">🎬 Add Video to ' + (cls ? cls.title : '') + '</h3>' +
+        '<input type="text" id="newVidTitle" class="admin-form-input" placeholder="Video title" style="margin-bottom:8px;">' +
+        '<input type="text" id="newVidUrl" class="admin-form-input" placeholder="Paste any URL (YouTube, Google Drive, MP4, etc.)" style="margin-bottom:8px;">' +
+        '<div style="font-size:9px;color:#71717a;margin:-4px 0 8px 0;">YouTube, Google Drive, Mega, OneDrive, MP4, Openbox etc.</div>' +
+        '<input type="text" id="newVidDuration" class="admin-form-input" placeholder="Duration (optional, e.g. 15:30)" style="margin-bottom:12px;">' +
+        '<div style="display:flex;gap:8px;">' +
+        '<button class="admin-btn admin-btn-secondary" onclick="document.getElementById(\'addVideoModal\').remove();" style="flex:1;">Cancel</button>' +
+        '<button class="admin-btn admin-btn-primary" onclick="submitAddVideo()" style="flex:1;">💾 Add</button>' +
+        '</div></div>';
+    document.body.appendChild(modal);
+}
+async function submitAddVideo() {
+    if (!currentAddVideoClassId) return;
+    const title = document.getElementById('newVidTitle').value.trim();
+    let url = document.getElementById('newVidUrl').value.trim();
+    if (!title || !url) { customAlert('Title & URL required', '❌'); return; }
+    const mType = detectMediaType(url);
+    if (mType === 'youtube') {
+        let vid = '';
+        let m = url.match(/[?&]v=([^&]+)/);
+        if (m) vid = m[1];
+        if (!vid) { m = url.match(/youtu\.be\/([^?&]+)/); if (m) vid = m[1]; }
+        if (!vid) { m = url.match(/youtube\.com\/embed\/([^?&]+)/); if (m) vid = m[1]; }
+        if (!vid) { m = url.match(/youtube\.com\/shorts\/([^?&]+)/); if (m) vid = m[1]; }
+        if (vid) url = 'https://www.youtube.com/watch?v=' + vid;
+    }
+    try {
+        const r = await fetch(API + '/api/admin/classes/' + currentAddVideoClassId + '/videos', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ title, url: url, duration: document.getElementById('newVidDuration').value.trim() })
+        }).then(r => r.json());
+        if (r.success) { customAlert('Video added! (' + mType.toUpperCase() + ') 🎬', '✅'); document.getElementById('addVideoModal')?.remove(); loadClassesAdmin(); } else { customAlert(r.message, '❌'); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+async function deleteClassVideo(classId, videoId) {
+    if (!await customConfirm('Remove this video?', '🗑️', 'Remove')) return;
+    try {
+        const r = await fetch(API + '/api/admin/classes/' + classId + '/videos/' + videoId, { method: 'DELETE', headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (r.success) { customAlert('Video removed', '🗑️'); loadClassesAdmin(); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+
 // ═══════ Add checkboxes to user table ═══════
 const origRenderUsers = window.renderUsers;
 window.renderUsers = function(users) {
@@ -5758,7 +6686,7 @@ window.renderUsers = function(users) {
             <div class="admin-user-cell">
                 <div class="admin-user-avatar">${initials}</div>
                 <div>
-                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
+                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.classApproved ? ' <span title="Class Access Granted" style="color:#a855f7;font-size:12px;">📚</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
                     <div class="admin-user-detail" style="font-size:10px;color:#71717a;">${u.fullName || ''} | ${u.email || ''}</div>
                     <div class="admin-user-detail" style="font-size:9px;color:#555;">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
                 </div>
@@ -5771,6 +6699,9 @@ window.renderUsers = function(users) {
             <div style="font-size:10px;color:#666;white-space:nowrap;">${lastLogin}</div>
             <div class="admin-action-btns" onclick="event.stopPropagation();">
                 <button class="admin-action-btn" onclick="event.stopPropagation();editUser('${u.username}')" title="Edit">✏️</button>
+                <div onclick="event.stopPropagation();toggleClassAccess('${u.username}')" title="${u.classApproved ? 'Revoke Class Access' : 'Grant Class Access'}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;background:${u.classApproved ? 'rgba(34,197,94,0.15)' : 'rgba(113,113,122,0.15)'};border:1px solid ${u.classApproved ? 'rgba(34,197,94,0.3)' : 'rgba(113,113,122,0.3)'};color:${u.classApproved ? '#22c55e' : '#71717a'};transition:all 0.2s;">
+                    📚 ${u.classApproved ? 'ON' : 'OFF'}
+                </div>
                 ${u.active ? `<button class="admin-action-btn" onclick="event.stopPropagation();blockUser('${u.username}')" title="Block">🚫</button>` : `<button class="admin-action-btn" onclick="event.stopPropagation();renewUser('${u.username}')" title="Unblock/Renew">✅</button>`}
                 <button class="admin-action-btn" onclick="event.stopPropagation();deleteUser('${u.username}')" title="Delete" style="color:#ef4444;">🗑️</button>
             </div>
@@ -5782,6 +6713,21 @@ window.renderUsers = function(users) {
 
 function toggleAllUserSelect(masterCb) {
     document.querySelectorAll('.user-select-cb').forEach(cb => { cb.checked = masterCb.checked; });
+}
+
+async function toggleClassAccess(username) {
+    try {
+        const r = await fetch(API + '/api/admin/user/' + username + '/class-access', {
+            method: 'POST',
+            headers: { 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        if (r.success) {
+            customAlert(r.message, '📚');
+            loadAdminData();
+        } else {
+            customAlert(r.message || 'Error', '❌');
+        }
+    } catch (e) { customAlert('Network error', '❌'); }
 }
 
 // Load current disclaimer into the admin textarea
@@ -5908,6 +6854,8 @@ function handleGlobalSearch(query) {
         { id:'offers', icon:'🎁', label:'Offers & Promotions', keywords:'offer discount coupon promo' },
         { id:'scheduled', icon:'⏰', label:'Scheduled Messages', keywords:'schedule future timer' },
         { id:'reminders', icon:'💳', label:'Payment Reminders', keywords:'payment renewal remind' },
+        { id:'renewalRequests', icon:'📋', label:'Renewal Requests', keywords:'renewal request promo code approve' },
+        { id:'tradingClass', icon:'📚', label:'Trading Class', keywords:'class video course module trading' },
         { id:'holidayBanners', icon:'🎉', label:'Holiday Banners', keywords:'banner festival holiday' },
         { id:'dashSettings', icon:'🎛️', label:'Dashboard Settings', keywords:'settings theme color bg' },
         { id:'disclaimer', icon:'⚙️', label:'Disclaimer', keywords:'disclaimer legal' },
@@ -6921,18 +7869,19 @@ async function deleteStockTip(id) {
 async function loadDashboardStockTips() {
     try {
         const data = await fetch(API + '/api/stocktips', { headers: getAuthHeaders() }).then(r => r.json());
+        if (data.error) { handleAuthError(data); return; }
         const section = document.getElementById('stockTipsSection');
         const divider = document.getElementById('stockTipsDivider');
         const grid = document.getElementById('stockTipsGrid');
 
-        if (!data.length) {
-            section.style.display = 'none';
-            divider.style.display = 'none';
+        if (!data || !data.length) {
+            if (section) section.style.display = 'none';
+            if (divider) divider.style.display = 'none';
             return;
         }
 
-        section.style.display = 'block';
-        divider.style.display = 'block';
+        if (section) section.style.display = 'block';
+        if (divider) divider.style.display = 'block';
         const broadcastMsg = (currentUser && currentUser.message) ? currentUser.message.toUpperCase() : '';
         grid.innerHTML = data.map(t => {
             const isBuy = t.action === 'BUY';
@@ -7508,7 +8457,7 @@ async function createOffer() {
     if (target === 'specific' && !selectedUsers.length) { st.innerHTML = '<span style="color:#ef4444;">Select at least 1 user</span>'; return; }
     if (bgImage && bgImage.startsWith('data:') && bgImage.length > 300000) { st.innerHTML = '<span style="color:#ef4444;">Image too large (max 200KB)</span>'; return; }
     try {
-        const body = { title, description, code, expiry, target, selectedUsers, theme, bgImage };
+        const body = { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays: parseInt(document.getElementById('offerBonusDays').value) || 7, maxUses: parseInt(document.getElementById('offerMaxUses').value) || 0 };
         const url = editId ? API + '/api/admin/offers/' + editId : API + '/api/admin/offers';
         const r = await fetch(url, {
             method: editId ? 'PUT' : 'POST',
@@ -7535,6 +8484,8 @@ function editOffer(id) {
         document.getElementById('offerDesc').value = o.description || '';
         document.getElementById('offerCode').value = o.code || '';
         document.getElementById('offerExpiry').value = o.expiry || '';
+        document.getElementById('offerBonusDays').value = o.bonusDays || 7;
+        document.getElementById('offerMaxUses').value = o.maxUses || 0;
         document.getElementById('offerTarget').value = o.target || 'all';
         _selectedOfferTheme = o.theme || 'golden';
         document.querySelectorAll('#offerColorPick .offer-theme-card').forEach(c => c.style.borderColor = 'transparent');
@@ -7891,7 +8842,6 @@ function formatCD(sec) {
 
 function updateClock() {
     const now = new Date();
-    document.getElementById("clock").textContent = now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const ms = getMarketStatus();
     const badge = document.getElementById("mkt-badge");
     badge.textContent = ms.label;
@@ -7935,25 +8885,30 @@ let _prevUserPrices = {};
 async function loadIndices() {
     try {
         const data = await fetch(API + "/api/indices", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
-        const fresh = JSON.stringify(data);
-        if (fresh === _lastUserIndicesJSON) return;
-        _lastUserIndicesJSON = fresh;
-        if (!data || data.length === 0) {
-            document.getElementById("indices-row").innerHTML = '<div style="color:#555;text-align:center;font-size:11px;padding:12px;">Market Closed — No Data</div>';
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
+        if (!Array.isArray(data) || data.length === 0) {
+            if (!window._lastIndicesData) {
+                document.getElementById("indices-row").innerHTML = '<div style="color:#555;text-align:center;font-size:11px;padding:12px;">Market Closed — No Data</div>';
+            }
             return;
         }
-        document.getElementById("indices-row").innerHTML = data.map(d => {
-            const prev = _prevUserPrices[d.name];
-            const changed = prev !== undefined && prev !== d.ltp;
-            const anim = changed ? 'idx-blink-' + (d.change >= 0 ? 'green' : 'red') : '';
-            _prevUserPrices[d.name] = d.ltp;
-            return '<div class="index-card ' + (d.change >= 0 ? 'up' : 'dn') + ' ' + anim + '">' +
-            '<div class="iname">' + d.name + '</div>' +
-            '<div class="iltp">' + fmt(d.ltp) + '</div>' +
-            '<div class="ichg ' + cls(d.change) + '">' + sign(d.change) + fmt2(d.change) + ' &nbsp; ' + sign(d.pct) + fmt2(d.pct) + '%</div></div>';
-        }).join("");
-    } catch (e) { console.error('Indices error:', e); }
+        window._lastIndicesData = data;
+    } catch (e) { console.error('Indices fetch error:', e); }
+}
+
+function renderIndices() {
+    const data = window._lastIndicesData;
+    if (!data || data.length === 0) return;
+    document.getElementById("indices-row").innerHTML = data.map(d => {
+        const prev = _prevUserPrices[d.name];
+        const changed = prev !== undefined && prev !== d.ltp;
+        const anim = changed ? 'idx-blink-' + (d.change >= 0 ? 'green' : 'red') : '';
+        _prevUserPrices[d.name] = d.ltp;
+        return '<div class="index-card ' + (d.change >= 0 ? 'up' : 'dn') + ' ' + anim + '">' +
+        '<div class="iname">' + d.name + '</div>' +
+        '<div class="iltp">' + fmt(d.ltp) + '</div>' +
+        '<div class="ichg ' + cls(d.change) + '">' + sign(d.change) + fmt2(d.change) + ' &nbsp; ' + sign(d.pct) + fmt2(d.pct) + '%</div></div>';
+    }).join("");
 }
 
 function renderCards(items, isUp) {
@@ -7970,7 +8925,7 @@ let _lastGLJSON = '';
 async function loadGL() {
     try {
         const data = await fetch(API + "/api/gainers-losers", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
         const fresh = JSON.stringify(data);
         if (fresh === _lastGLJSON) return;
         _lastGLJSON = fresh;
@@ -8023,14 +8978,14 @@ let _lastHeatmapJSON = '';
 async function loadHeatmap() {
     try {
         const data = await fetch(API + "/api/heatmap", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
+        if (!Array.isArray(data) || data.length === 0) {
+            if (!_lastHeatmapJSON) document.getElementById("heatmap-grid").innerHTML = '<div style="color:#444;padding:12px;text-align:center;font-size:11px;">No data — Market Closed</div>';
+            return;
+        }
         const fresh = JSON.stringify(data);
         if (fresh === _lastHeatmapJSON) return;
         _lastHeatmapJSON = fresh;
-        if (!data || data.length === 0) {
-            document.getElementById("heatmap-grid").innerHTML = '<div style="color:#444;padding:12px;text-align:center;font-size:11px;">No data — Market Closed</div>';
-            return;
-        }
         document.getElementById("heatmap-grid").innerHTML = data.map(d => {
             const sectorEsc = d.name.replace(/'/g, "\\'");
             return '<div class="hm-cell" style="' + heatStyle(d.pct) + '" onclick="openHeatmapSector(event, \'' + sectorEsc + '\')">' +
@@ -8044,7 +8999,7 @@ let _lastFOJSON = '';
 async function loadFO() {
     try {
         const data = await fetch(API + "/api/fo-stocks", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
         const fresh = JSON.stringify(data);
         if (fresh === _lastFOJSON) return;
         _lastFOJSON = fresh;
@@ -8057,7 +9012,7 @@ let _lastFNOJSON = '';
 async function loadFNOAll() {
     try {
         const data = await fetch(API + "/api/fno-all", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
         const fresh = JSON.stringify(data);
         if (fresh === _lastFNOJSON) return;
         _lastFNOJSON = fresh;
@@ -8077,14 +9032,12 @@ async function loadFNOAll() {
 }
 
 let _lastSignalsJSON = '';
+let _prevSignalsData = {};
 async function loadSignals() {
     try {
         const data = await fetch(API + "/api/signals", { headers: getAuthHeaders() }).then(r => r.json());
-        if (data.error) { handleAuthError(data); return; }
-        const fresh = JSON.stringify(data);
-        if (fresh === _lastSignalsJSON) return;
-        _lastSignalsJSON = fresh;
-        if (!data || !data.length) {
+        if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
+        if (!Array.isArray(data) || !data.length) {
             const mkMsg = isMarketHours()
                 ? 'Analyzing market data... Signals appear once enough data is collected.'
                 : 'Market closed. Signals will resume during market hours (8am-4pm).';
@@ -8092,6 +9045,9 @@ async function loadSignals() {
                 '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">' + mkMsg + '</td></tr>';
             return;
         }
+        const oldData = _prevSignalsData;
+        const newDataMap = {};
+        data.forEach(d => { newDataMap[d.symbol] = d; });
         document.getElementById("signals-body").innerHTML = data.map(d => {
             const confColor = d.confidence >= 70 ? '#00c853' : d.confidence >= 50 ? '#ffab00' : '#888';
             const rsiVal = d.rsi ? parseFloat(d.rsi) : null;
@@ -8100,16 +9056,23 @@ async function loadSignals() {
                 const rsiColor = rsiVal < 30 ? '#00c853' : rsiVal > 70 ? '#ff1744' : '#ffab00';
                 rsiHtml = '<span style="color:' + rsiColor + ';font-weight:700;">' + rsiVal + '</span>';
             }
-            return '<tr>' +
-                '<td class="sym-cell">' + d.symbol + '</td>' +
+            const old = oldData[d.symbol];
+            const signalChanged = old && old.signal !== d.signal;
+            const priceChanged = old && old.entry !== d.entry;
+            const changeHighlight = signalChanged ? 'background:rgba(255,107,53,0.15);' : '';
+            const signalBadge = signalChanged ? '<span style="color:#ff6b35;font-size:8px;"> ⚡NEW</span>' : '';
+            const priceHighlight = priceChanged ? 'text-shadow:0 0 6px #ff6b35;' : '';
+            return '<tr style="' + changeHighlight + '">' +
+                '<td class="sym-cell">' + d.symbol + signalBadge + '</td>' +
                 '<td><span class="badge ' + d.signal.toLowerCase() + '">' + d.signal + '</span></td>' +
-                '<td class="' + cls(d.signal === 'BUY' ? 1 : -1) + '">' + fmt2(d.entry) + '</td>' +
+                '<td class="' + cls(d.signal === 'BUY' ? 1 : -1) + '" style="' + priceHighlight + '">' + fmt2(d.entry) + '</td>' +
                 '<td class="tgt">' + fmt2(d.target) + '</td>' +
                 '<td class="sl-val">' + fmt2(d.sl) + '</td>' +
                 '<td><span style="color:' + confColor + ';font-weight:700;font-family:JetBrains Mono,monospace;">' + (d.confidence || '--') + '%</span></td>' +
                 '<td>' + rsiHtml + '</td>' +
                 '<td><span class="badge ' + (d.status === 'TARGET DONE' ? 'buy' : d.status === 'SL HIT' ? 'sell' : 'neutral') + '">' + d.status + '</span></td></tr>';
         }).join("");
+        data.forEach(d => { _prevSignalsData[d.symbol] = { signal: d.signal, entry: d.entry }; });
     } catch (e) { console.error('Signals error:', e); }
 }
 
@@ -8142,17 +9105,23 @@ function startAutoRefresh() {
     
     // Start new intervals only if user is logged in
     if (currentUser) {
-        const fastInterval = () => isMarketHours() ? 1000 : 30000;
-        const medInterval = () => isMarketHours() ? 1000 : 60000;
-
         function startDynamicIntervals() {
             refreshIntervals.forEach(id => clearInterval(id));
             refreshIntervals = [];
-            refreshIntervals.push(setInterval(() => { if (currentUser) loadIndices(); }, fastInterval()));
-            refreshIntervals.push(setInterval(() => { if (currentUser) { loadGL(); loadFO(); loadFNOAll(); loadHeatmap(); } }, medInterval()));
-            refreshIntervals.push(setInterval(() => { if (currentUser) loadSignals(); }, fastInterval()));
-            refreshIntervals.push(setInterval(() => { if (currentUser) checkMessageUpdate(); }, fastInterval()));
-            refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardStockTips(); }, medInterval()));
+            // Indices: fetch fast during market hours (2s), slow when closed (30s); render every 30ms (tick-by-tick)
+            const idxFetchMs = isMarketHours() ? 2000 : 30000;
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadIndices(); }, idxFetchMs));
+            refreshIntervals.push(setInterval(() => { if (currentUser) renderIndices(); }, 30));
+            // Signals: fetch every 1 min (shows old→new change comparison)
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadSignals(); }, 60000));
+            // Heatmap: fetch every 1 min
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadHeatmap(); }, 60000));
+            // Gainers/Losers + F&O: every 5 min
+            refreshIntervals.push(setInterval(() => { if (currentUser) { loadGL(); loadFO(); loadFNOAll(); } }, 300000));
+            // Stock tips: every 2 min
+            refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardStockTips(); }, 120000));
+            // Others
+            refreshIntervals.push(setInterval(() => { if (currentUser) checkMessageUpdate(); }, 30000));
             refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardSettingsAndApply(); }, 60000));
             refreshIntervals.push(setInterval(() => { if (currentUser) loadDisclaimer(); }, 60000));
             refreshIntervals.push(setInterval(() => { startDynamicIntervals(); }, 300000));
@@ -8373,6 +9342,392 @@ function customConfirm(msg, icon, dangerText) {
         overlay.querySelector('#modalOkBtn').onclick = () => { overlay.remove(); resolve(true); };
     });
 }
+
+// ═══════════════════════════════════════════
+// STUDENT TRADING CLASS (Full-Screen Overlay)
+// ═══════════════════════════════════════════
+let _clsModules = [];
+let _clsFlatVideos = [];
+let _clsCurrentVidIdx = -1;
+
+function openClassesPage() {
+    let overlay = document.getElementById('classesOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'classesOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:#0a0a12;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100vw;height:100vh;height:100dvh;';
+        overlay.innerHTML = `
+        <div id="clsWatermark" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;pointer-events:none;overflow:hidden;"></div>
+        <div style="background:linear-gradient(135deg,#0a0a18,#1a0a2e);border-bottom:1px solid #1f1f2e;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;">
+            <div onclick="closeClassesPage()" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);color:#a855f7;font-size:16px;cursor:pointer;flex-shrink:0;">←</div>
+            <div style="font-size:18px;font-weight:700;background:linear-gradient(135deg,#a855f7,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">📚 Trading Classes</div>
+            <div id="clsModuleCount" style="margin-left:auto;font-size:11px;color:#71717a;background:#12121a;padding:4px 10px;border-radius:20px;border:1px solid #1f1f2e;">Loading...</div>
+        </div>
+        <div id="classesContentWrap" style="max-width:800px;margin:0 auto;padding:16px;position:relative;z-index:1;">
+            <div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;margin-bottom:12px;">📚</div><h3 style="font-size:16px;margin-bottom:6px;color:#e4e4e7;">Loading classes...</h3></div>
+        </div>`;
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'block';
+    overlay.scrollTop = 0;
+    renderWatermark();
+    openClassesPageRefresh();
+}
+
+async function openClassesPageRefresh() {
+    try {
+        const r = await fetch(API + '/api/me', { headers: { 'user-id': currentUser.id } }).then(r => r.json());
+        if (r.loggedIn && r.user) {
+            currentUser = r.user;
+        }
+    } catch (e) {}
+    loadUserClasses();
+}
+
+function renderWatermark() {
+    const container = document.getElementById('clsWatermark');
+    if (!container) return;
+    const uname = (currentUser && currentUser.username) ? currentUser.username : 'user';
+    const ts = new Date().toLocaleString('en-IN');
+    let html = '';
+    for (let row = 0; row < 20; row++) {
+        for (let col = 0; col < 4; col++) {
+            const x = col * 260 + (row % 2 ? 130 : 0);
+            const y = row * 160;
+            html += '<div style="position:absolute;left:' + x + 'px;top:' + y + 'px;transform:rotate(-35deg);color:rgba(168,85,247,0.08);font-size:13px;font-weight:700;font-family:monospace;white-space:nowrap;pointer-events:none;user-select:none;">' + uname + ' | BF ' + ts + '</div>';
+        }
+    }
+    container.innerHTML = html;
+}
+
+function closeClassesPage() {
+    const overlay = document.getElementById('classesOverlay');
+    if (overlay) overlay.style.display = 'none';
+    closeClsPlayer();
+}
+
+async function loadUserClasses() {
+    const wrap = document.getElementById('classesContentWrap');
+    const countEl = document.getElementById('clsModuleCount');
+    try {
+        const r = await fetch(API + '/api/classes', { headers: { 'user-id': currentUser.id } }).then(r => r.json());
+        if (r.success && r.classes && r.classes.length) {
+            _clsModules = r.classes.sort((a,b) => (a.order||0) - (b.order||0));
+            _clsFlatVideos = [];
+            _clsModules.forEach(m => {
+                (m.videos || []).sort((a,b) => (a.order||0)-(b.order||0)).forEach(v => {
+                    _clsFlatVideos.push({ moduleTitle: m.title, ...v });
+                });
+            });
+            countEl.textContent = _clsModules.length + ' modules | ' + _clsFlatVideos.length + ' videos';
+            let notice = '';
+            if (!currentUser.classApproved) {
+                notice = '<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">🔒</span><div><div style="font-size:12px;font-weight:700;color:#eab308;">Class Access Pending</div><div style="font-size:10px;color:#a1a1aa;">Contact admin to watch videos. You can browse modules below.</div></div></div>';
+            }
+            wrap.innerHTML = notice + renderUserClasses();
+        } else {
+            _clsModules = [];
+            _clsFlatVideos = [];
+            countEl.textContent = '0 modules';
+            wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;margin-bottom:12px;">📖</div><h3 style="font-size:16px;margin-bottom:6px;color:#e4e4e7;">Coming Soon</h3><p style="font-size:12px;">Trading classes will be available soon!</p></div>';
+        }
+    } catch (e) {
+        wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;">⚠️</div><h3>Error Loading</h3></div>';
+    }
+}
+
+function renderUserClasses() {
+    const wrap = document.getElementById('classesContentWrap');
+    const html = _clsModules.map((m, idx) => {
+        const vids = (m.videos || []).sort((a,b) => (a.order||0)-(b.order||0));
+        const vidCount = vids.length;
+        return '<div class="cls-mod-card" id="clsMod_' + m.id + '" style="background:#12121a;border:1px solid #1f1f2e;border-radius:14px;margin-bottom:14px;overflow:hidden;">' +
+            '<div onclick="toggleClsModule(\'' + m.id + '\')" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">' +
+            '<div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#a855f7,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">' + (m.order || idx + 1) + '</div>' +
+            '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(m.title) + '</div>' +
+            '<div style="font-size:11px;color:#71717a;margin-top:2px;">' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + '</div></div>' +
+            '<div id="clsArrow_' + m.id + '" style="font-size:14px;color:#71717a;transition:transform 0.2s;">▶</div>' +
+            '</div>' +
+            '<div id="clsBody_' + m.id + '" style="display:none;border-top:1px solid #1f1f2e;">' +
+            (m.description ? '<div style="padding:10px 16px;font-size:11px;color:#71717a;border-bottom:1px solid #1f1f2e;">' + _escH(m.description) + '</div>' : '') +
+            (vids.length ? vids.map(v => {
+                const vUrl = v.url || v.youtubeUrl || '';
+                const mType = detectMediaType(vUrl);
+                const typeIcons = { youtube:'▶', gdrive:'📁', direct:'🎥', mega:'☁', onedrive:'💾', embed:'🔗', unknown:'🎬' };
+                const typeColors = { youtube:'#ef4444', gdrive:'#22c55e', direct:'#3b82f6', mega:'#ef4444', onedrive:'#3b82f6', embed:'#f59e0b', unknown:'#71717a' };
+                const icon = typeIcons[mType] || '🎬';
+                const color = typeColors[mType] || '#71717a';
+                return '<div class="cls-vid-item" onclick="playClsVideo(\'' + v.id + '\')" id="clsVi_' + v.id + '" style="padding:10px 16px 10px 56px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(31,31,46,0.5);transition:background 0.15s;">' +
+                    '<div style="width:32px;height:32px;border-radius:8px;background:' + color + '20;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:' + color + ';">' + icon + '</div>' +
+                    '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(v.title) + '</div>' +
+                    '<div style="font-size:10px;color:' + color + ';margin-top:1px;">' + mType.toUpperCase() + (v.duration ? ' • ' + _escH(v.duration) : '') + '</div>' +
+                    '</div></div>';
+            }).join('') : '<div style="padding:20px;text-align:center;color:#71717a;font-size:11px;">No videos yet</div>') +
+            '</div></div>';
+    }).join('');
+    return html;
+}
+
+function toggleClsModule(id) {
+    const body = document.getElementById('clsBody_' + id);
+    const arrow = document.getElementById('clsArrow_' + id);
+    const card = document.getElementById('clsMod_' + id);
+    if (!body) return;
+    const isOpen = body.style.display === 'block';
+    document.querySelectorAll('[id^="clsBody_"]').forEach(b => b.style.display = 'none');
+    document.querySelectorAll('[id^="clsArrow_"]').forEach(a => a.style.transform = 'rotate(0deg)');
+    document.querySelectorAll('.cls-mod-card').forEach(c => c.style.borderColor = '#1f1f2e');
+    if (!isOpen) {
+        body.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+        card.style.borderColor = '#a855f7';
+    }
+}
+
+function playClsVideo(vidId) {
+    if (!currentUser.classApproved) {
+        showClassAccessDenied();
+        return;
+    }
+    const idx = _clsFlatVideos.findIndex(v => v.id === vidId);
+    if (idx === -1) return;
+    const vid = _clsFlatVideos[idx];
+    _clsCurrentVidIdx = idx;
+    renderClsPlayer(vid.url || vid.youtubeUrl, vid.title);
+    document.querySelectorAll('.cls-vid-item').forEach(el => el.style.background = '');
+    const el = document.getElementById('clsVi_' + vidId);
+    if (el) el.style.background = 'rgba(168,85,247,0.15)';
+}
+
+function showClassAccessDenied() {
+    let overlay = document.getElementById('classDeniedOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'classDeniedOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+        overlay.innerHTML = '<div style="text-align:center;max-width:340px;padding:32px;">' +
+            '<div style="font-size:64px;margin-bottom:16px;">🔒</div>' +
+            '<div style="font-size:22px;font-weight:800;color:#e4e4e7;margin-bottom:10px;">Class Access Restricted</div>' +
+            '<div style="font-size:13px;color:#a1a1aa;margin-bottom:24px;line-height:1.6;">You need admin approval to watch classes.<br>Please contact admin to get access.</div>' +
+            '<button onclick="closeClassDenied()" style="background:linear-gradient(135deg,#c0a843,#a89030);color:#000;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Contact Admin</button>' +
+            '</div>';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+    setTimeout(function() { closeClassDenied(); }, 5000);
+}
+
+function closeClassDenied() {
+    var ov = document.getElementById('classDeniedOverlay');
+    if (ov) ov.style.display = 'none';
+    closeClassesPage();
+}
+
+function detectMediaType(url) {
+    if (!url) return 'unknown';
+    url = url.toLowerCase();
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('drive.google.com')) return 'gdrive';
+    if (url.includes('mega.nz') || url.includes('mega.co.nz')) return 'mega';
+    if (url.match(/\.(mp4|webm|ogg|mov|avi|m3u8|mkv)(\?|$)/)) return 'direct';
+    if (url.includes('onedrive.live.com') || url.includes('1drv.ms')) return 'onedrive';
+    if (url.includes('openbox.video') || url.includes('streamable.com')) return 'embed';
+    if (url.endsWith('.mp4') || url.includes('.mp4?')) return 'direct';
+    if (url.includes('blob:')) return 'direct';
+    return 'embed';
+}
+
+function getGDriveEmbed(url) {
+    let m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (!m) m = url.match(/id=([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+    return url;
+}
+
+function renderClsPlayer(url, title) {
+    const mediaType = detectMediaType(url);
+    let player = document.getElementById('clsPlayerOverlay');
+    if (!player) {
+        player = document.createElement('div');
+        player.id = 'clsPlayerOverlay';
+        player.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:8px;';
+        player.onclick = function(e) { if (e.target === this) closeClsPlayer(); };
+        player.oncontextmenu = function(e) { e.preventDefault(); return false; };
+        player.innerHTML = `<div id="clsPlayerBox" style="width:100%;max-width:720px;background:#12121a;border:1px solid #1f1f2e;border-radius:14px;overflow:hidden;max-height:95vh;position:relative;">
+            <div style="padding:8px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1f1f2e;background:#0f0f1a;">
+                <div style="font-size:10px;color:#71717a;background:#1a1a24;padding:2px 6px;border-radius:4px;" id="clsPlayerType">VIDEO</div>
+                <div id="clsPlayerTitle" style="flex:1;font-size:13px;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                <div onclick="closeClsPlayer()" style="width:28px;height:28px;border-radius:6px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:14px;cursor:pointer;">✕</div>
+            </div>
+            <div id="clsPlayerWrap" style="position:relative;background:#000;overflow:hidden;"></div>
+            <div id="clsPlayerWatermark" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10;overflow:hidden;"></div>
+            <div id="clsPlayerFallback" style="display:none;padding:40px 20px;text-align:center;">
+                <div style="font-size:48px;margin-bottom:12px;">🎬</div>
+                <div style="color:#e4e4e7;font-size:14px;font-weight:600;margin-bottom:6px;">Video cannot play here</div>
+                <div id="clsFallbackMsg" style="color:#71717a;font-size:11px;margin-bottom:16px;"></div>
+                <a id="clsExternalLink" href="#" target="_blank" rel="noopener" style="display:inline-block;padding:10px 24px;background:#a855f7;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">▶ Open Link</a>
+            </div>
+            <div style="padding:8px 12px;display:flex;gap:8px;border-top:1px solid #1f1f2e;background:#0f0f1a;">
+                <button id="clsPrevBtn" onclick="playClsAdjacent(-1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:#e4e4e7;cursor:pointer;">⬅ Previous</button>
+                <button id="clsNextBtn" onclick="playClsAdjacent(1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:#e4e4e7;cursor:pointer;">Next ➡</button>
+            </div>
+        </div>`;
+        document.body.appendChild(player);
+    }
+
+    document.getElementById('clsPlayerTitle').textContent = title || 'Video';
+    document.getElementById('clsPlayerWrap').style.display = 'block';
+    document.getElementById('clsPlayerFallback').style.display = 'none';
+    document.getElementById('clsExternalLink').href = url;
+    document.getElementById('clsPlayerWrap').innerHTML = '';
+    document.getElementById('clsPlayerWatermark').innerHTML = '';
+
+    const wrap = document.getElementById('clsPlayerWrap');
+    const wrapStyle = 'width:100%;display:block;';
+
+    if (mediaType === 'youtube') {
+        document.getElementById('clsPlayerType').textContent = '▶ YOUTUBE';
+        document.getElementById('clsPlayerType').style.color = '#ef4444';
+        const vidId = _getYtId(url);
+        if (vidId && window.YT && window.YT.Player) {
+            embedYtPlayer(vidId);
+        } else if (vidId) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(tag);
+            window._ytApiCb = function() { embedYtPlayer(vidId); };
+            window.onYouTubeIframeAPIReady = window._ytApiCb;
+        } else {
+            showClsFallback('Invalid YouTube URL', 'Open in YouTube');
+        }
+    } else if (mediaType === 'gdrive') {
+        document.getElementById('clsPlayerType').textContent = '📁 GOOGLE DRIVE';
+        document.getElementById('clsPlayerType').style.color = '#22c55e';
+        wrap.style.cssText = wrapStyle + 'padding-bottom:75%;';
+        const iframe = document.createElement('iframe');
+        iframe.src = getGDriveEmbed(url);
+        iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
+        iframe.allow = 'autoplay; encrypted-media';
+        iframe.allowFullscreen = true;
+        wrap.appendChild(iframe);
+        renderVideoWatermark();
+    } else if (mediaType === 'direct') {
+        document.getElementById('clsPlayerType').textContent = '🎥 VIDEO';
+        document.getElementById('clsPlayerType').style.color = '#3b82f6';
+        wrap.style.cssText = wrapStyle;
+        const video = document.createElement('video');
+        video.src = url;
+        video.controls = true;
+        video.controlsList.add('nodownload');
+        video.controlsList.add('nofullscreen');
+        video.disablePictureInPicture = true;
+        video.style.cssText = 'width:100%;max-height:70vh;display:block;background:#000;';
+        video.oncontextmenu = function(e) { e.preventDefault(); return false; };
+        wrap.appendChild(video);
+        video.play().catch(function(){});
+        renderVideoWatermark();
+    } else {
+        document.getElementById('clsPlayerType').textContent = '🔗 EMBED';
+        document.getElementById('clsPlayerType').style.color = '#f59e0b';
+        wrap.style.cssText = wrapStyle + 'padding-bottom:56.25%;';
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
+        iframe.allow = 'autoplay; encrypted-media';
+        iframe.allowFullscreen = true;
+        wrap.appendChild(iframe);
+        renderVideoWatermark();
+    }
+
+    document.getElementById('clsPrevBtn').disabled = _clsCurrentVidIdx <= 0;
+    document.getElementById('clsNextBtn').disabled = _clsCurrentVidIdx >= _clsFlatVideos.length - 1;
+    player.style.display = 'flex';
+}
+
+function renderVideoWatermark() {
+    const wm = document.getElementById('clsPlayerWatermark');
+    if (!wm) return;
+    const uname = (currentUser && currentUser.username) ? currentUser.username : 'user';
+    let html = '';
+    const positions = [
+        {x:15,y:20},{x:55,y:10},{x:30,y:65},{x:70,y:45},{x:10,y:85},
+        {x:60,y:75},{x:80,y:15},{x:25,y:40},{x:45,y:90},{x:85,y:60},
+        {x:5,y:50},{x:50,y:30},{x:75,y:80},{x:35,y:5},{x:90,y:35}
+    ];
+    positions.forEach(function(p) {
+        html += '<div style="position:absolute;left:' + p.x + '%;top:' + p.y + '%;transform:rotate(-30deg);color:rgba(255,255,255,0.08);font-size:11px;font-weight:700;font-family:monospace;white-space:nowrap;pointer-events:none;user-select:none;text-shadow:0 0 4px rgba(0,0,0,0.5);">' + _escH(uname) + ' 🐻 BF</div>';
+    });
+    wm.innerHTML = html;
+}
+
+function embedYtPlayer(vidId) {
+    const wrap = document.getElementById('clsPlayerWrap');
+    wrap.style.cssText = 'position:relative;padding-bottom:56.25%;height:0;background:#000;';
+    wrap.innerHTML = '<div id="clsYtDiv" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>';
+    try {
+        new YT.Player('clsYtDiv', {
+            videoId: vidId,
+            playerVars: { autoplay: 1, rel: 0, modestbranding: 1, origin: window.location.origin },
+            events: {
+                onReady: function(e) { e.target.playVideo(); renderVideoWatermark(); },
+                onError: function() { showClsFallback('YouTube video cannot be embedded', 'Open in YouTube'); }
+            }
+        });
+    } catch(e) {
+        showClsFallback('YouTube player failed to load', 'Open in YouTube');
+    }
+}
+
+function showClsFallback(msg, btnText) {
+    document.getElementById('clsPlayerWrap').style.display = 'none';
+    document.getElementById('clsPlayerFallback').style.display = 'block';
+    document.getElementById('clsFallbackMsg').textContent = msg;
+}
+
+function playClsAdjacent(dir) {
+    const newIdx = _clsCurrentVidIdx + dir;
+    if (newIdx >= 0 && newIdx < _clsFlatVideos.length) {
+        const vid = _clsFlatVideos[newIdx];
+        _clsCurrentVidIdx = newIdx;
+        renderClsPlayer(vid.url || vid.youtubeUrl, vid.title);
+        document.querySelectorAll('.cls-vid-item').forEach(el => el.style.background = '');
+        const el = document.getElementById('clsVi_' + vid.id);
+        if (el) el.style.background = 'rgba(168,85,247,0.15)';
+    }
+}
+
+function closeClsPlayer() {
+    const player = document.getElementById('clsPlayerOverlay');
+    if (player) {
+        player.style.display = 'none';
+        document.getElementById('clsPlayerWrap').innerHTML = '';
+    }
+    document.querySelectorAll('.cls-vid-item').forEach(el => el.style.background = '');
+}
+
+function _getYtId(url) {
+    if (!url) return '';
+    let m = url.match(/[?&]v=([^&]+)/);
+    if (m) return m[1];
+    m = url.match(/youtu\.be\/([^?&]+)/);
+    if (m) return m[1];
+    m = url.match(/youtube\.com\/embed\/([^?&]+)/);
+    if (m) return m[1];
+    m = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+    if (m) return m[1];
+    return '';
+}
+function _escH(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (document.getElementById('clsPlayerOverlay')?.style.display === 'flex') closeClsPlayer();
+        else if (document.getElementById('classesOverlay')?.style.display === 'block') closeClassesPage();
+    }
+});
 </script>
 </body>
 </html>

@@ -1,29 +1,36 @@
-const CACHE_NAME = 'bearfighter-v2';
-const ASSETS = [
-    '/',
-    '/index.html'
-];
+const CACHE_NAME = 'bearfighter-v8';
 
 self.addEventListener('install', e => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-    );
     self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
     e.waitUntil(
         caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+            keys.map(k => caches.delete(k))
         ))
     );
     self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-    if (e.request.url.includes('/api/')) return;
+    const url = new URL(e.request.url);
+
+    // API calls — always network
+    if (url.pathname.startsWith('/api/')) return;
+
+    // HTML pages — ALWAYS network, NEVER cache
+    if (e.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === '/admin' || url.pathname === '/register') {
+        return;
+    }
+
+    // Static assets (CSS, images, icons) — cache first, fallback to network
     e.respondWith(
-        caches.match(e.request).then(r => r || fetch(e.request))
+        caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+            return resp;
+        }))
     );
 });
 
