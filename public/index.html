@@ -2704,7 +2704,7 @@ input[type="color"] {
         </div>
 
         <!-- Stats -->
-        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(10, 1fr);">
+        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(11, 1fr);">
           <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
@@ -2741,9 +2741,13 @@ input[type="color"] {
             <div class="admin-stat-label">🔄 Renewal Requests</div>
             <div class="admin-stat-value" style="color: #3b82f6;" id="dashRenewalReqs">0</div>
           </div>
-          <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));padding:8px 6px;" title="Click to view registration requests">
+            <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));padding:8px 6px;" title="Click to view registration requests">
             <div class="admin-stat-label" style="font-size:9px;">📝 Registrations</div>
             <div class="admin-stat-value" style="color: #f59e0b;font-size:16px;" id="dashRegRequests">0</div>
+          </div>
+          <div class="admin-stat-card" onclick="showStatPopup('stockTips')" style="cursor:pointer;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.02));" title="Click to manage stock tips">
+            <div class="admin-stat-label">📊 Stock Tips</div>
+            <div class="admin-stat-value" style="color: #8b5cf6;font-size:16px;" id="dashStockTipsCount">0</div>
           </div>
         </div>
         <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
@@ -5829,6 +5833,27 @@ function showStatPopup(type) {
     } else if (type === 'revenue') {
         html += '💰 Revenue Details';
         list = _lastDashboardUsers.filter(u => u.paymentAmount > 0);
+    } else if (type === 'stockTips') {
+        html += '📊 Stock Tips</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+        html += '<div style="margin-bottom:8px;display:flex;gap:6px;"><button class="admin-tip-type-btn ptip-type buy selected" onclick="document.querySelectorAll(\'.ptip-type\').forEach(b=>b.classList.remove(\'selected\'));this.classList.add(\'selected\');">BUY</button><button class="admin-tip-type-btn ptip-type sell" onclick="document.querySelectorAll(\'.ptip-type\').forEach(b=>b.classList.remove(\'selected\'));this.classList.add(\'selected\');">SELL</button></div>';
+        html += '<div style="display:flex;gap:4px;margin-bottom:6px;"><input id="ptipSymbol" class="admin-form-input" placeholder="STOCK" style="flex:1;text-transform:uppercase;font-size:10px;padding:4px 6px;" oninput="this.value=this.value.toUpperCase()"><input id="ptipEntry" class="admin-form-input" placeholder="Entry" style="width:65px;font-size:10px;padding:4px 6px;"><input id="ptipTarget" class="admin-form-input" placeholder="Target" style="width:65px;font-size:10px;padding:4px 6px;"><input id="ptipSL" class="admin-form-input" placeholder="SL" style="width:55px;font-size:10px;padding:4px 6px;"></div>';
+        html += '<div style="margin-bottom:6px;"><input id="ptipNote" class="admin-form-input" placeholder="Note (optional)" style="font-size:10px;padding:4px 6px;"></div>';
+        html += '<button class="admin-btn admin-btn-primary" onclick="addPopupTip()" style="width:100%;font-size:10px;padding:4px;">➕ Add Tip</button>';
+        html += '<div id="pStockTipsList" style="margin-top:8px;max-height:150px;overflow-y:auto;"></div>';
+        p.innerHTML = html;
+        p.style.display = 'block';
+        fetch(API + '/api/stocktips', { headers: getAuthHeaders() }).then(r => r.json()).then(d => {
+            const list = document.getElementById('pStockTipsList');
+            if (!list) return;
+            const tips = d.tips || d || [];
+            if (!tips.length) { list.innerHTML = '<div style="color:#555;text-align:center;padding:8px;font-size:10px;">No tips yet</div>'; return; }
+            list.innerHTML = tips.slice(0,20).reverse().map(t => {
+                const st = t.status || 'active';
+                const sc = st === 'targetDone' ? '#22c55e' : st === 'slHit' ? '#ef4444' : '#8b5cf6';
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid #222;font-size:10px;"><span style="color:#e4e4e7;font-weight:600;">' + (t.symbol||'?') + '</span><span style="color:#71717a;">' + (t.type||'') + ' @ ' + (t.entry||'') + '</span><span style="color:' + sc + ';">' + st + '</span></div>';
+            }).join('');
+        });
+        return;
     } else if (type === 'allUsers') {
         html += '👥 All Users (' + _lastDashboardUsers.length + ')';
         list = _lastDashboardUsers;
@@ -6035,6 +6060,12 @@ async function loadDashboardData() {
         // Load renewal requests count
         fetch(API + '/api/admin/renewal-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r3 => r3.json()).then(r3 => {
             if (r3.success && el('dashRenewalReqs')) el('dashRenewalReqs').textContent = (r3.requests || []).length;
+        }).catch(() => {});
+
+        // Load stock tips count
+        fetch(API + '/api/stocktips', { headers: getAuthHeaders() }).then(r4 => r4.json()).then(r4 => {
+            const tips = r4.tips || r4 || [];
+            if (el('dashStockTipsCount')) el('dashStockTipsCount').textContent = tips.length;
         }).catch(() => {});
 
         // Load live indices
@@ -8079,6 +8110,32 @@ async function addStockTip() {
     } catch (e) {
         customAlert('Server error', '❌');
     }
+}
+
+async function addPopupTip() {
+    const symbol = document.getElementById('ptipSymbol').value.trim();
+    const action = document.querySelector('.ptip-type.selected') ? document.querySelector('.ptip-type.selected').textContent.trim() : 'BUY';
+    const entry = document.getElementById('ptipEntry').value.trim();
+    const target = document.getElementById('ptipTarget').value.trim();
+    const sl = document.getElementById('ptipSL').value.trim();
+    const note = document.getElementById('ptipNote').value.trim();
+    if (!symbol) { customAlert('Enter stock symbol', '⚠️'); return; }
+    try {
+        const r = await fetch(API + '/api/admin/stocktips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ symbol, action, entry, target, sl, note, sendTelegram: false })
+        }).then(r => r.json());
+        if (!r.success) { customAlert(r.message, '❌'); return; }
+        document.getElementById('ptipSymbol').value = '';
+        document.getElementById('ptipEntry').value = '';
+        document.getElementById('ptipTarget').value = '';
+        document.getElementById('ptipSL').value = '';
+        document.getElementById('ptipNote').value = '';
+        loadAdminStockTips();
+        customAlert('✅ Tip added!', '✅');
+        showStatPopup('stockTips');
+    } catch (e) { customAlert('Server error', '❌'); }
 }
 
 async function loadAdminStockTips() {
