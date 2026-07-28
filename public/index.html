@@ -2705,7 +2705,7 @@ input[type="color"] {
         </div>
 
         <!-- Stats -->
-        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(9, 1fr);">
+        <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(10, 1fr);">
           <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
             <div class="admin-stat-label">Total Revenue</div>
             <div class="admin-stat-value" style="color: #22c55e;" id="dashTotalRevenue">₹0</div>
@@ -2742,9 +2742,9 @@ input[type="color"] {
             <div class="admin-stat-label">🔄 Renewal Requests</div>
             <div class="admin-stat-value" style="color: #3b82f6;" id="dashRenewalReqs">0</div>
           </div>
-          <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));" title="Click to view registration requests">
-            <div class="admin-stat-label">📝 Registrations</div>
-            <div class="admin-stat-value" style="color: #f59e0b;" id="dashRegRequests">0</div>
+          <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));padding:8px 6px;" title="Click to view registration requests">
+            <div class="admin-stat-label" style="font-size:9px;">📝 Registrations</div>
+            <div class="admin-stat-value" style="color: #f59e0b;font-size:16px;" id="dashRegRequests">0</div>
           </div>
         </div>
         <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
