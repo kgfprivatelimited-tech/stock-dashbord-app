@@ -5167,6 +5167,7 @@ async function checkSession() {
             if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
             if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
             if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
+            setTimeout(loadThemeSettings, 150);
         } else {
             document.getElementById('adminLoginScreen').classList.add('show');
         }
