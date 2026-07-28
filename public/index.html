@@ -1157,7 +1157,7 @@ header {
     overflow: hidden;
     font-family: 'Inter', sans-serif;
 }
-.admin-panel .admin-layout { display: flex; height: 100vh; padding-left: 260px; }
+.admin-panel .admin-layout { display: flex; height: 100vh; }
 .admin-sidebar-nav {
     width: 260px;
     background: #12121a;
@@ -1217,18 +1217,19 @@ header {
 .manual-badge { display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-right:4px; }
 .admin-main-area {
     flex: 1;
+    margin-left: 260px;
     padding: 24px;
     overflow-y: auto;
     height: 100vh;
 }
-.admin-left-panel { width: 100%; }
-.admin-right-sidebar {
-    width: 340px;
-    flex-shrink: 0;
-    padding: 24px 24px 24px 0;
-    overflow-y: auto;
-    height: 100vh;
+.admin-main-grid {
+    display: flex;
+    flex-direction: row !important;
+    gap: 24px;
+    align-items: flex-start;
 }
+.admin-left-panel { flex: 1; min-width: 0; }
+.admin-right-sidebar { width: 340px; flex-shrink: 0; }
 
 .admin-top-bar {
     display: flex;
@@ -2121,10 +2122,9 @@ header {
     .dash-stat-card .d-label { font-size: 8px; }
 
     /* ADMIN PANEL MOBILE - FULL RESPONSIVE */
-    .admin-panel .admin-layout { flex-direction: column; padding-left: 0; }
     .admin-sidebar-nav { width: 0; padding: 0; overflow: hidden; }
-    .admin-main-area { padding: 12px; }
-    .admin-right-sidebar { width: 100%; padding: 12px; height: auto; }
+    .admin-main-area { margin-left: 0; padding: 12px; }
+    .admin-right-sidebar { width: 100%; }
     .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-top-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
     .admin-top-bar-actions { flex-wrap: wrap; width: 100%; }
@@ -4062,11 +4062,9 @@ input[type="color"] {
       </div>
 
       </div><!-- /admin-left-panel -->
-    </div><!-- /admin-main-grid -->
-  </div><!-- /admin-main-area -->
 
-  <!-- ═══ RIGHT SIDEBAR ═══ -->
-  <div class="admin-right-sidebar">
+      <!-- ═══ RIGHT SIDEBAR ═══ -->
+      <div class="admin-right-sidebar">
 
         <!-- Stock Tips -->
         <div class="admin-card">
@@ -4114,6 +4112,8 @@ input[type="color"] {
         </div>
 
       </div><!-- /admin-right-sidebar -->
+    </div><!-- /admin-main-grid -->
+  </div><!-- /admin-main-area -->
 </div><!-- /admin-layout -->
 </div>
 
