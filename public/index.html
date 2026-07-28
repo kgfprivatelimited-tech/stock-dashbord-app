@@ -1210,6 +1210,11 @@ header {
 }
 .admin-nav-item:hover { background: rgba(255,255,255,0.05); color: #e4e4e7; }
 .admin-nav-item.active { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.manual-nav-btn { background:rgba(255,255,255,0.05);border:1px solid #2a2a35;color:#a1a1aa;padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-weight:600;transition:all 0.2s; }
+.manual-nav-btn:hover { background:rgba(59,130,246,0.15);color:#60a5fa;border-color:rgba(59,130,246,0.3); }
+.manual-subhead { font-size:13px;font-weight:700;color:#e4e4e7;margin:12px 0 6px;padding-left:4px; }
+.manual-item { padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid #2a2a35; }
+.manual-badge { display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-right:4px; }
 .admin-main-area {
     flex: 1;
     margin-left: 260px;
@@ -2673,6 +2678,10 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('activity', this)">🕐 Recent Activity</div>
       <div class="admin-nav-item" onclick="showAdminSection('loginHist', this)">🔑 Login History</div>
     </div>
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Help</div>
+      <div class="admin-nav-item" onclick="showAdminSection('userManual', this)" style="background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(168,85,247,0.12));border:1px solid rgba(59,130,246,0.2);color:#60a5fa;">📖 User Manual</div>
+    </div>
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
 
@@ -2733,9 +2742,14 @@ input[type="color"] {
             <div class="admin-stat-label">🔄 Renewal Requests</div>
             <div class="admin-stat-value" style="color: #3b82f6;" id="dashRenewalReqs">0</div>
           </div>
+          <div class="admin-stat-card" onclick="showStatPopup('regRequests')" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));" title="Click to view registration requests">
+            <div class="admin-stat-label">📝 Registrations</div>
+            <div class="admin-stat-value" style="color: #f59e0b;" id="dashRegRequests">0</div>
+          </div>
         </div>
         <div id="statPopup" style="display:none;margin:8px 0;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;max-height:300px;overflow-y:auto;"></div>
-
+        <div id="registerRequestsFeed" style="display:none;"></div>
+        
         <!-- Quick Shortcuts Row -->
         <div style="margin:10px 0;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -3788,6 +3802,262 @@ input[type="color"] {
         </div>
       </div>
 
+      </div>
+
+      <!-- ═══ USER MANUAL SECTION ═══ -->
+      <div id="section-userManual" style="display:none;">
+        <div class="admin-card" style="border:1px solid rgba(59,130,246,0.3);">
+          <div class="admin-card-header">
+            <div class="admin-card-title" style="color:#60a5fa;">📖 Bear Fighter — Complete User Manual</div>
+          </div>
+          <div style="padding:14px;font-size:12px;color:#a1a1aa;line-height:1.8;">
+
+            <div id="manualNav" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;position:sticky;top:0;background:#0e0e1a;padding:8px 0;z-index:5;border-bottom:1px solid #1f1f2e;">
+              <button onclick="manualScroll('m-admin')" class="manual-nav-btn">Admin Features</button>
+              <button onclick="manualScroll('m-user')" class="manual-nav-btn">User Features</button>
+              <button onclick="manualScroll('m-apis')" class="manual-nav-btn">API Endpoints</button>
+              <button onclick="manualScroll('m-jobs')" class="manual-nav-btn">Background Jobs</button>
+              <button onclick="manualScroll('m-files')" class="manual-nav-btn">File Guide</button>
+              <button onclick="manualScroll('m-tips')" class="manual-nav-btn">Quick Tips</button>
+            </div>
+
+            <!-- ═══ ADMIN FEATURES ═══ -->
+            <div id="m-admin">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">🔧 Admin Panel Features</div>
+
+            <div class="manual-subhead">📊 Overview (Dashboard)</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Dashboard</span> Total users, active users, pending devices, pending renewals — sab ek jagah dikhta hai. Quick stats cards se turant status samajh aata hai.</div>
+
+            <div class="manual-subhead">➕ Create User</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Create</span> Naya user banao — Username, Email, Password, Full Name, Category (Silver/Gold/Diamond/Premium), Subscription Days, Payment details, Telegram Chat ID, WhatsApp Number.</div>
+
+            <div class="manual-subhead">👥 All Users</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Users</span> Saare users dikhenge — search karo, filter karo. Har user ke baju icons: ✏️ Edit, 📚 Class ON/OFF toggle, 🚫 Block / ✅ Renew, 🗑️ Delete. Click on user row → full edit form khulega.</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Bulk</span> Checkboxes select karke bulk category change karo. Export CSV bhi available hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">📚 Class Access</span> Har user ke baju 📚 ON/OFF toggle hai. ON = user videos dekh sakta hai. OFF = user ko "Contact Admin" dikhega.</div>
+
+            <div class="manual-subhead">📢 Broadcast</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;">Message</span> Text message likho, color choose karo, users select karo (sab ya category ya search karke). Telegram bhejo ☑️, WhatsApp link generate karo ☑️. Message user ke dashboard pe banner dikhata hai + bell notification + browser push + sound + vibration.</div>
+
+            <div class="manual-subhead">🎁 Offers</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(168,85,247,0.15);color:#a855f7;">Offer</span> Naya offer banao — title, description, bonus days, promo code, max uses. Target users select karo. Offer create karte hi selected users ko notification jaata hai.</div>
+
+            <div class="manual-subhead">⏰ Scheduled Messages</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(99,102,241,0.15);color:#6366f1;">Schedule</span> Message likho, future date/time set karo. Server automatically us time pe message bhejega selected users ko.</div>
+
+            <div class="manual-subhead">💳 Reminders</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">Renewal</span> Jin users ka subscription 1-3 din me expire ho raha hai, unhe automatic reminder jaata hai (har 6 ghante). Manual "Send Reminders" button se abhi turant bhej sakte ho.</div>
+
+            <div class="manual-subhead">📋 Renewal Requests</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">Renew</span> User ne Renew pe click kiya → UPI payment kiya → admin ko request dikhti hai. Plan, amount, days, txn ID sab dikhta hai. Approve karo → user ki expiry badh jaati hai. Reject karo → request hata di.</div>
+
+            <div class="manual-subhead">🎉 Holiday Banners</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(236,72,153,0.15);color:#ec4899;">Banner</span> Festival/holiday ke liye banner banao — image upload (URL ya base64), title, message, color, schedule. Desktop/Mobile toggle. Users ko banner dikhega.</div>
+
+            <div class="manual-subhead">📚 Trading Class</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(168,85,247,0.15);color:#a855f7;">Class</span> Modules banao (title, description, order, thumbnail). Videos add karo (YouTube, Google Drive, Mega, Direct MP4, OneDrive, Embed). Access control: All users / Category based / Specific users. Admin approval ke bina user video nahi dekh sakta.</div>
+
+            <div class="manual-subhead">🎛️ Dashboard Settings</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Config</span> Dashboard ke sections toggle karo (Indices, Heatmap, Tips, Signals etc.). Stock tips configuration. Sector stocks list manage karo.</div>
+
+            <div class="manual-subhead">⚙️ Disclaimer</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Legal</span> Disclaimer text, background color, text color, speed, font size — sab customize karo. Preview dikhta hai.</div>
+
+            <div class="manual-subhead">🔧 Maintenance Mode</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Maintenance</span> ON karo → sirf admin access kar sakta hai, users ko maintenance page dikhta hai. Schedule bhi set kar sakte ho (auto ON/OFF). Custom message likho. Daily maintenance window bhi set kar sakte ho (raat ko automatic).</div>
+
+            <div class="manual-subhead">🔐 Change Password</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Security</span> Admin password change karo. Users ke passwords bhi reset kar sakte ho.</div>
+
+            <div class="manual-subhead">🔑 API Keys</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">API</span> Upstox API key + access token manage karo. Google OAuth credentials. Telegram bot token.</div>
+
+            <div class="manual-subhead">📊 Heatmap Stocks</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Stocks</span> Har sector me kaunse stocks dikhne chahiye wo configure karo. Add/Remove/Reset defaults.</div>
+
+            <div class="manual-subhead">🎯 Tip Performance</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Analytics</span> Kitne tips diye, kitne target hit hue, kitne SL hit hue — sab stats.</div>
+
+            <div class="manual-subhead">🕐 Recent Activity + 🔑 Login History</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Logs</span> Kaunne kya kiya — login, logout, broadcast, user create/delete, device approve. Timestamps ke saath.</div>
+            </div>
+
+            <!-- ═══ USER FEATURES ═══ -->
+            <div id="m-user">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">👤 User Panel Features</div>
+
+            <div class="manual-subhead">📊 Dashboard</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">Home</span> Login ke baad dashboard dikhta hai — Nifty, Sensex, Bank Nifty live indices. Market status (Open/Close). Subscription badge with days left. Highlighted users ka naam golden hota hai.</div>
+
+            <div class="manual-subhead">📈 Indices (Live)</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;">Live</span> Nifty 50, Sensex, Bank Nifty — real-time Upstox V3 API se. Market hours me 2 sec, close hone pe 30 sec. Har tick update hota hai.</div>
+
+            <div class="manual-subhead">🗺️ Heatmap</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">Visual</span> Sector-wise heatmap — red/green colors se pata chalta hai kaun sector upar hai kaun neeche. Stocks hover karke live price dekho.</div>
+
+            <div class="manual-subhead">📊 Stock Tips</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">BUY</span><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">SELL</span> Admin ne diye tips yahan dikhte hain — Entry, Target, SL, Note. Active, Target Done ✅, SL Hit ❌ status.</div>
+
+            <div class="manual-subhead">⚡ Signals</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;">Signal</span> EMA/RSI based automatic buy/sell signals. RSI overbought/oversold, EMA crossover detection.</div>
+
+            <div class="manual-subhead">📱 Bottom Navigation Bar</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Nav</span> Profile 👤 — Apna profile dekho, name/email/password change, social verification (Google/Telegram), DOB, device info.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(168,85,247,0.15);color:#a855f7;">📚 Class</span> Trading classes — modules dikhte hain. Admin ne approve kiya toh videos play hongi. Nahi toh "Contact Admin" dikhega.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">🔄 Renew</span> Self-renewal — plan choose karo, UPI pe payment karo, txn ID dalo. Admin approve karega.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;">📱 Telegram</span> Bear Fighter Telegram group/channel se judo.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">💬 WhatsApp</span> Bear Fighter WhatsApp group se judo.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">🔔 Alerts</span> Notification bell — broadcast messages, stock tips, offers — sab yahan dikhta hai. Browser push notification bhi aata hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">🚪 Logout</span> Logout karo.</div>
+
+            <div class="manual-subhead">📝 Registration (New Users)</div>
+            <div class="manual-item"><span class="manual-badge admin-badge-admin">Register</span> /register pe jaake form bharo — name, email, phone, category choose, UPI payment. Admin approve karega.</div>
+
+            <div class="manual-subhead">🔐 Security Features</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Device Lock</span> Sirf 1 device allowed hai. Naya device use karo toh admin approval lagegi. Approve hone pe purana device hata diya jaata hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Screenshot Block</span> Screenshot/Screen recording disable hai. Right-click, Ctrl+U, Ctrl+S sab blocked hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">Social Verification</span> Google ya Telegram link karo profile se. Dono link ho jaayein toh blue tick ✅ milta hai.</div>
+            </div>
+
+            <!-- ═══ API ENDPOINTS ═══ -->
+            <div id="m-apis">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">🔌 API Endpoints</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr style="border-bottom:1px solid #1f1f2e;"><th style="text-align:left;color:#71717a;padding:4px 8px;">Method</th><th style="text-align:left;color:#71717a;padding:4px 8px;">Route</th><th style="text-align:left;color:#71717a;padding:4px 8px;">Auth</th><th style="text-align:left;color:#71717a;padding:4px 8px;">Purpose</th></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/settings</td><td style="color:#71717a;">None</td><td>Public settings (disclaimer, maintenance, telegram bot username)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/maintenance</td><td style="color:#71717a;">None</td><td>Maintenance mode check</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/login</td><td style="color:#71717a;">None</td><td>User login</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/logout</td><td style="color:#71717a;">None</td><td>User logout</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/me</td><td style="color:#f59e0b;">User</td><td>Current user info + message + birthday + social verification</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/me/profile</td><td style="color:#f59e0b;">User</td><td>Full profile (name, email, phone, category, DOB, social)</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/change-password</td><td style="color:#f59e0b;">User</td><td>User password change request</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/profile/name</td><td style="color:#f59e0b;">User</td><td>Update full name</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/profile/send-email-otp</td><td style="color:#f59e0b;">User</td><td>Send email verification OTP</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/profile/verify-email-otp</td><td style="color:#f59e0b;">User</td><td>Verify email OTP</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/profile/send-mobile-otp</td><td style="color:#f59e0b;">User</td><td>Send mobile verification OTP</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/me/profile/verify-mobile-otp</td><td style="color:#f59e0b;">User</td><td>Verify mobile OTP</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/register</td><td style="color:#71717a;">None</td><td>New user registration request</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/register/payment</td><td style="color:#71717a;">None</td><td>Submit UPI payment details</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/renewal-request</td><td style="color:#f59e0b;">User</td><td>Submit self-renewal request with UPI txn</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/validate-promo</td><td style="color:#f59e0b;">User</td><td>Validate promo code for renewal discount</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/indices</td><td style="color:#f59e0b;">User</td><td>Live market indices (Nifty, Sensex, Bank Nifty)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/gainers-losers</td><td style="color:#f59e0b;">User</td><td>Top gainers and losers</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/heatmap</td><td style="color:#f59e0b;">User</td><td>Sector heatmap data</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/fo-stocks</td><td style="color:#f59e0b;">User</td><td>F&O stocks list</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/fno-all</td><td style="color:#f59e0b;">User</td><td>All F&O stocks</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/signals</td><td style="color:#f59e0b;">User</td><td>EMA/RSI trading signals</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/stocktips</td><td style="color:#f59e0b;">User</td><td>Active stock tips</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/classes</td><td style="color:#f59e0b;">User</td><td>Trading classes list</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/classes/:id</td><td style="color:#f59e0b;">User</td><td>Single class detail + videos</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/offers</td><td style="color:#f59e0b;">User</td><td>Active offers/promos</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/dashboard-settings</td><td style="color:#f59e0b;">User</td><td>Dashboard layout settings</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#eab308;">GET</td><td>/api/auth/google/link</td><td style="color:#71717a;">None</td><td>Google OAuth link (profile verification)</td></tr>
+            <tr><td style="padding:3px 8px;color:#eab308;">GET</td><td>/api/auth/google/callback</td><td style="color:#71717a;">None</td><td>Google OAuth callback</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/auth/telegram/link</td><td style="color:#f59e0b;">User</td><td>Telegram link (profile verification)</td></tr>
+            <tr><td colspan="4" style="padding:6px 8px;color:#ef4444;font-weight:700;">— Admin Endpoints (require admin-key header) —</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/users</td><td style="color:#ef4444;">Admin</td><td>Saare users ka data</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/dashboard</td><td style="color:#ef4444;">Admin</td><td>Dashboard stats (users, tips, pending devices, renewals)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/approve</td><td style="color:#ef4444;">Admin</td><td>Registration request approve</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/reject-register</td><td style="color:#ef4444;">Admin</td><td>Registration request reject</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/block</td><td style="color:#ef4444;">Admin</td><td>User block/unblock</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/renew</td><td style="color:#ef4444;">Admin</td><td>User subscription renew</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">PUT</td><td>/api/admin/user/:username</td><td style="color:#ef4444;">Admin</td><td>Edit user details</td></tr>
+            <tr><td style="padding:3px 8px;color:#ef4444;">DEL</td><td>/api/admin/user/:username</td><td style="color:#ef4444;">Admin</td><td>Delete user</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/broadcast</td><td style="color:#ef4444;">Admin</td><td>Broadcast message to users</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/clear-messages</td><td style="color:#ef4444;">Admin</td><td>Clear messages for selected users</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/clear-all-messages</td><td style="color:#ef4444;">Admin</td><td>Clear ALL users' messages</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/stocktips</td><td style="color:#ef4444;">Admin</td><td>Add stock tip</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">PUT</td><td>/api/admin/stocktips/:id</td><td style="color:#ef4444;">Admin</td><td>Edit stock tip</td></tr>
+            <tr><td style="padding:3px 8px;color:#ef4444;">DEL</td><td>/api/admin/stocktips/:id</td><td style="color:#ef4444;">Admin</td><td>Delete stock tip</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/device/:username/approve</td><td style="color:#ef4444;">Admin</td><td>Approve new device</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/device/:username/reject</td><td style="color:#ef4444;">Admin</td><td>Reject new device</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/user/:username/class-access</td><td style="color:#ef4444;">Admin</td><td>Toggle class access ON/OFF</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/approve-password</td><td style="color:#ef4444;">Admin</td><td>Approve user password change</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/reset-password</td><td style="color:#ef4444;">Admin</td><td>Reset user password</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/offers</td><td style="color:#ef4444;">Admin</td><td>Create offer</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/offers/:id/toggle</td><td style="color:#ef4444;">Admin</td><td>Toggle offer active/inactive</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/classes</td><td style="color:#ef4444;">Admin</td><td>Create class module</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">PUT</td><td>/api/admin/classes/:id</td><td style="color:#ef4444;">Admin</td><td>Edit class module</td></tr>
+            <tr><td style="padding:3px 8px;color:#ef4444;">DEL</td><td>/api/admin/classes/:id</td><td style="color:#ef4444;">Admin</td><td>Delete class module</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/classes/:id/videos</td><td style="color:#ef4444;">Admin</td><td>Add video to class</td></tr>
+            <tr><td style="padding:3px 8px;color:#ef4444;">DEL</td><td>/api/admin/classes/:classId/videos/:videoId</td><td style="color:#ef4444;">Admin</td><td>Remove video from class</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/maintenance</td><td style="color:#ef4444;">Admin</td><td>Toggle maintenance ON/OFF</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/maintenance/schedule</td><td style="color:#ef4444;">Admin</td><td>Schedule maintenance window</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/maintenance/daily</td><td style="color:#ef4444;">Admin</td><td>Set daily maintenance window</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/schedule-message</td><td style="color:#ef4444;">Admin</td><td>Schedule future message</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/send-reminders</td><td style="color:#ef4444;">Admin</td><td>Send payment reminders to expiring users</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/change-password</td><td style="color:#ef4444;">Admin</td><td>Change admin password</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/bulk-category</td><td style="color:#ef4444;">Admin</td><td>Bulk category change</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/renewal-requests/:id/approve</td><td style="color:#ef4444;">Admin</td><td>Approve renewal request</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/renewal-requests/:id/reject</td><td style="color:#ef4444;">Admin</td><td>Reject renewal request</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/activity</td><td style="color:#ef4444;">Admin</td><td>Recent activity log</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/login-history</td><td style="color:#ef4444;">Admin</td><td>Login history</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/tip-performance</td><td style="color:#ef4444;">Admin</td><td>Stock tip performance stats</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/online-users</td><td style="color:#ef4444;">Admin</td><td>Currently online users</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/birthdays</td><td style="color:#ef4444;">Admin</td><td>Upcoming birthdays</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/pending-devices</td><td style="color:#ef4444;">Admin</td><td>Pending device approval requests</td></tr>
+            <tr><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/renewal-requests</td><td style="color:#ef4444;">Admin</td><td>Pending renewal requests</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#22c55e;">GET</td><td>/api/admin/sector-stocks</td><td style="color:#ef4444;">Admin</td><td>Heatmap sector stocks config</td></tr>
+            <tr><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/sector-stocks</td><td style="color:#ef4444;">Admin</td><td>Update sector stocks</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#3b82f6;">POST</td><td>/api/admin/sector-stocks/reset</td><td style="color:#ef4444;">Admin</td><td>Reset sector stocks to defaults</td></tr>
+            </table>
+            </div>
+
+            <!-- ═══ BACKGROUND JOBS ═══ -->
+            <div id="m-jobs">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">⚡ Background Jobs (Server pe automatic chalte hain)</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;">2 sec</span> <b>Stock Data Refresh</b> — Market hours me Upstox V3 API se live stock data fetch hota hai (indices, gainers/losers, heatmap). 15 sec cache TTL.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;">15 sec</span> <b>Stock Background Refresh</b> — `refreshStocksBackground()` — Market close hone pe bhi background me data ready rakhta hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;">1 min</span> <b>Scheduled Messages</b> — Jo messages schedule kiye gaye hain, unhe time aane pe automatically bhejta hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">6 hours</span> <b>Payment Reminders</b> — Jin users ka subscription 1-3 din me expire ho raha hai, unhe automatic Telegram + dashboard reminder bhejta hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(168,85,247,0.15);color:#a855f7;">1 min</span> <b>Maintenance Check</b> — Scheduled maintenance window check karta hai. Time aane pe auto ON/OFF. Users ko notification bhejta hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(34,197,94,0.15);color:#22c55e;">1 min</span> <b>Signal History Save</b> — Trading signals ka history save hota hai JSON file me.</div>
+            </div>
+
+            <!-- ═══ FILE GUIDE ═══ -->
+            <div id="m-files">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">📁 File Guide</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr style="border-bottom:1px solid #1f1f2e;"><th style="text-align:left;color:#71717a;padding:4px 8px;">File</th><th style="text-align:left;color:#71717a;padding:4px 8px;">Purpose</th></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">index.js</td><td>Main server — saare API routes, background jobs, Telegram/WhatsApp integration</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">db.js</td><td>MongoDB Atlas connection layer — hybrid storage (MongoDB + JSON fallback), cache, debounced writes</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/index.html</td><td>Full frontend — Login, Dashboard, Admin Panel, CSS + JS sab isme (single file SPA)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/register.html</td><td>Registration page — new user sign-up with UPI payment flow</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/classes.html</td><td>Standalone classes page — self-contained SPA for viewing trading classes</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/sw.js</td><td>Service Worker v8 — PWA support, offline caching, HTML NEVER cached</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/manifest.json</td><td>PWA manifest — app icon, name, theme color</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">.env</td><td>Secrets — MONGODB_URI, API keys, bot tokens, admin password (NEVER commit to git)</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">users.json</td><td>User data — all registered users (JSON fallback when MongoDB offline)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">settings.json</td><td>App settings — classes, banners, offers, disclaimer, sector stocks, renewal requests</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">stocktips.json</td><td>Stock tips database (BUY/SELL tips with status)</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">activitylog.json</td><td>Activity log — kaunne kya kiya</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">loginhistory.json</td><td>Login history — kaun kab login hua</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">scheduledmsgs.json</td><td>Scheduled messages — future me bhejne wale messages</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">signalhistory.json</td><td>Signal history — purane trading signals ka record</td></tr>
+            <tr style="background:rgba(255,255,255,0.02);"><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">package.json</td><td>Dependencies — mongodb, express, axios, bcryptjs, helmet, compression, etc.</td></tr>
+            <tr><td style="padding:3px 8px;color:#e4e4e7;font-weight:600;">public/icons/</td><td>PNG icons — profile, class, renew, telegram, whatsapp, logout</td></tr>
+            </table>
+            </div>
+
+            <!-- ═══ QUICK TIPS ═══ -->
+            <div id="m-tips">
+            <div style="font-size:16px;font-weight:800;color:#e4e4e7;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid #1f1f2e;">💡 Quick Tips</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Deploy:</b> GitHub pe push karo → Render.com pe auto-deploy hota hai.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Upstox Token:</b> Access token expire hota hai (~1 year). .env me naya token dalo.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>MongoDB:</b> Agar Atlas disconnect ho jaye toh JSON files se data load hota hai (fallback).</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Backup:</b> users.json + settings.json + .env — ye 3 files hamesha backup rakho.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Device Lock:</b> Sirf 1 device per user. Switch = fresh admin approval.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Class Access:</b> Admin ko manually 📚 ON karna padta hai per user.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Browser Notifications:</b> User ko "Allow" karna padta hai jab prompt aaye. Bina allow ke push nahi aayega.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Service Worker:</b> HTML pages kabhi cache nahi hoti (v8). Sirf static assets cache hoti hain.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>Admin Password:</b> Default: bearfighter@admin. Admin panel me jaake change karo.</div>
+            <div class="manual-item"><span class="manual-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">Tip</span> <b>UPI Payment:</b> User ne payment ki → Renew pe click kiya → admin ko request aayi → Approve/Reject.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       </div><!-- /admin-left-panel -->
 
       <!-- ═══ RIGHT SIDEBAR ═══ -->
@@ -4796,6 +5066,8 @@ async function checkSession() {
                 badge.textContent = (currentUser.daysLeft > 0 ? currentUser.daysLeft : 0) + 'd left';
                 if (currentUser.highlight) { document.getElementById('headerHighlightBadge').style.display = 'block'; }
                 updateHeaderProfile();
+                updateMessageBanner();
+                if (currentUser.message && currentUser.message.trim()) checkNotifsForBroadcast(currentUser.message.trim());
             } else {
                 // Server says not valid — force logout
                 doLogout();
@@ -5325,6 +5597,7 @@ function updateAdminSidebarClock() {
 }
 
 function showAdminSection(section, navEl) {
+    if (section === 'registerRequests') { showStatPopup('regRequests'); section = 'dashboard'; }
     document.querySelectorAll('[id^="section-"]').forEach(el => { if (el.id !== 'section-dashboard') el.style.display = 'none'; });
     document.getElementById('section-dashboard').style.display = 'none';
     const target = document.getElementById('section-' + section);
@@ -5757,7 +6030,7 @@ async function loadDashboardData() {
         if (el('dashPendingDevices')) el('dashPendingDevices').textContent = s.pendingDevices || 0;
 
         fetch(API + '/api/admin/register-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r2 => r2.json()).then(r2 => {
-            if (r2.success && el('dashRegRequests')) el('dashRegRequests').textContent = (r2.pending || []).length;
+            if (r2.success && el('dashRegRequests')) el('dashRegRequests').textContent = (r2.requests || []).filter(r => r.status === 'pending').length;
         }).catch(() => {});
 
         // Load renewal requests count
@@ -5882,14 +6155,17 @@ let lastMessageCount = 0;
 async function checkNewNotifications() {
     try {
         const userId = sessionStorage.getItem('userId');
-        if (!userId) return;
+        if (!userId || !currentUser) return;
         const r = await fetch(API + '/api/me', { headers: { 'user-id': userId } }).then(r => r.json());
         if (r.loggedIn && r.user.message && r.user.message.trim() !== '') {
             const msgKey = r.user.message.substring(0, 50);
             if (msgKey !== lastMessageCount) {
                 lastMessageCount = msgKey;
+                currentUser.message = r.user.message;
+                currentUser.msgColor = r.user.msgColor || '#ff6b35';
                 sendBrowserNotification('📢 New Message from Vaibhav', r.user.message, 'broadcast-' + msgKey);
-                // Vibrate device if supported
+                updateMessageBanner();
+                checkNotifsForBroadcast(r.user.message.trim());
                 if (navigator.vibrate) {
                     navigator.vibrate([200, 100, 200]);
                 }
