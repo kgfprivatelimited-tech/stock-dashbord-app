@@ -1234,13 +1234,13 @@ header {
     height: 100vh;
 }
 .admin-main-grid {
-    display: flex;
-    flex-direction: row !important;
+    display: grid;
+    grid-template-columns: 1fr 340px;
     gap: 24px;
     align-items: flex-start;
 }
-.admin-left-panel { flex: 1; min-width: 0; }
-.admin-right-sidebar { width: 340px; flex-shrink: 0; }
+.admin-left-panel { min-width: 0; overflow: hidden; }
+.admin-right-sidebar { width: auto; min-width: 0; }
 
 .admin-top-bar {
     display: flex;
@@ -2135,7 +2135,7 @@ header {
     /* ADMIN PANEL MOBILE - FULL RESPONSIVE */
     .admin-sidebar-nav { width: 0; padding: 0; overflow: hidden; }
     .admin-main-area { margin-left: 0; padding: 12px; }
-    .admin-right-sidebar { width: 100%; }
+    .admin-main-grid { grid-template-columns: 1fr; }
     .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-top-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
     .admin-top-bar-actions { flex-wrap: wrap; width: 100%; }
@@ -4238,7 +4238,7 @@ input[type="color"] {
       <div class="admin-theme-label">🌈 Preset</div>
       <div class="admin-theme-presets">
         <button class="admin-theme-preset active" data-preset="default" onclick="applyThemePreset('default')">Default</button>
-        <button class="admin-theme-preset" data-preset="darkblack" onclick="applyThemePreset('darkblack')">Black</button>
+        <button class="admin-theme-preset" data-preset="black" onclick="applyThemePreset('black')">Black</button>
         <button class="admin-theme-preset" data-preset="royal" onclick="applyThemePreset('royal')">Royal</button>
       </div>
     </div>
