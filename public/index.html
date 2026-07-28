@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1091,15 +1091,15 @@ header {
 .admin-login-screen {
     display: none;
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--abg) 100%);
     z-index: 99999;
     justify-content: center; align-items: center;
     font-family: 'Inter', sans-serif;
 }
 .admin-login-screen.show { display: flex; }
 .admin-login-box {
-    background: #12121a;
-    border: 1px solid #2a2a35;
+    background: var(--acard);
+    border: 1px solid var(--aborder);
     border-radius: 16px;
     padding: 40px 36px;
     width: 340px;
@@ -1114,17 +1114,17 @@ header {
     margin-bottom: 8px;
 }
 .admin-login-box p {
-    color: #71717a;
+    color: var(--adim);
     font-size: 12px;
     margin-bottom: 20px;
 }
 .admin-login-box input {
     width: 100%;
     padding: 12px 16px;
-    background: #1a1a24;
-    border: 1px solid #2a2a35;
+    background: var(--aelevated);
+    border: 1px solid var(--aborder);
     border-radius: 8px;
-    color: #e4e4e7;
+    color: var(--atext);
     font-size: 14px;
     text-align: center;
     outline: none;
@@ -1152,16 +1152,27 @@ header {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: #0a0a0f;
+    background: var(--abg, #0a0a0f);
     z-index: 9999;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
 }
+
+.admin-panel.light-theme {
+    --abg: #f5f5f0;
+    --acard: #ffffff;
+    --aelevated: #f0f0eb;
+    --aborder: #e0e0d8;
+    --atext: #1c1c1e;
+    --adim: #888888;
+    --amute: #999999;
+}
+
 .admin-panel .admin-layout { display: flex; height: 100vh; }
 .admin-sidebar-nav {
     width: 260px;
-    background: #12121a;
-    border-right: 1px solid #2a2a35;
+    background: var(--acard);
+    border-right: 1px solid var(--aborder);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -1191,7 +1202,7 @@ header {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: #71717a;
+    color: var(--adim);
     margin-bottom: 10px;
     padding-left: 12px;
     font-weight: 600;
@@ -1199,7 +1210,7 @@ header {
 .admin-nav-item {
     padding: 12px 14px;
     border-radius: 10px;
-    color: #71717a;
+    color: var(--adim);
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -1208,12 +1219,12 @@ header {
     margin-bottom: 4px;
     font-size: 13px;
 }
-.admin-nav-item:hover { background: rgba(255,255,255,0.05); color: #e4e4e7; }
+.admin-nav-item:hover { background: rgba(255,255,255,0.05); color: var(--atext); }
 .admin-nav-item.active { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.manual-nav-btn { background:rgba(255,255,255,0.05);border:1px solid #2a2a35;color:#a1a1aa;padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-weight:600;transition:all 0.2s; }
+.manual-nav-btn { background:rgba(255,255,255,0.05);border:1px solid var(--aborder);color:#a1a1aa;padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-weight:600;transition:all 0.2s; }
 .manual-nav-btn:hover { background:rgba(59,130,246,0.15);color:#60a5fa;border-color:rgba(59,130,246,0.3); }
-.manual-subhead { font-size:13px;font-weight:700;color:#e4e4e7;margin:12px 0 6px;padding-left:4px; }
-.manual-item { padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid #2a2a35; }
+.manual-subhead { font-size:13px;font-weight:700;color:var(--atext);margin:12px 0 6px;padding-left:4px; }
+.manual-item { padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid var(--aborder); }
 .manual-badge { display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-right:4px; }
 .admin-main-area {
     flex: 1;
@@ -1242,8 +1253,8 @@ header {
 
 /* Admin Cards - Modern */
 .admin-card {
-    background: #12121a;
-    border: 1px solid #2a2a35;
+    background: var(--acard);
+    border: 1px solid var(--aborder);
     border-radius: 14px;
     padding: 20px;
     margin-bottom: 20px;
@@ -1261,12 +1272,12 @@ header {
     margin-bottom: 20px;
 }
 .admin-stat-card {
-    background: #12121a;
-    border: 1px solid #2a2a35;
+    background: var(--acard);
+    border: 1px solid var(--aborder);
     border-radius: 12px;
     padding: 16px;
 }
-.admin-stat-label { font-size: 11px; color: #71717a; margin-bottom: 6px; }
+.admin-stat-label { font-size: 11px; color: var(--adim); margin-bottom: 6px; }
 .admin-stat-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 22px;
@@ -1296,7 +1307,7 @@ header {
     left: 50%;
     transform: translateX(-50%);
     font-size: 10px;
-    color: #71717a;
+    color: var(--adim);
 }
 .admin-chart-bar .chart-val {
     position: absolute;
@@ -1315,11 +1326,11 @@ header {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr 0.8fr 0.6fr;
     padding: 12px 0;
-    border-bottom: 1px solid #2a2a35;
+    border-bottom: 1px solid var(--aborder);
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #71717a;
+    color: var(--adim);
 }
 .admin-table-row {
     display: grid;
@@ -1339,7 +1350,7 @@ header {
     font-size: 12px; font-weight: 600; color: #fff;
 }
 .admin-user-name { font-weight: 500; color: #fff; font-size: 11px; }
-.admin-user-detail { font-size: 10px; color: #71717a; }
+.admin-user-detail { font-size: 10px; color: var(--adim); }
 
 /* Admin Badges */
 .admin-badge {
@@ -1364,25 +1375,25 @@ header {
 
 /* Admin Forms */
 .admin-form-group { margin-bottom: 16px; }
-.admin-form-label { display: block; font-size: 11px; color: #71717a; margin-bottom: 4px; font-weight: 500; }
+.admin-form-label { display: block; font-size: 11px; color: var(--adim); margin-bottom: 4px; font-weight: 500; }
 .admin-form-input {
     width: 100%;
-    background: #1a1a24;
-    border: 1px solid #2a2a35;
+    background: var(--aelevated);
+    border: 1px solid var(--aborder);
     border-radius: 8px;
     padding: 8px 12px;
-    color: #e4e4e7;
+    color: var(--atext);
     font-size: 12px;
     font-family: inherit;
 }
 .admin-form-input:focus { outline: none; border-color: #f59e0b; }
 .admin-form-select {
     width: 100%;
-    background: #1a1a24;
-    border: 1px solid #2a2a35;
+    background: var(--aelevated);
+    border: 1px solid var(--aborder);
     border-radius: 8px;
     padding: 10px 14px;
-    color: #e4e4e7;
+    color: var(--atext);
     font-size: 13px;
     cursor: pointer;
 }
@@ -1404,7 +1415,7 @@ header {
 .admin-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .admin-btn-primary { background: #f59e0b; color: #000; }
 .admin-btn-primary:hover { background: #d97706; }
-.admin-btn-secondary { background: #1a1a24; color: #e4e4e7; border: 1px solid #2a2a35; }
+.admin-btn-secondary { background: var(--aelevated); color: var(--atext); border: 1px solid var(--aborder); }
 .admin-btn-secondary:hover { border-color: #f59e0b; }
 .admin-btn-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 .admin-btn-success { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
@@ -1413,10 +1424,10 @@ header {
 
 /* Admin Toggle Switch */
 .admin-toggle-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-.admin-toggle-label { font-size: 13px; color: #e4e4e7; }
+.admin-toggle-label { font-size: 13px; color: var(--atext); }
 .admin-toggle {
     width: 48px; height: 26px;
-    background: #1a1a24;
+    background: var(--aelevated);
     border-radius: 13px;
     position: relative;
     cursor: pointer;
@@ -1450,8 +1461,8 @@ header {
     flex-shrink: 0;
 }
 .admin-activity-content { flex: 1; }
-.admin-activity-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: #e4e4e7; }
-.admin-activity-time { font-size: 11px; color: #71717a; }
+.admin-activity-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--atext); }
+.admin-activity-time { font-size: 11px; color: var(--adim); }
 
 /* Admin Tip Form */
 .admin-tip-type-btns { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -1459,9 +1470,9 @@ header {
     flex: 1;
     padding: 12px;
     border-radius: 8px;
-    border: 2px solid #2a2a35;
+    border: 2px solid var(--aborder);
     background: transparent;
-    color: #e4e4e7;
+    color: var(--atext);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -1479,11 +1490,11 @@ header {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #1a1a24;
+    background: var(--aelevated);
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
-    color: #e4e4e7;
+    color: var(--atext);
 }
 .admin-checkbox-item input { accent-color: #f59e0b; }
 
@@ -1492,9 +1503,9 @@ header {
 .admin-template-btn {
     padding: 6px 14px;
     border-radius: 20px;
-    border: 1px solid #2a2a35;
+    border: 1px solid var(--aborder);
     background: transparent;
-    color: #71717a;
+    color: var(--adim);
     font-size: 12px;
     cursor: pointer;
 }
@@ -1512,7 +1523,7 @@ header {
 
 /* Admin Scheduled Item */
 .admin-scheduled-item {
-    background: #1a1a24;
+    background: var(--aelevated);
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 10px;
@@ -1521,13 +1532,13 @@ header {
     align-items: center;
 }
 .admin-scheduled-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #fff; }
-.admin-scheduled-info p { font-size: 11px; color: #71717a; }
+.admin-scheduled-info p { font-size: 11px; color: var(--adim); }
 .admin-scheduled-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #f59e0b; }
 
 /* Admin Color Picker Group */
 .admin-color-picker-group { display: flex; gap: 12px; margin-bottom: 12px; }
 .admin-color-picker-item { flex: 1; }
-.admin-color-picker-item label { display: block; font-size: 11px; color: #71717a; margin-bottom: 6px; }
+.admin-color-picker-item label { display: block; font-size: 11px; color: var(--adim); margin-bottom: 6px; }
 .admin-color-input {
     width: 100%; height: 36px;
     border: none; border-radius: 6px;
@@ -1536,11 +1547,11 @@ header {
 
 /* Admin Range Slider */
 .admin-slider-wrap { margin-top: 12px; }
-.admin-slider-wrap label { display: flex; justify-content: space-between; font-size: 12px; color: #71717a; margin-bottom: 8px; }
+.admin-slider-wrap label { display: flex; justify-content: space-between; font-size: 12px; color: var(--adim); margin-bottom: 8px; }
 .admin-slider {
     width: 100%; height: 6px;
     -webkit-appearance: none;
-    background: #1a1a24;
+    background: var(--aelevated);
     border-radius: 3px; outline: none;
 }
 .admin-slider::-webkit-slider-thumb {
@@ -1588,8 +1599,8 @@ header {
     width: 28px; height: 28px;
     border-radius: 6px;
     border: none;
-    background: #1a1a24;
-    color: #71717a;
+    background: var(--aelevated);
+    color: var(--adim);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1601,11 +1612,11 @@ header {
 
 /* Admin Sidebar Scrollbar */
 .admin-sidebar-nav::-webkit-scrollbar { width: 6px; }
-.admin-sidebar-nav::-webkit-scrollbar-track { background: #0a0a0f; }
-.admin-sidebar-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
+.admin-sidebar-nav::-webkit-scrollbar-track { background: var(--abg, #0a0a0f); }
+.admin-sidebar-nav::-webkit-scrollbar-thumb { background: var(--aborder); border-radius: 3px; }
 .admin-main-area::-webkit-scrollbar { width: 6px; }
-.admin-main-area::-webkit-scrollbar-track { background: #0a0a0f; }
-.admin-main-area::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
+.admin-main-area::-webkit-scrollbar-track { background: var(--abg, #0a0a0f); }
+.admin-main-area::-webkit-scrollbar-thumb { background: var(--aborder); border-radius: 3px; }
 
 /* Admin Logout Button */
 .admin-logout-btn {
@@ -2564,7 +2575,7 @@ input[type="color"] {
 .admin-theme-panel.open { display: block; }
 .admin-theme-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 14px; }
 .admin-theme-group { margin-bottom: 14px; }
-.admin-theme-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #71717a; margin-bottom: 8px; }
+.admin-theme-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--adim); margin-bottom: 8px; }
 .admin-theme-presets { display: flex; gap: 8px; }
 .admin-theme-preset {
     flex: 1; padding: 10px 8px;
@@ -2602,7 +2613,7 @@ input[type="color"] {
     background: transparent;
     padding: 2px;
 }
-.admin-theme-accent-value { font-size: 11px; color: #71717a; font-family: 'JetBrains Mono', monospace; }
+.admin-theme-accent-value { font-size: 11px; color: var(--adim); font-family: 'JetBrains Mono', monospace; }
 .admin-theme-toggle-wrap { display: flex; align-items: center; gap: 10px; }
 .admin-theme-toggle {
     width: 44px; height: 24px;
@@ -2625,49 +2636,6 @@ input[type="color"] {
 }
 .admin-theme-toggle.active::after { left: 22px; }
 
-/* Light theme overrides for admin panel */
-.admin-panel.light-theme {
-    background: #f5f5f0;
-}
-.admin-panel.light-theme .admin-sidebar-nav {
-    background: #ffffff;
-    border-right-color: #e0e0d8;
-}
-.admin-panel.light-theme .admin-sidebar-nav .sidebar-logo { color: #1a1a1a; }
-.admin-panel.light-theme .admin-nav-item { color: #666; }
-.admin-panel.light-theme .admin-nav-item:hover { background: rgba(0,0,0,0.03); color: #1a1a1a; }
-.admin-panel.light-theme .admin-main-area { background: #f5f5f0; }
-.admin-panel.light-theme .admin-card {
-    background: #ffffff;
-    border-color: #e0e0d8;
-}
-.admin-panel.light-theme .admin-card-title { color: #1a1a1a; }
-.admin-panel.light-theme .admin-card:hover { border-color: #ccc; }
-.admin-panel.light-theme .admin-stat-card {
-    background: #ffffff;
-    border-color: #e0e0d8;
-}
-.admin-panel.light-theme .admin-stat-label { color: #888; }
-.admin-panel.light-theme .admin-stat-value { color: #1a1a1a; }
-.admin-panel.light-theme .admin-top-bar h1 { color: #1a1a1a; }
-.admin-panel.light-theme .admin-table-row { border-bottom-color: rgba(0,0,0,0.05); }
-.admin-panel.light-theme .admin-user-name { color: #1a1a1a; }
-.admin-panel.light-theme .admin-form-input { background: #f5f5f0; border-color: #e0e0d8; color: #1a1a1a; }
-.admin-panel.light-theme .admin-btn-secondary { background: #f5f5f0; border-color: #e0e0d8; color: #1a1a1a; }
-.admin-panel.light-theme .admin-nav-label { color: #999; }
-.admin-panel.light-theme .admin-theme-panel { background: #ffffff; border-color: #e0e0d8; }
-.admin-panel.light-theme .admin-theme-title { color: #1a1a1a; }
-.admin-panel.light-theme .admin-theme-preset { border-color: #e0e0d8; color: #666; }
-.admin-panel.light-theme .admin-theme-layout-btn { border-color: #e0e0d8; color: #666; }
-.admin-panel.light-theme .admin-theme-label { color: #999; }
-.admin-panel.light-theme .admin-theme-accent-value { color: #999; }
-.admin-panel.light-theme .manual-nav-btn { background: #f0f0eb; border-color: #e0e0d8; color: #666; }
-.admin-panel.light-theme .admin-scheduled-item { background: #f0f0eb; }
-.admin-panel.light-theme .admin-activity-item { border-bottom-color: rgba(0,0,0,0.05); }
-.admin-panel.light-theme .admin-checkbox-item { background: #f0f0eb; }
-.admin-panel.light-theme #globalSearchDropdown { background: #ffffff; border-color: #e0e0d8; }
-.admin-panel.light-theme .admin-tip-type-btn { border-color: #e0e0d8; }
-.admin-panel.light-theme .sidebar-logo-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
 /* Layout pattern: Centered */
 .admin-main-grid.layout-centered {
@@ -5828,7 +5796,7 @@ async function loadRegisterRequests() {
         const div = document.getElementById('registerRequestsFeed');
         if (!div) return;
         if (!r.success || r.requests.length === 0) {
-            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">No requests</div>';
+            div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:10px;">No requests</div>';
             return;
         }
         const pending = r.requests.filter(q => q.status === 'pending');
@@ -5844,16 +5812,16 @@ async function loadRegisterRequests() {
                     <div style="display:flex;justify-content:space-between;align-items:start;">
                         <div>
                             <div style="font-size:13px;font-weight:700;color:#f59e0b;">${q.fullName}</div>
-                            <div style="font-size:10px;color:#71717a;">@${q.username} • ${q.email}</div>
-                            <div style="font-size:10px;color:#71717a;">📱 ${q.phone || 'N/A'} ${waText}</div>
-                            <div style="font-size:10px;color:#71717a;">🎂 ${q.dob || 'N/A'} • 📋 ${q.plan || 'Standard'}</div>
+                            <div style="font-size:10px;color:var(--adim);">@${q.username} • ${q.email}</div>
+                            <div style="font-size:10px;color:var(--adim);">📱 ${q.phone || 'N/A'} ${waText}</div>
+                            <div style="font-size:10px;color:var(--adim);">🎂 ${q.dob || 'N/A'} • 📋 ${q.plan || 'Standard'}</div>
                             <div style="margin-top:3px;">${payBadge}</div>
-                            <div style="font-size:9px;color:#555;margin-top:2px;">Source: ${q.source || 'N/A'} • ${t}</div>
+                            <div style="font-size:9px;color:var(--amute);margin-top:2px;">Source: ${q.source || 'N/A'} • ${t}</div>
                         </div>
                     </div>
-                    ${q.payment && q.payment.screenshot ? '<div style="margin-top:6px;"><img src="' + q.payment.screenshot + '" style="max-width:120px;max-height:80px;border-radius:6px;border:1px solid #2a2a35;cursor:pointer;" onclick="window.open(this.src)"></div>' : ''}
+                    ${q.payment && q.payment.screenshot ? '<div style="margin-top:6px;"><img src="' + q.payment.screenshot + '" style="max-width:120px;max-height:80px;border-radius:6px;border:1px solid var(--aborder);cursor:pointer;" onclick="window.open(this.src)"></div>' : ''}
                     <div style="display:flex;gap:6px;margin-top:8px;">
-                        <input type="number" id="regDays_${q.id}" value="30" min="1" style="width:70px;padding:4px 8px;background:#0f0f1a;border:1px solid #2a2a35;border-radius:6px;color:#e0e0e0;font-size:10px;" placeholder="Days">
+                        <input type="number" id="regDays_${q.id}" value="30" min="1" style="width:70px;padding:4px 8px;background:#0f0f1a;border:1px solid var(--aborder);border-radius:6px;color:#e0e0e0;font-size:10px;" placeholder="Days">
                         <button class="admin-btn admin-btn-primary" style="padding:4px 10px;font-size:10px;" onclick="approveRegRequest('${q.id}')">✅ Approve</button>
                         <button class="admin-btn admin-btn-danger" style="padding:4px 10px;font-size:10px;" onclick="rejectRegRequest('${q.id}')">❌ Reject</button>
                     </div>
@@ -5861,12 +5829,12 @@ async function loadRegisterRequests() {
             }).join('');
         }
         if (processed.length > 0) {
-            html += '<div style="font-size:10px;color:#71717a;font-weight:700;margin-top:12px;margin-bottom:8px;">📜 PROCESSED</div>';
+            html += '<div style="font-size:10px;color:var(--adim);font-weight:700;margin-top:12px;margin-bottom:8px;">📜 PROCESSED</div>';
             html += processed.map(q => {
                 const icon = q.status === 'approved' ? '✅' : '❌';
                 const color = q.status === 'approved' ? '#22c55e' : '#ff1744';
                 return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;">
-                    <span style="color:#e4e4e7;">${q.fullName} <span style="color:#555;">@${q.username}</span></span>
+                    <span style="color:var(--atext);">${q.fullName} <span style="color:var(--amute);">@${q.username}</span></span>
                     <span style="color:${color};font-weight:600;">${icon} ${q.status}</span>
                 </div>`;
             }).join('');
@@ -5909,14 +5877,14 @@ async function loadAdminBirthdays() {
         if (countEl) countEl.textContent = r.success ? r.birthdays.length : 0;
         if (!div) return;
         if (!r.success || r.birthdays.length === 0) {
-            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:10px;">Aaj kisi ka birthday nahi hai</div>';
+            div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:10px;">Aaj kisi ka birthday nahi hai</div>';
             return;
         }
         div.innerHTML = r.birthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;margin-bottom:6px;">
             <div style="font-size:20px;">🎂</div>
             <div style="flex:1;">
                 <div style="font-size:12px;font-weight:700;color:#f59e0b;">${b.fullName || b.username}</div>
-                <div style="font-size:9px;color:#71717a;">${b.age} saal • <span class="admin-badge admin-badge-${(b.category||'silver').toLowerCase()}">${b.category||'Silver'}</span></div>
+                <div style="font-size:9px;color:var(--adim);">${b.age} saal • <span class="admin-badge admin-badge-${(b.category||'silver').toLowerCase()}">${b.category||'Silver'}</span></div>
             </div>
             <div style="font-size:16px;">🎉</div>
         </div>`).join('');
@@ -5974,7 +5942,7 @@ function showStatPopup(type) {
     }
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
-    let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#e4e4e7;font-size:12px;">';
+    let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:var(--atext);font-size:12px;">';
     let list = [];
     if (type === 'online') {
         html += '🟢 Online Users';
@@ -6003,7 +5971,7 @@ function showStatPopup(type) {
         html += '💰 Revenue Details';
         list = _lastDashboardUsers.filter(u => u.paymentAmount > 0);
     } else if (type === 'stockTips') {
-        html += '📊 Stock Tips</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+        html += '📊 Stock Tips</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:var(--adim);cursor:pointer;font-size:14px;">✕</button></div>';
         html += '<div style="margin-bottom:8px;display:flex;gap:6px;"><button class="admin-tip-type-btn ptip-type buy selected" onclick="document.querySelectorAll(\'.ptip-type\').forEach(b=>b.classList.remove(\'selected\'));this.classList.add(\'selected\');">BUY</button><button class="admin-tip-type-btn ptip-type sell" onclick="document.querySelectorAll(\'.ptip-type\').forEach(b=>b.classList.remove(\'selected\'));this.classList.add(\'selected\');">SELL</button></div>';
         html += '<div style="display:flex;gap:4px;margin-bottom:6px;"><input id="ptipSymbol" class="admin-form-input" placeholder="STOCK" style="flex:1;text-transform:uppercase;font-size:10px;padding:4px 6px;" oninput="this.value=this.value.toUpperCase()"><input id="ptipEntry" class="admin-form-input" placeholder="Entry" style="width:65px;font-size:10px;padding:4px 6px;"><input id="ptipTarget" class="admin-form-input" placeholder="Target" style="width:65px;font-size:10px;padding:4px 6px;"><input id="ptipSL" class="admin-form-input" placeholder="SL" style="width:55px;font-size:10px;padding:4px 6px;"></div>';
         html += '<div style="margin-bottom:6px;"><input id="ptipNote" class="admin-form-input" placeholder="Note (optional)" style="font-size:10px;padding:4px 6px;"></div>';
@@ -6015,11 +5983,11 @@ function showStatPopup(type) {
             const list = document.getElementById('pStockTipsList');
             if (!list) return;
             const tips = d.tips || d || [];
-            if (!tips.length) { list.innerHTML = '<div style="color:#555;text-align:center;padding:8px;font-size:10px;">No tips yet</div>'; return; }
+            if (!tips.length) { list.innerHTML = '<div style="color:var(--amute);text-align:center;padding:8px;font-size:10px;">No tips yet</div>'; return; }
             list.innerHTML = tips.slice(0,20).reverse().map(t => {
                 const st = t.status || 'active';
                 const sc = st === 'targetDone' ? '#22c55e' : st === 'slHit' ? '#ef4444' : '#8b5cf6';
-                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid #222;font-size:10px;"><span style="color:#e4e4e7;font-weight:600;">' + (t.symbol||'?') + '</span><span style="color:#71717a;">' + (t.type||'') + ' @ ' + (t.entry||'') + '</span><span style="color:' + sc + ';">' + st + '</span></div>';
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid #222;font-size:10px;"><span style="color:var(--atext);font-weight:600;">' + (t.symbol||'?') + '</span><span style="color:var(--adim);">' + (t.type||'') + ' @ ' + (t.entry||'') + '</span><span style="color:' + sc + ';">' + st + '</span></div>';
             }).join('');
         });
         return;
@@ -6030,23 +5998,23 @@ function showStatPopup(type) {
         html += '📝 Registration Requests';
         const regDiv = document.getElementById('registerRequestsFeed');
         if (regDiv) {
-            p.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#e4e4e7;font-size:12px;">📝 Registration Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>' + regDiv.innerHTML;
+            p.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:var(--atext);font-size:12px;">📝 Registration Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:var(--adim);cursor:pointer;font-size:14px;">✕</button></div>' + regDiv.innerHTML;
             p.style.display = 'block';
             return;
         }
         html += ' (0)';
     } else if (type === 'pendingDevices') {
         fetch(API + '/api/admin/pending-devices', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(d => {
-            let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#ef4444;font-size:12px;">📱 Pending Device Approvals</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
-            if (!d.pending || !d.pending.length) { h += '<div style="color:#555;text-align:center;padding:12px;font-size:11px;">No pending device approvals</div>'; }
+            let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#ef4444;font-size:12px;">📱 Pending Device Approvals</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:var(--adim);cursor:pointer;font-size:14px;">✕</button></div>';
+            if (!d.pending || !d.pending.length) { h += '<div style="color:var(--amute);text-align:center;padding:12px;font-size:11px;">No pending device approvals</div>'; }
             else {
                 d.pending.forEach(item => {
                     const pd = item.pendingDevice;
-                    h += '<div style="padding:8px;border:1px solid #2a2a35;border-radius:8px;margin-bottom:6px;background:#1a1a24;">' +
+                    h += '<div style="padding:8px;border:1px solid var(--aborder);border-radius:8px;margin-bottom:6px;background:var(--aelevated);">' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                        '<div><strong style="color:#e4e4e7;font-size:12px;">' + item.fullName + '</strong> <span style="color:#71717a;font-size:10px;">@' + item.username + '</span>' +
+                        '<div><strong style="color:var(--atext);font-size:12px;">' + item.fullName + '</strong> <span style="color:var(--adim);font-size:10px;">@' + item.username + '</span>' +
                         '<div style="font-size:10px;color:#aaa;margin-top:2px;">📱 ' + pd.device + ' | 🖥️ ' + pd.platform + '</div>' +
-                        '<div style="font-size:9px;color:#555;margin-top:2px;">🕐 ' + new Date(pd.requestedAt).toLocaleString('en-IN') + '</div>' +
+                        '<div style="font-size:9px;color:var(--amute);margin-top:2px;">🕐 ' + new Date(pd.requestedAt).toLocaleString('en-IN') + '</div>' +
                         '</div>' +
                         '<div style="display:flex;gap:6px;">' +
                         '<button onclick="approveDevice(\'' + item.username + '\')" style="background:#22c55e;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">✅ Approve</button>' +
@@ -6061,17 +6029,17 @@ function showStatPopup(type) {
     }
     if (type === 'pendingRenewals') {
         fetch(API + '/api/admin/renewal-requests', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(d => {
-            let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#3b82f6;font-size:12px;">🔄 Pending Renewal Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+            let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="color:#3b82f6;font-size:12px;">🔄 Pending Renewal Requests</strong><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:var(--adim);cursor:pointer;font-size:14px;">✕</button></div>';
             const pending = (d.requests || []).filter(r => r.status === 'pending');
-            if (!pending.length) { h += '<div style="color:#555;text-align:center;padding:12px;font-size:11px;">No pending renewal requests</div>'; }
+            if (!pending.length) { h += '<div style="color:var(--amute);text-align:center;padding:12px;font-size:11px;">No pending renewal requests</div>'; }
             else {
                 pending.forEach(item => {
-                    h += '<div style="padding:8px;border:1px solid #2a2a35;border-radius:8px;margin-bottom:6px;background:#1a1a24;">' +
+                    h += '<div style="padding:8px;border:1px solid var(--aborder);border-radius:8px;margin-bottom:6px;background:var(--aelevated);">' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                        '<div><strong style="color:#e4e4e7;font-size:12px;">' + (item.fullName || item.username) + '</strong> <span style="color:#71717a;font-size:10px;">@' + item.username + '</span>' +
+                        '<div><strong style="color:var(--atext);font-size:12px;">' + (item.fullName || item.username) + '</strong> <span style="color:var(--adim);font-size:10px;">@' + item.username + '</span>' +
                         '<div style="font-size:10px;color:#aaa;margin-top:2px;">📦 ' + (item.planName || 'Plan') + ' | ₹' + (item.amount || 0) + ' | ' + (item.days || 30) + ' days</div>' +
-                        (item.txnId ? '<div style="font-size:9px;color:#555;margin-top:2px;">🆔 Txn: ' + item.txnId + '</div>' : '') +
-                        '<div style="font-size:9px;color:#555;margin-top:2px;">🕐 ' + new Date(item.createdAt).toLocaleString('en-IN') + '</div>' +
+                        (item.txnId ? '<div style="font-size:9px;color:var(--amute);margin-top:2px;">🆔 Txn: ' + item.txnId + '</div>' : '') +
+                        '<div style="font-size:9px;color:var(--amute);margin-top:2px;">🕐 ' + new Date(item.createdAt).toLocaleString('en-IN') + '</div>' +
                         '</div>' +
                         '<div style="display:flex;gap:6px;">' +
                         '<button onclick="approveRenewalReq(\'' + item.id + '\')" style="background:#22c55e;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">✅ Approve</button>' +
@@ -6084,21 +6052,21 @@ function showStatPopup(type) {
         });
         return;
     }
-    html += '</div><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:14px;">✕</button></div>';
+    html += '</div><button onclick="document.getElementById(\'statPopup\').style.display=\'none\'" style="background:none;border:none;color:var(--adim);cursor:pointer;font-size:14px;">✕</button></div>';
     if (type === 'revenue') {
         let total = list.reduce((a, b) => a + (b.paymentAmount || 0), 0);
         html += '<div style="font-size:11px;color:#22c55e;margin-bottom:6px;">Total: ₹' + total.toLocaleString() + '</div>';
     }
     if (!list.length) {
-        html += '<div style="color:#555;text-align:center;padding:12px;font-size:11px;">No users in this category</div>';
+        html += '<div style="color:var(--amute);text-align:center;padding:12px;font-size:11px;">No users in this category</div>';
     } else {
         list.forEach(u => {
             const name = u.fullName || u.username || 'Unknown';
             const cat = u.category || '';
             const badge = u.active ? '#22c55e' : '#ef4444';
             html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid #222;font-size:11px;">' +
-                '<div><span style="color:#e4e4e7;font-weight:600;">' + name + '</span>' +
-                ' <span style="color:#71717a;">' + cat + '</span></div>' +
+                '<div><span style="color:var(--atext);font-weight:600;">' + name + '</span>' +
+                ' <span style="color:var(--adim);">' + cat + '</span></div>' +
                 '<div><span style="width:6px;height:6px;border-radius:50%;background:' + badge + ';display:inline-block;"></span> ' + (u.active ? 'Active' : 'Expired') +
                 (type === 'revenue' && u.paymentAmount ? ' <span style="color:#22c55e;">₹' + u.paymentAmount.toLocaleString() + '</span>' : '') +
                 '</div></div>';
@@ -6132,7 +6100,7 @@ function toggleShortcutEditor() {
     const e = document.getElementById('shortcutsEditor');
     if (e.style.display === 'none') {
         document.getElementById('shortcutCheckboxes').innerHTML = ALL_SHORTCUTS.map(s =>
-            '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#e4e4e7;cursor:pointer;padding:3px;">' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--atext);cursor:pointer;padding:3px;">' +
             '<input type="checkbox" value="' + s.id + '" ' + (_userShortcuts.includes(s.id) ? 'checked' : '') + ' style="accent-color:#7c3aed;"> ' + s.icon + ' ' + s.label + '</label>'
         ).join('');
         e.style.display = 'block';
@@ -6153,7 +6121,7 @@ function renderShortcuts() {
     el.innerHTML = _userShortcuts.map(id => {
         const s = ALL_SHORTCUTS.find(x => x.id === id);
         if (!s) return '';
-        return '<div onclick="showAdminSection(\'' + s.section + '\',null)" style="padding:8px 6px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'#2a2a35\';this.style.transform=\'none\'">' +
+        return '<div onclick="showAdminSection(\'' + s.section + '\',null)" style="padding:8px 6px;background:var(--aelevated);border:1px solid var(--aborder);border-radius:8px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--aborder)\';this.style.transform=\'none\'">' +
             '<div style="font-size:16px;margin-bottom:2px;">' + s.icon + '</div>' +
             '<div style="font-size:9px;color:#a1a1aa;line-height:1.2;">' + s.label + '</div></div>';
     }).join('');
@@ -6246,7 +6214,7 @@ async function loadDashboardData() {
         const renderActivity = (div) => {
             if (!div) return;
             if (r.recentActivity.length === 0) {
-                div.innerHTML = '<div style="color: #71717a; font-size: 11px; text-align: center; padding: 10px;">No activity yet</div>';
+                div.innerHTML = '<div style="color: var(--adim); font-size: 11px; text-align: center; padding: 10px;">No activity yet</div>';
             } else {
                 div.innerHTML = r.recentActivity.map(a => {
                     const time = new Date(a.timestamp);
@@ -6298,7 +6266,7 @@ function renderAdminIndices() {
         const changed = prev !== undefined && prev !== ltp;
         const animClass = changed ? (isUp ? 'idx-blink-green' : 'idx-blink-red') : '';
         _prevIndicesPrices[d.name] = ltp;
-        return `<div class="idx-card ${animClass}" style="width:100%;background:#1a1a24;border:1px solid #2a2a35;border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
+        return `<div class="idx-card ${animClass}" style="width:100%;background:var(--aelevated);border:1px solid var(--aborder);border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
             <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;">${d.name}</div>
             <div style="font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
             <div style="font-size:12px;color:${color};margin-top:4px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
@@ -6317,7 +6285,7 @@ async function loadDashboardIndices() {
         if (fresh === _lastIndicesJSON) return;
         _lastIndicesJSON = fresh;
         if (!r || r.length === 0 || r.error) {
-            grid.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Market Closed</div>';
+            grid.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:12px;">Market Closed</div>';
             return;
         }
         _adminIndicesCache = r;
@@ -6556,10 +6524,10 @@ async function loadPlansAdmin() {
         adminPlans = r.plans || [];
         const el = document.getElementById('plansList');
         if (!el) return;
-        if (adminPlans.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:8px;">No plans yet</div>'; return; }
+        if (adminPlans.length === 0) { el.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:8px;">No plans yet</div>'; return; }
         el.innerHTML = adminPlans.map((p, i) => '<div style="padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:12px;">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-            '<div><strong style="color:#e4e4e7;">' + p.name + '</strong> <span style="color:#71717a;">— ' + p.days + ' days</span> <span style="color:#22c55e;">₹' + (p.price || 0) + '</span></div>' +
+            '<div><strong style="color:var(--atext);">' + p.name + '</strong> <span style="color:var(--adim);">— ' + p.days + ' days</span> <span style="color:#22c55e;">₹' + (p.price || 0) + '</span></div>' +
             '<button class="admin-btn admin-btn-danger" style="padding:2px 8px;font-size:10px;" onclick="removePlan(' + i + ')">🗑️</button></div>' +
             (p.description ? '<div style="font-size:10px;color:#a1a1aa;margin-top:4px;padding-left:2px;">📋 ' + p.description + '</div>' : '') +
             '</div>').join('');
@@ -6693,10 +6661,10 @@ async function loadLoginHistory() {
             const lastT = u.lastLogin ? new Date(u.lastLogin).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true }) : 'Never';
             return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid rgba(255,255,255,0.04);border-radius:6px;margin-bottom:4px;background:${u.online ? 'rgba(0,200,83,0.06)' : 'transparent'};">
                 <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-                    <span style="width:7px;height:7px;border-radius:50%;background:${u.online ? '#22c55e' : '#555'};flex-shrink:0;"></span>
+                    <span style="width:7px;height:7px;border-radius:50%;background:${u.online ? '#22c55e' : 'var(--amute)'};flex-shrink:0;"></span>
                     <div style="min-width:0;">
-                        <div style="font-size:12px;font-weight:600;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.fullName || u.username}</div>
-                        <div style="font-size:9px;color:#71717a;">Last: ${lastT}</div>
+                        <div style="font-size:12px;font-weight:600;color:var(--atext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.fullName || u.username}</div>
+                        <div style="font-size:9px;color:var(--adim);">Last: ${lastT}</div>
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;font-size:10px;font-family:'JetBrains Mono',monospace;">
@@ -6808,7 +6776,7 @@ async function loadScheduledMessages() {
             const via = [];
             if (m.sendTelegram) via.push('✈️');
             if (m.sendWhatsApp) via.push('💬');
-            const viaStr = via.length ? ' <span style="font-size:9px;color:#555;">(' + via.join('+') + ')</span>' : '';
+            const viaStr = via.length ? ' <span style="font-size:9px;color:var(--amute);">(' + via.join('+') + ')</span>' : '';
             return `<div class="sched-item ${m.sent ? 'sent' : ''}">
                 <span class="sched-msg">${m.message.substring(0, 40)}${m.message.length > 40 ? '...' : ''}</span>
                 <span class="sched-time">${m.sent ? '✅ Sent' : '⏰ ' + timeStr + viaStr}</span>
@@ -6900,11 +6868,11 @@ function deselectAllReminders() {
 async function loadRenewalRequests() {
     const status = document.getElementById('rrFilterStatus').value;
     const div = document.getElementById('renewalRequestsList');
-    div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Loading...</div>';
+    div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:12px;">Loading...</div>';
     try {
         const r = await fetch(API + '/api/admin/renewal-requests?status=' + status, { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         if (!r.success || !r.requests.length) {
-            div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">No requests found ✅</div>';
+            div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:16px;">No requests found ✅</div>';
             updateRRBadge(0);
             return;
         }
@@ -6916,15 +6884,15 @@ async function loadRenewalRequests() {
             const time = new Date(rr.requestedAt).toLocaleString('en-IN');
             return '<div style="padding:10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-                '<div><strong style="color:#e4e4e7;font-size:12px;">' + (rr.fullName || rr.username) + '</strong> <span style="color:#71717a;font-size:10px;">@' + rr.username + '</span></div>' +
+                '<div><strong style="color:var(--atext);font-size:12px;">' + (rr.fullName || rr.username) + '</strong> <span style="color:var(--adim);font-size:10px;">@' + rr.username + '</span></div>' +
                 '<span style="color:' + statusColor + ';font-size:10px;font-weight:700;">' + statusIcon + ' ' + rr.status.toUpperCase() + '</span></div>' +
-                '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">📅 ' + time + '</div>' +
+                '<div style="font-size:10px;color:var(--adim);margin-bottom:4px;">📅 ' + time + '</div>' +
                 (rr.promoCode ? '<div style="font-size:10px;margin-bottom:4px;">🎟️ Code: <span style="color:#f59e0b;font-weight:600;">' + rr.promoCode + '</span>' + (rr.offerTitle ? ' (' + rr.offerTitle + ')' : '') + ' — <span style="color:#22c55e;">+' + rr.bonusDays + ' bonus days</span></div>' : '') +
-                (rr.planName ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">📦 Plan: <span style="color:#e4e4e7;font-weight:600;">' + rr.planName + '</span> (' + (rr.planDays || '?') + ' days)</div>' : '') +
+                (rr.planName ? '<div style="font-size:10px;color:var(--adim);margin-bottom:4px;">📦 Plan: <span style="color:var(--atext);font-weight:600;">' + rr.planName + '</span> (' + (rr.planDays || '?') + ' days)</div>' : '') +
                 (rr.txnId ? '<div style="font-size:10px;margin-bottom:4px;">🔑 Txn: <span style="color:#22c55e;font-family:monospace;">' + rr.txnId + '</span></div>' : '') +
-                (rr.amount ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">💰 ₹' + rr.amount + ' | ' + rr.category + '</div>' : '') +
+                (rr.amount ? '<div style="font-size:10px;color:var(--adim);margin-bottom:4px;">💰 ₹' + rr.amount + ' | ' + rr.category + '</div>' : '') +
                 (rr.status === 'pending' ? '<div style="display:flex;gap:6px;margin-top:6px;">' +
-                    '<input type="number" id="rrDays_' + rr.id + '" value="30" min="1" style="width:60px;padding:4px 6px;background:#1a1a24;border:1px solid #2a2a35;border-radius:4px;color:#e4e4e7;font-size:10px;">' +
+                    '<input type="number" id="rrDays_' + rr.id + '" value="30" min="1" style="width:60px;padding:4px 6px;background:var(--aelevated);border:1px solid var(--aborder);border-radius:4px;color:var(--atext);font-size:10px;">' +
                     '<button class="admin-btn admin-btn-primary" onclick="approveRR(\'' + rr.id + '\')" style="flex:1;font-size:10px;">✅ Approve</button>' +
                     '<button class="admin-btn admin-btn-danger" onclick="rejectRR(\'' + rr.id + '\')" style="font-size:10px;">❌</button>' +
                 '</div>' : (rr.status === 'approved' ? '<div style="font-size:10px;color:#22c55e;margin-top:4px;">✅ Approved — ' + (rr.approvedDays || '?') + ' days</div>' : '')) +
@@ -6963,25 +6931,25 @@ let allClassesData = [];
 async function loadClassesAdmin() {
     const div = document.getElementById('classesAdminList');
     if (!div) return;
-    div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:12px;">Loading...</div>';
+    div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:12px;">Loading...</div>';
     try {
         const r = await fetch(API + '/api/admin/classes', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
-        if (!r.success || !r.classes.length) { div.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:16px;">No modules yet 📚</div>'; return; }
+        if (!r.success || !r.classes.length) { div.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:16px;">No modules yet 📚</div>'; return; }
         allClassesData = r.classes;
         div.innerHTML = r.classes.sort((a,b) => (a.order||0) - (b.order||0)).map(cls => {
             const vidCount = (cls.videos || []).length;
             const accessLabel = cls.access ? (cls.access.type === 'all' ? '🌐 All' : cls.access.type === 'category' ? '📁 ' + (cls.access.categories||[]).join(', ') : '🔒 ' + (cls.access.users||[]).length + ' users') : '🌐 All';
             return '<div style="padding:10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-                '<div><strong style="color:#e4e4e7;font-size:12px;">' + cls.title + '</strong> <span style="color:#71717a;font-size:10px;">#' + (cls.order||'-') + '</span></div>' +
+                '<div><strong style="color:var(--atext);font-size:12px;">' + cls.title + '</strong> <span style="color:var(--adim);font-size:10px;">#' + (cls.order||'-') + '</span></div>' +
                 '<div style="display:flex;gap:4px;">' +
                     '<button class="admin-btn admin-btn-secondary" onclick="editClass(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">✏️ Edit</button>' +
                     '<button class="admin-btn admin-btn-danger" onclick="deleteClass(\'' + cls.id + '\')" style="font-size:9px;padding:3px 8px;">🗑️</button>' +
                 '</div></div>' +
-                (cls.description ? '<div style="font-size:10px;color:#71717a;margin-bottom:4px;">' + cls.description + '</div>' : '') +
+                (cls.description ? '<div style="font-size:10px;color:var(--adim);margin-bottom:4px;">' + cls.description + '</div>' : '') +
                 '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;margin-bottom:6px;">' +
                     '<span style="color:#22c55e;">🎬 ' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + '</span>' +
-                    '<span style="color:#71717a;">|</span>' +
+                    '<span style="color:var(--adim);">|</span>' +
                     '<span style="color:#a855f7;">' + accessLabel + '</span>' +
                 '</div>' +
                 '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
@@ -7076,11 +7044,11 @@ async function listClassVideos(classId) {
     const div = document.getElementById('clsVids_' + classId);
     if (div.style.display === 'block') { div.style.display = 'none'; return; }
     const cls = allClassesData.find(c => c.id === classId);
-    if (!cls || !cls.videos || !cls.videos.length) { div.innerHTML = '<div style="color:#71717a;font-size:10px;">No videos</div>'; div.style.display = 'block'; return; }
+    if (!cls || !cls.videos || !cls.videos.length) { div.innerHTML = '<div style="color:var(--adim);font-size:10px;">No videos</div>'; div.style.display = 'block'; return; }
     div.innerHTML = cls.videos.sort((a,b) => (a.order||0)-(b.order||0)).map(v => {
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#12121a;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
-            '<div style="flex:1;"><div style="color:#e4e4e7;font-size:11px;font-weight:600;">' + v.title + '</div>' +
-            '<div style="color:#71717a;font-size:9px;word-break:break-all;">' + v.youtubeUrl + '</div></div>' +
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--acard);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
+            '<div style="flex:1;"><div style="color:var(--atext);font-size:11px;font-weight:600;">' + v.title + '</div>' +
+            '<div style="color:var(--adim);font-size:9px;word-break:break-all;">' + v.youtubeUrl + '</div></div>' +
             '<button class="admin-btn admin-btn-danger" onclick="deleteClassVideo(\'' + classId + '\',\'' + v.id + '\')" style="font-size:9px;padding:2px 6px;margin-left:6px;">🗑️</button>' +
             '</div>';
     }).join('');
@@ -7093,11 +7061,11 @@ function showAddVideoForm(classId) {
     const modal = document.createElement('div');
     modal.id = 'addVideoModal';
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = '<div style="background:#1a1a24;border:1px solid #22c55e;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
+    modal.innerHTML = '<div style="background:var(--aelevated);border:1px solid #22c55e;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
         '<h3 style="color:#22c55e;margin:0 0 12px 0;font-size:14px;">🎬 Add Video to ' + (cls ? cls.title : '') + '</h3>' +
         '<input type="text" id="newVidTitle" class="admin-form-input" placeholder="Video title" style="margin-bottom:8px;">' +
         '<input type="text" id="newVidUrl" class="admin-form-input" placeholder="Paste any URL (YouTube, Google Drive, MP4, etc.)" style="margin-bottom:8px;">' +
-        '<div style="font-size:9px;color:#71717a;margin:-4px 0 8px 0;">YouTube, Google Drive, Mega, OneDrive, MP4, Openbox etc.</div>' +
+        '<div style="font-size:9px;color:var(--adim);margin:-4px 0 8px 0;">YouTube, Google Drive, Mega, OneDrive, MP4, Openbox etc.</div>' +
         '<input type="text" id="newVidDuration" class="admin-form-input" placeholder="Duration (optional, e.g. 15:30)" style="margin-bottom:12px;">' +
         '<div style="display:flex;gap:8px;">' +
         '<button class="admin-btn admin-btn-secondary" onclick="document.getElementById(\'addVideoModal\').remove();" style="flex:1;">Cancel</button>' +
@@ -7141,7 +7109,7 @@ const origRenderUsers = window.renderUsers;
 window.renderUsers = function(users) {
     const container = document.getElementById('usersListContainer');
     if (!users.length) {
-        container.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:20px;">No users found.</div>';
+        container.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:20px;">No users found.</div>';
         return;
     }
     let html = '<div class="admin-user-search" style="margin-bottom:12px;"><input type="text" id="allUsersSearchInput" class="admin-form-input" placeholder="🔍 Search by name, email, phone, amount..." style="width:100%;" oninput="filterAllUsersSearch()"></div>';
@@ -7162,19 +7130,19 @@ window.renderUsers = function(users) {
                 <div class="admin-user-avatar">${initials}</div>
                 <div>
                     <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.classApproved ? ' <span title="Class Access Granted" style="color:#a855f7;font-size:12px;">📚</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
-                    <div class="admin-user-detail" style="font-size:10px;color:#71717a;">${u.fullName || ''} | ${u.email || ''}</div>
-                    <div class="admin-user-detail" style="font-size:9px;color:#555;">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
+                    <div class="admin-user-detail" style="font-size:10px;color:var(--adim);">${u.fullName || ''} | ${u.email || ''}</div>
+                    <div class="admin-user-detail" style="font-size:9px;color:var(--amute);">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
                 </div>
             </div>
             <div><span class="admin-badge ${catBadgeClass[cat] || 'admin-badge-silver'}">${cat}</span></div>
             <div><span class="admin-badge ${statusBadge}">${statusText}</span></div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:12px;">₹${(u.paymentAmount || 0).toLocaleString()}</div>
             <div style="font-size:11px;color:#888;">${u.paymentMethod || '-'}</div>
-            <div style="color:${daysLeft <= 7 && daysLeft > 0 ? '#eab308' : '#71717a'};font-size:11px;">${expDate}<br><span style="font-size:9px;color:#555;">${daysLeft}d left</span></div>
+            <div style="color:${daysLeft <= 7 && daysLeft > 0 ? '#eab308' : 'var(--adim)'};font-size:11px;">${expDate}<br><span style="font-size:9px;color:var(--amute);">${daysLeft}d left</span></div>
             <div style="font-size:10px;color:#666;white-space:nowrap;">${lastLogin}</div>
             <div class="admin-action-btns" onclick="event.stopPropagation();">
                 <button class="admin-action-btn" onclick="event.stopPropagation();editUser('${u.username}')" title="Edit">✏️</button>
-                <div onclick="event.stopPropagation();toggleClassAccess('${u.username}')" title="${u.classApproved ? 'Revoke Class Access' : 'Grant Class Access'}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;background:${u.classApproved ? 'rgba(34,197,94,0.15)' : 'rgba(113,113,122,0.15)'};border:1px solid ${u.classApproved ? 'rgba(34,197,94,0.3)' : 'rgba(113,113,122,0.3)'};color:${u.classApproved ? '#22c55e' : '#71717a'};transition:all 0.2s;">
+                <div onclick="event.stopPropagation();toggleClassAccess('${u.username}')" title="${u.classApproved ? 'Revoke Class Access' : 'Grant Class Access'}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;background:${u.classApproved ? 'rgba(34,197,94,0.15)' : 'rgba(113,113,122,0.15)'};border:1px solid ${u.classApproved ? 'rgba(34,197,94,0.3)' : 'rgba(113,113,122,0.3)'};color:${u.classApproved ? '#22c55e' : 'var(--adim)'};transition:all 0.2s;">
                     📚 ${u.classApproved ? 'ON' : 'OFF'}
                 </div>
                 ${u.active ? `<button class="admin-action-btn" onclick="event.stopPropagation();blockUser('${u.username}')" title="Block">🚫</button>` : `<button class="admin-action-btn" onclick="event.stopPropagation();renewUser('${u.username}')" title="Unblock/Renew">✅</button>`}
@@ -7357,16 +7325,16 @@ function handleGlobalSearch(query) {
         matches = matches.concat(userMatches);
     }
     if (!matches.length) {
-        dd.innerHTML = '<div style="padding:12px;color:#555;text-align:center;font-size:11px;">No results found</div>';
+        dd.innerHTML = '<div style="padding:12px;color:var(--amute);text-align:center;font-size:11px;">No results found</div>';
         dd.style.display = 'block';
         return;
     }
     dd.innerHTML = matches.slice(0, 12).map(m => {
         if (m.type === 'user') {
-            return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'allUsers\',null);setTimeout(()=>{const s=document.getElementById(\'searchUser\');if(s){s.value=\'' + m.username + '\';filterUsersAndShowAll();}},200);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:#e4e4e7;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a1a24;" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
-                '<span>' + m.icon + '</span><div><div>' + m.label + '</div><div style="font-size:9px;color:#71717a;">User</div></div></div>';
+            return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'allUsers\',null);setTimeout(()=>{const s=document.getElementById(\'searchUser\');if(s){s.value=\'' + m.username + '\';filterUsersAndShowAll();}},200);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:var(--atext);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--aelevated);" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
+                '<span>' + m.icon + '</span><div><div>' + m.label + '</div><div style="font-size:9px;color:var(--adim);">User</div></div></div>';
         }
-        return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'' + m.id + '\',null);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:#e4e4e7;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a1a24;" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
+        return '<div onclick="document.getElementById(\'globalSearchDropdown\').style.display=\'none\';document.getElementById(\'searchUser\').value=\'\';showAdminSection(\'' + m.id + '\',null);" style="padding:8px 12px;cursor:pointer;font-size:12px;color:var(--atext);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--aelevated);" onmouseover="this.style.background=\'#222\'" onmouseout="this.style.background=\'transparent\'">' +
             '<span>' + m.icon + '</span><div>' + m.label + '</div></div>';
     }).join('');
     dd.style.display = 'block';
@@ -7529,14 +7497,14 @@ async function blockUser(username) {
 async function renewUser(username) {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
-    overlay.innerHTML = '<div style="background:#1a1a24;border:1px solid #2a2a35;border-radius:12px;padding:20px;width:320px;max-width:90vw;">' +
-        '<div style="font-size:14px;font-weight:700;color:#e4e4e7;margin-bottom:12px;">🔄 Renew — ' + username + '</div>' +
-        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">📅 Subscription Days</label>' +
+    overlay.innerHTML = '<div style="background:var(--aelevated);border:1px solid var(--aborder);border-radius:12px;padding:20px;width:320px;max-width:90vw;">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--atext);margin-bottom:12px;">🔄 Renew — ' + username + '</div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--adim);display:block;margin-bottom:4px;">📅 Subscription Days</label>' +
         '<input type="number" id="renewDays" class="admin-form-input" value="30" min="1" placeholder="30"></div>' +
-        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">🎟️ Offer Code (optional)</label>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--adim);display:block;margin-bottom:4px;">🎟️ Offer Code (optional)</label>' +
         '<input type="text" id="renewOfferCode" class="admin-form-input" placeholder="e.g. INDIE50">' +
-        '<div id="renewOfferMsg" style="font-size:10px;margin-top:4px;color:#555;"></div></div>' +
-        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:#71717a;display:block;margin-bottom:4px;">💰 Payment Amount (₹)</label>' +
+        '<div id="renewOfferMsg" style="font-size:10px;margin-top:4px;color:var(--amute);"></div></div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--adim);display:block;margin-bottom:4px;">💰 Payment Amount (₹)</label>' +
         '<input type="number" id="renewAmount" class="admin-form-input" placeholder="0"></div>' +
         '<div style="display:flex;gap:8px;"><button class="admin-btn admin-btn-primary" onclick="doRenew(\'' + username + '\')" style="flex:1;">✅ Renew</button>' +
         '<button class="admin-btn admin-btn-secondary" onclick="this.closest(\'div[style*=fixed]\').remove()" style="flex:1;">Cancel</button></div></div>';
@@ -7702,7 +7670,7 @@ async function editUser(username) {
     }
     if (user.pendingDevice) {
         pendDevDiv.style.display = 'block';
-        pendDevInfo.innerHTML = '<b>📱 ' + (user.pendingDevice.device || 'Unknown') + '</b><br><b>🖥️ ' + (user.pendingDevice.platform || '') + '</b><br><span style="font-size:9px;color:#555;">🕐 Requested: ' + new Date(user.pendingDevice.requestedAt).toLocaleString('en-IN') + '</span>';
+        pendDevInfo.innerHTML = '<b>📱 ' + (user.pendingDevice.device || 'Unknown') + '</b><br><b>🖥️ ' + (user.pendingDevice.platform || '') + '</b><br><span style="font-size:9px;color:var(--amute);">🕐 Requested: ' + new Date(user.pendingDevice.requestedAt).toLocaleString('en-IN') + '</span>';
     } else {
         pendDevDiv.style.display = 'none';
     }
@@ -7858,7 +7826,7 @@ function applyBroadcastTemplate() {
 function renderBroadcastUsers() {
     const container = document.getElementById('broadcastUserList');
     if (!window.allUsers || !window.allUsers.length) {
-        container.innerHTML = '<div style="color:#555;font-size:11px;padding:8px;">No users found</div>';
+        container.innerHTML = '<div style="color:var(--amute);font-size:11px;padding:8px;">No users found</div>';
         return;
     }
     const searchTerm = (document.getElementById('broadcastSearch')?.value || '').toLowerCase();
@@ -7882,7 +7850,7 @@ function renderBroadcastUsers() {
     }).join('');
 
     if (!filtered.length) {
-        container.innerHTML = '<div style="color:#555;font-size:11px;padding:8px;">No users in this category</div>';
+        container.innerHTML = '<div style="color:var(--amute);font-size:11px;padding:8px;">No users in this category</div>';
     }
 }
 
@@ -8026,7 +7994,7 @@ async function loadMaintenanceStatus() {
                 curStatus.innerHTML = '🟢 Active: ' + fmtH(dm.startHour||2) + ' — ' + fmtH(dm.endHour||7) + ' IST daily';
             } else if (curStatus) {
                 curStatus.style.display = 'block';
-                curStatus.style.color = '#71717a';
+                curStatus.style.color = 'var(--adim)';
                 curStatus.innerHTML = '⚪ Daily maintenance is OFF';
             }
         } catch(e) {}
@@ -8161,7 +8129,7 @@ async function testDailyMaintenance() {
         const fmtH = h => { const hr12 = h % 12 || 12; return hr12 + ':00 ' + (h < 12 ? 'AM' : 'PM'); };
         let html = '';
         html += '🕐 Server Time: ' + r.nowIST + ' IST<br>';
-        html += '🔧 Maintenance Mode: ' + (r.maintenanceMode ? '🟢 ON' : '⚪ OFF') + ' <span style="font-size:9px;color:#555;">(src: ' + (r.maintenanceSource || 'none') + ')</span><br>';
+        html += '🔧 Maintenance Mode: ' + (r.maintenanceMode ? '🟢 ON' : '⚪ OFF') + ' <span style="font-size:9px;color:var(--amute);">(src: ' + (r.maintenanceSource || 'none') + ')</span><br>';
         if (r.schedule && r.schedule.enabled) {
             html += '📅 Schedule: ' + (r.schedule.active ? '🟢 ACTIVE' : '⚪ Inactive') + '<br>';
         }
@@ -8170,7 +8138,7 @@ async function testDailyMaintenance() {
         } else {
             html += '🔄 Daily: Disabled';
         }
-        st.style.color = r.maintenanceMode ? '#22c55e' : '#71717a';
+        st.style.color = r.maintenanceMode ? '#22c55e' : 'var(--adim)';
         st.innerHTML = html;
     } catch(e) { st.style.color='#ef4444'; st.textContent='❌ Error checking'; }
 }
@@ -8316,7 +8284,7 @@ async function loadAdminStockTips() {
         if (r.success) {
             const container = document.getElementById('stockTipsList');
             if (!r.tips.length) {
-                container.innerHTML = '<div style="color:#555;font-size:10px;text-align:center;padding:8px;">No tips yet</div>';
+                container.innerHTML = '<div style="color:var(--amute);font-size:10px;text-align:center;padding:8px;">No tips yet</div>';
                 return;
             }
             container.innerHTML = r.tips.map(t => {
@@ -8405,7 +8373,7 @@ async function loadDashboardStockTips() {
                 ${statusBadge}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: ${color};">${t.action}</span>
-                    <span style="font-size: 9px; color: #555;">${statusBadgeInline}</span>
+                    <span style="font-size: 9px; color: var(--amute);">${statusBadgeInline}</span>
                 </div>
                 <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 4px;">${t.symbol}</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; font-size: 10px;">
@@ -8415,8 +8383,8 @@ async function loadDashboardStockTips() {
                 </div>
                 ${t.note ? `<div style="margin-top:4px; font-size:9px; color:#888;">${t.note}</div>` : ''}
                 <div style="margin-top:4px; font-size:9px; color:#ff6b35; font-weight:600;">By Vaibhav</div>
-                <div style="margin-top:2px; font-size:8px; color:#555;">${formatTipTime(t.createdAt)}${t.updatedAt ? ' · ✏️ ' + formatTipTime(t.updatedAt) : ''}</div>
-                ${window._showTipSebiText !== false ? '<div style="margin-top:2px; font-size:7px; color:#555; line-height:1;">' + (window._sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY') + '</div>' : ''}
+                <div style="margin-top:2px; font-size:8px; color:var(--amute);">${formatTipTime(t.createdAt)}${t.updatedAt ? ' · ✏️ ' + formatTipTime(t.updatedAt) : ''}</div>
+                ${window._showTipSebiText !== false ? '<div style="margin-top:2px; font-size:7px; color:var(--amute); line-height:1;">' + (window._sebiDisclaimerText || 'I AM NOT SEBI REGISTERED — FOR EDUCATIONAL PURPOSES ONLY') + '</div>' : ''}
             </div>`;
         }).join('');
         if (typeof checkNotifsForTips === 'function') checkNotifsForTips(data.filter(t => t.active));
@@ -8644,7 +8612,7 @@ async function loadBanners() {
 
 function renderBannerList() {
     const container = document.getElementById('bannerList');
-    if (!allBanners.length) { container.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:20px;">No banners yet. Click "+ New Banner"</div>'; return; }
+    if (!allBanners.length) { container.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:20px;">No banners yet. Click "+ New Banner"</div>'; return; }
     const now = new Date().toISOString().split('T')[0];
     container.innerHTML = allBanners.map(b => {
         const isExpired = b.endDate && now > b.endDate;
@@ -8656,11 +8624,11 @@ function renderBannerList() {
         const defaultBadge = b.isDefault ? ' <span style="font-size:9px;background:#f59e0b;color:#000;padding:2px 6px;border-radius:4px;">⭐ Default</span>' : '';
         const imageBadge = b.hasImage ? ' <span style="font-size:9px;background:#3b82f6;color:#fff;padding:2px 6px;border-radius:4px;">🖼️ Image</span>' : '';
         const icon = b.imageUrl ? '<img src="' + b.imageUrl + '" style="width:100%;height:100%;object-fit:cover;">' : (b.hasImage ? '🖼️' : '🎊');
-        return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:8px;margin-bottom:8px;">' +
+        return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--aelevated);border:1px solid var(--aborder);border-radius:8px;margin-bottom:8px;">' +
             '<div style="width:40px;height:40px;border-radius:8px;background:' + (b.bgColor||'#ff6b35') + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;">' + icon + '</div>' +
             '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:13px;font-weight:600;color:#fff;">' + b.title + ' ' + statusBadge + defaultBadge + imageBadge + '</div>' +
-            '<div style="font-size:10px;color:#71717a;margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterDisclaimer:'After Disclaimer',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Disclaimer') + '</div>' +
+            '<div style="font-size:10px;color:var(--adim);margin-top:2px;">' + (b.startDate||'?') + ' to ' + (b.endDate||'?') + ' | 🖥️' + (b.showOnDesktop?'✓':'✕') + ' 📱' + (b.showOnMobile?'✓':'✕') + ' | 📍' + ({top:'Top',afterDisclaimer:'After Disclaimer',afterIndices:'After Indices',afterStockTips:'After Stock Tips',afterHeatmap:'After Heatmap',afterSignals:'After Signals'}[b.position]||'After Disclaimer') + '</div>' +
             '</div>' +
             '<div class="admin-action-btns">' +
             '<button class="admin-action-btn" onclick="editBanner(\'' + b.id + '\')">✏️</button>' +
@@ -8827,10 +8795,10 @@ async function loadOfferTargetUsers() {
         const r = await fetch(API + '/api/admin/users', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
         if (!r.success) return;
         document.getElementById('offerUserCheckboxes').innerHTML = r.users.map(u =>
-            '<label style="display:flex;align-items:center;gap:6px;padding:4px 6px;font-size:11px;color:#e4e4e7;cursor:pointer;border-bottom:1px solid #1a1a24;">' +
+            '<label style="display:flex;align-items:center;gap:6px;padding:4px 6px;font-size:11px;color:var(--atext);cursor:pointer;border-bottom:1px solid var(--aelevated);">' +
             '<input type="checkbox" value="' + u.username + '" style="accent-color:#7c3aed;"> ' +
             '<span>' + (u.fullName || u.username) + '</span>' +
-            '<span style="color:#71717a;font-size:9px;margin-left:auto;">' + u.category + '</span></label>'
+            '<span style="color:var(--adim);font-size:9px;margin-left:auto;">' + u.category + '</span></label>'
         ).join('');
     } catch(e) {}
 }
@@ -8859,10 +8827,10 @@ async function loadHeatmapStockSettings() {
         const sectors = Object.keys(r.defaults);
         container.innerHTML = sectors.map(sector => {
             const stocks = (current[sector] || []).join(', ');
-            return `<div style="margin-bottom:14px;background:#0f0f1a;border:1px solid #2a2a35;border-radius:10px;padding:12px;">
+            return `<div style="margin-bottom:14px;background:#0f0f1a;border:1px solid var(--aborder);border-radius:10px;padding:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div style="font-size:12px;font-weight:700;color:#c0a843;">📁 ${sector}</div>
-                    <span style="font-size:9px;color:#555;">${(current[sector] || []).length} stocks</span>
+                    <span style="font-size:9px;color:var(--amute);">${(current[sector] || []).length} stocks</span>
                 </div>
                 <div style="display:flex;gap:6px;">
                     <input type="text" class="admin-form-input sector-stocks-input" data-sector="${sector}" value="${stocks}" placeholder="TCS, INFY, WIPRO..." style="flex:1;font-size:11px;">
@@ -8907,7 +8875,7 @@ async function loadOffers() {
         const el = document.getElementById('offersList');
         if (!el) return;
         loadOffersPreviewListeners();
-        if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:#71717a;font-size:11px;text-align:center;padding:24px;">No offers yet. Click "+ Create Offer" to start!</div>'; return; }
+        if (!r.success || !r.offers || r.offers.length === 0) { el.innerHTML = '<div style="color:var(--adim);font-size:11px;text-align:center;padding:24px;">No offers yet. Click "+ Create Offer" to start!</div>'; return; }
         el.innerHTML = r.offers.map(o => {
             const isExpired = o.expiry && new Date(o.expiry) < new Date();
             const themes = { golden: '#f59e0b', royal: '#7c3aed', neon: '#22c55e', fire: '#ef4444', ocean: '#0ea5e9', banner: '#ffffff', sunset: '#f97316', crystal: '#67e8f9' };
@@ -8915,8 +8883,8 @@ async function loadOffers() {
             const badge = isExpired ? '<span style="font-size:9px;background:#ef4444;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Expired</span>' : o.active ? '<span style="font-size:9px;background:#22c55e;color:#fff;padding:3px 10px;border-radius:10px;font-weight:600;">Active</span>' : '<span style="font-size:9px;background:#666;color:#fff;padding:3px 10px;border-radius:10px;">Off</span>';
             const targetLabel = { all:'All Users', active:'Active Only', expired:'Expired Only', expiring:'Expiring Soon', silver:'Silver', gold:'Gold', diamond:'Diamond', premium:'Premium', specific:'Specific Users' }[o.target] || o.target;
             const userCount = (o.selectedUsers && o.selectedUsers.length) ? o.selectedUsers.length + ' users' : '';
-            return '<div style="padding:0;border:1px solid #2a2a35;border-radius:14px;margin-bottom:10px;overflow:hidden;">' +
-                '<div style="padding:14px 16px;' + (o.bgImage ? 'background:url(' + o.bgImage + ') center/cover;color:#fff;' : 'background:linear-gradient(135deg,' + tColor + '33,#1a1a24);color:#fff;') + 'position:relative;">' +
+            return '<div style="padding:0;border:1px solid var(--aborder);border-radius:14px;margin-bottom:10px;overflow:hidden;">' +
+                '<div style="padding:14px 16px;' + (o.bgImage ? 'background:url(' + o.bgImage + ') center/cover;color:#fff;' : 'background:linear-gradient(135deg,' + tColor + '33,var(--aelevated));color:#fff;') + 'position:relative;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
                 '<div style="flex:1;padding-right:12px;"><strong style="font-size:14px;">' + o.title + '</strong> ' + badge +
                 (o.description ? '<div style="font-size:11px;opacity:0.9;margin-top:4px;line-height:1.4;">' + o.description + '</div>' : '') +
@@ -9389,7 +9357,7 @@ async function loadIndices() {
         if (data.error || data.success === false) { if (data.error) handleAuthError(data); return; }
         if (!Array.isArray(data) || data.length === 0) {
             if (!window._lastIndicesData) {
-                document.getElementById("indices-row").innerHTML = '<div style="color:#555;text-align:center;font-size:11px;padding:12px;">Market Closed — No Data</div>';
+                document.getElementById("indices-row").innerHTML = '<div style="color:var(--amute);text-align:center;font-size:11px;padding:12px;">Market Closed — No Data</div>';
             }
             return;
         }
@@ -9527,7 +9495,7 @@ async function loadFNOAll() {
             return '<div class="stock-card ' + (isUp ? 'card-up' : 'card-dn') + '">' +
                 '<div class="sc-sym">' + d.symbol + '</div>' +
                 '<div class="sc-ltp">' + fmt(d.ltp) + '</div>' +
-                '<div class="sc-pct">' + sign(d.pct) + fmt2(d.pct) + '% <span style="font-size:9px;color:#555">' + label + '</span></div></div>';
+                '<div class="sc-pct">' + sign(d.pct) + fmt2(d.pct) + '% <span style="font-size:9px;color:var(--amute)">' + label + '</span></div></div>';
         }).join("");
     } catch (e) { console.error('F&O All error:', e); }
 }
@@ -9543,7 +9511,7 @@ async function loadSignals() {
                 ? 'Analyzing market data... Signals appear once enough data is collected.'
                 : 'Market closed. Signals will resume during market hours (8am-4pm).';
             document.getElementById("signals-body").innerHTML =
-                '<tr><td colspan="9" style="color:#555;padding:20px;text-align:center;">' + mkMsg + '</td></tr>';
+                '<tr><td colspan="9" style="color:var(--amute);padding:20px;text-align:center;">' + mkMsg + '</td></tr>';
             return;
         }
         const oldData = _prevSignalsData;
@@ -9552,7 +9520,7 @@ async function loadSignals() {
         document.getElementById("signals-body").innerHTML = data.map(d => {
             const confColor = d.confidence >= 70 ? '#00c853' : d.confidence >= 50 ? '#ffab00' : '#888';
             const rsiVal = d.rsi ? parseFloat(d.rsi) : null;
-            let rsiHtml = '<span style="color:#555;">--</span>';
+            let rsiHtml = '<span style="color:var(--amute);">--</span>';
             if (rsiVal !== null) {
                 const rsiColor = rsiVal < 30 ? '#00c853' : rsiVal > 70 ? '#ff1744' : '#ffab00';
                 rsiHtml = '<span style="color:' + rsiColor + ';font-weight:700;">' + rsiVal + '</span>';
@@ -9792,15 +9760,15 @@ function createModalStyles() {
     s.id = 'customModalStyles';
     s.textContent = `
     .custom-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:modalFadeIn 0.2s;}
-    .custom-modal-box{background:#1a1a24;border:1px solid #2a2a35;border-radius:16px;padding:28px 24px;max-width:360px;width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalSlideIn 0.25s;}
+    .custom-modal-box{background:var(--aelevated);border:1px solid var(--aborder);border-radius:16px;padding:28px 24px;max-width:360px;width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalSlideIn 0.25s;}
     .custom-modal-icon{font-size:36px;margin-bottom:10px;}
-    .custom-modal-msg{color:#e4e4e7;font-size:13px;line-height:1.6;margin-bottom:20px;white-space:pre-wrap;}
+    .custom-modal-msg{color:var(--atext);font-size:13px;line-height:1.6;margin-bottom:20px;white-space:pre-wrap;}
     .custom-modal-btns{display:flex;gap:10px;justify-content:center;}
     .custom-modal-btn{padding:10px 24px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:80px;}
     .custom-modal-btn:hover{transform:translateY(-1px);}
     .custom-modal-btn-ok{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;}
     .custom-modal-btn-ok:hover{box-shadow:0 4px 15px rgba(245,158,11,0.3);}
-    .custom-modal-btn-cancel{background:#2a2a35;color:#e4e4e7;}
+    .custom-modal-btn-cancel{background:var(--aborder);color:var(--atext);}
     .custom-modal-btn-cancel:hover{background:#3a3a45;}
     .custom-modal-btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;}
     @keyframes modalFadeIn{from{opacity:0;}to{opacity:1;}}
@@ -9862,10 +9830,10 @@ function openClassesPage() {
         <div style="background:linear-gradient(135deg,#0a0a18,#1a0a2e);border-bottom:1px solid #1f1f2e;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;">
             <div onclick="closeClassesPage()" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);color:#a855f7;font-size:16px;cursor:pointer;flex-shrink:0;">←</div>
             <div style="font-size:18px;font-weight:700;background:linear-gradient(135deg,#a855f7,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">📚 Trading Classes</div>
-            <div id="clsModuleCount" style="margin-left:auto;font-size:11px;color:#71717a;background:#12121a;padding:4px 10px;border-radius:20px;border:1px solid #1f1f2e;">Loading...</div>
+            <div id="clsModuleCount" style="margin-left:auto;font-size:11px;color:var(--adim);background:var(--acard);padding:4px 10px;border-radius:20px;border:1px solid #1f1f2e;">Loading...</div>
         </div>
         <div id="classesContentWrap" style="max-width:800px;margin:0 auto;padding:16px;position:relative;z-index:1;">
-            <div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;margin-bottom:12px;">📚</div><h3 style="font-size:16px;margin-bottom:6px;color:#e4e4e7;">Loading classes...</h3></div>
+            <div style="text-align:center;padding:60px 20px;color:var(--adim);"><div style="font-size:48px;margin-bottom:12px;">📚</div><h3 style="font-size:16px;margin-bottom:6px;color:var(--atext);">Loading classes...</h3></div>
         </div>`;
         document.body.appendChild(overlay);
     }
@@ -9930,10 +9898,10 @@ async function loadUserClasses() {
             _clsModules = [];
             _clsFlatVideos = [];
             countEl.textContent = '0 modules';
-            wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;margin-bottom:12px;">📖</div><h3 style="font-size:16px;margin-bottom:6px;color:#e4e4e7;">Coming Soon</h3><p style="font-size:12px;">Trading classes will be available soon!</p></div>';
+            wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--adim);"><div style="font-size:48px;margin-bottom:12px;">📖</div><h3 style="font-size:16px;margin-bottom:6px;color:var(--atext);">Coming Soon</h3><p style="font-size:12px;">Trading classes will be available soon!</p></div>';
         }
     } catch (e) {
-        wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#71717a;"><div style="font-size:48px;">⚠️</div><h3>Error Loading</h3></div>';
+        wrap.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--adim);"><div style="font-size:48px;">⚠️</div><h3>Error Loading</h3></div>';
     }
 }
 
@@ -9942,28 +9910,28 @@ function renderUserClasses() {
     const html = _clsModules.map((m, idx) => {
         const vids = (m.videos || []).sort((a,b) => (a.order||0)-(b.order||0));
         const vidCount = vids.length;
-        return '<div class="cls-mod-card" id="clsMod_' + m.id + '" style="background:#12121a;border:1px solid #1f1f2e;border-radius:14px;margin-bottom:14px;overflow:hidden;">' +
+        return '<div class="cls-mod-card" id="clsMod_' + m.id + '" style="background:var(--acard);border:1px solid #1f1f2e;border-radius:14px;margin-bottom:14px;overflow:hidden;">' +
             '<div onclick="toggleClsModule(\'' + m.id + '\')" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">' +
             '<div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#a855f7,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">' + (m.order || idx + 1) + '</div>' +
-            '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(m.title) + '</div>' +
-            '<div style="font-size:11px;color:#71717a;margin-top:2px;">' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + '</div></div>' +
-            '<div id="clsArrow_' + m.id + '" style="font-size:14px;color:#71717a;transition:transform 0.2s;">▶</div>' +
+            '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--atext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(m.title) + '</div>' +
+            '<div style="font-size:11px;color:var(--adim);margin-top:2px;">' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + '</div></div>' +
+            '<div id="clsArrow_' + m.id + '" style="font-size:14px;color:var(--adim);transition:transform 0.2s;">▶</div>' +
             '</div>' +
             '<div id="clsBody_' + m.id + '" style="display:none;border-top:1px solid #1f1f2e;">' +
-            (m.description ? '<div style="padding:10px 16px;font-size:11px;color:#71717a;border-bottom:1px solid #1f1f2e;">' + _escH(m.description) + '</div>' : '') +
+            (m.description ? '<div style="padding:10px 16px;font-size:11px;color:var(--adim);border-bottom:1px solid #1f1f2e;">' + _escH(m.description) + '</div>' : '') +
             (vids.length ? vids.map(v => {
                 const vUrl = v.url || v.youtubeUrl || '';
                 const mType = detectMediaType(vUrl);
                 const typeIcons = { youtube:'▶', gdrive:'📁', direct:'🎥', mega:'☁', onedrive:'💾', embed:'🔗', unknown:'🎬' };
-                const typeColors = { youtube:'#ef4444', gdrive:'#22c55e', direct:'#3b82f6', mega:'#ef4444', onedrive:'#3b82f6', embed:'#f59e0b', unknown:'#71717a' };
+                const typeColors = { youtube:'#ef4444', gdrive:'#22c55e', direct:'#3b82f6', mega:'#ef4444', onedrive:'#3b82f6', embed:'#f59e0b', unknown:'var(--adim)' };
                 const icon = typeIcons[mType] || '🎬';
-                const color = typeColors[mType] || '#71717a';
+                const color = typeColors[mType] || 'var(--adim)';
                 return '<div class="cls-vid-item" onclick="playClsVideo(\'' + v.id + '\')" id="clsVi_' + v.id + '" style="padding:10px 16px 10px 56px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(31,31,46,0.5);transition:background 0.15s;">' +
                     '<div style="width:32px;height:32px;border-radius:8px;background:' + color + '20;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:' + color + ';">' + icon + '</div>' +
-                    '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(v.title) + '</div>' +
+                    '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:var(--atext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escH(v.title) + '</div>' +
                     '<div style="font-size:10px;color:' + color + ';margin-top:1px;">' + mType.toUpperCase() + (v.duration ? ' • ' + _escH(v.duration) : '') + '</div>' +
                     '</div></div>';
-            }).join('') : '<div style="padding:20px;text-align:center;color:#71717a;font-size:11px;">No videos yet</div>') +
+            }).join('') : '<div style="padding:20px;text-align:center;color:var(--adim);font-size:11px;">No videos yet</div>') +
             '</div></div>';
     }).join('');
     return html;
@@ -10008,7 +9976,7 @@ function showClassAccessDenied() {
         overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
         overlay.innerHTML = '<div style="text-align:center;max-width:340px;padding:32px;">' +
             '<div style="font-size:64px;margin-bottom:16px;">🔒</div>' +
-            '<div style="font-size:22px;font-weight:800;color:#e4e4e7;margin-bottom:10px;">Class Access Restricted</div>' +
+            '<div style="font-size:22px;font-weight:800;color:var(--atext);margin-bottom:10px;">Class Access Restricted</div>' +
             '<div style="font-size:13px;color:#a1a1aa;margin-bottom:24px;line-height:1.6;">You need admin approval to watch classes.<br>Please contact admin to get access.</div>' +
             '<button onclick="closeClassDenied()" style="background:linear-gradient(135deg,#c0a843,#a89030);color:#000;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Contact Admin</button>' +
             '</div>';
@@ -10054,23 +10022,23 @@ function renderClsPlayer(url, title) {
         player.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:8px;';
         player.onclick = function(e) { if (e.target === this) closeClsPlayer(); };
         player.oncontextmenu = function(e) { e.preventDefault(); return false; };
-        player.innerHTML = `<div id="clsPlayerBox" style="width:100%;max-width:720px;background:#12121a;border:1px solid #1f1f2e;border-radius:14px;overflow:hidden;max-height:95vh;position:relative;">
+        player.innerHTML = `<div id="clsPlayerBox" style="width:100%;max-width:720px;background:var(--acard);border:1px solid #1f1f2e;border-radius:14px;overflow:hidden;max-height:95vh;position:relative;">
             <div style="padding:8px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1f1f2e;background:#0f0f1a;">
-                <div style="font-size:10px;color:#71717a;background:#1a1a24;padding:2px 6px;border-radius:4px;" id="clsPlayerType">VIDEO</div>
-                <div id="clsPlayerTitle" style="flex:1;font-size:13px;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                <div style="font-size:10px;color:var(--adim);background:var(--aelevated);padding:2px 6px;border-radius:4px;" id="clsPlayerType">VIDEO</div>
+                <div id="clsPlayerTitle" style="flex:1;font-size:13px;color:var(--atext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
                 <div onclick="closeClsPlayer()" style="width:28px;height:28px;border-radius:6px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:14px;cursor:pointer;">✕</div>
             </div>
             <div id="clsPlayerWrap" style="position:relative;background:#000;overflow:hidden;"></div>
             <div id="clsPlayerWatermark" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10;overflow:hidden;"></div>
             <div id="clsPlayerFallback" style="display:none;padding:40px 20px;text-align:center;">
                 <div style="font-size:48px;margin-bottom:12px;">🎬</div>
-                <div style="color:#e4e4e7;font-size:14px;font-weight:600;margin-bottom:6px;">Video cannot play here</div>
-                <div id="clsFallbackMsg" style="color:#71717a;font-size:11px;margin-bottom:16px;"></div>
+                <div style="color:var(--atext);font-size:14px;font-weight:600;margin-bottom:6px;">Video cannot play here</div>
+                <div id="clsFallbackMsg" style="color:var(--adim);font-size:11px;margin-bottom:16px;"></div>
                 <a id="clsExternalLink" href="#" target="_blank" rel="noopener" style="display:inline-block;padding:10px 24px;background:#a855f7;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">▶ Open Link</a>
             </div>
             <div style="padding:8px 12px;display:flex;gap:8px;border-top:1px solid #1f1f2e;background:#0f0f1a;">
-                <button id="clsPrevBtn" onclick="playClsAdjacent(-1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:#e4e4e7;cursor:pointer;">⬅ Previous</button>
-                <button id="clsNextBtn" onclick="playClsAdjacent(1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:#e4e4e7;cursor:pointer;">Next ➡</button>
+                <button id="clsPrevBtn" onclick="playClsAdjacent(-1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:var(--atext);cursor:pointer;">⬅ Previous</button>
+                <button id="clsNextBtn" onclick="playClsAdjacent(1)" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1f1f2e;background:#0a0a12;color:var(--atext);cursor:pointer;">Next ➡</button>
             </div>
         </div>`;
         document.body.appendChild(player);
@@ -10231,6 +10199,24 @@ document.addEventListener('keydown', function(e) {
 });
 
 /* ═══════ THEME SETTINGS ═══════ */
+const ADMIN_DARK = { bg:'#0a0a0f', card:'#12121a', elevated:'#1a1a24', border:'#2a2a35', text:'#e4e4e7', dim:'#71717a', mute:'#555555' };
+const ADMIN_LIGHT = { bg:'#f5f5f0', card:'#ffffff', elevated:'#f0f0eb', border:'#e0e0d8', text:'#1c1c1e', dim:'#888888', mute:'#999999' };
+const ADMIN_PRESETS = {
+    default: { bg:'#0a0a0f', card:'#12121a', elevated:'#1a1a24', border:'#2a2a35', text:'#e4e4e7', dim:'#71717a', mute:'#555555', accent:'#ff6b35' },
+    black: { bg:'#000000', card:'#0a0a0a', elevated:'#111111', border:'#1a1a1a', text:'#e0e0e0', dim:'#666666', mute:'#444444', accent:'#ff6b35' },
+    royal: { bg:'#0a0015', card:'#150025', elevated:'#1e0035', border:'#2e0a4a', text:'#dcccf0', dim:'#9480b0', mute:'#5a4a6a', accent:'#b388ff' }
+};
+
+function applyAdminVars(v, panel) {
+    if (!panel) panel = document.querySelector('.admin-panel');
+    if (!panel) return;
+    const keys = { bg:'--abg', card:'--acard', elevated:'--aelevated', border:'--aborder', text:'--atext', dim:'--adim', mute:'--amute' };
+    Object.keys(keys).forEach(k => {
+        if (v[k]) panel.style.setProperty(keys[k], v[k]);
+    });
+    if (v.accent) setAccentColor(v.accent, true);
+}
+
 function toggleThemePanel() {
     document.getElementById('themePanel').classList.toggle('open');
 }
@@ -10238,25 +10224,23 @@ function toggleThemePanel() {
 function toggleThemeMode() {
     const el = document.getElementById('themeModeToggle');
     const label = document.getElementById('themeModeLabel');
-    const panel = document.querySelector('.admin-panel');
     el.classList.toggle('active');
-    if (el.classList.contains('active')) {
-        label.textContent = 'Light';
-        if (panel) panel.classList.add('light-theme');
-    } else {
-        label.textContent = 'Dark';
-        if (panel) panel.classList.remove('light-theme');
-    }
+    const isLight = el.classList.contains('active');
+    label.textContent = isLight ? 'Light' : 'Dark';
+    const panel = document.querySelector('.admin-panel');
+    applyAdminVars(isLight ? ADMIN_LIGHT : ADMIN_DARK, panel);
+    // Restore preset accent if switching back to dark
+    const preset = document.querySelector('.admin-theme-preset.active')?.dataset?.preset;
+    if (!isLight && preset && ADMIN_PRESETS[preset]) setAccentColor(ADMIN_PRESETS[preset].accent, true);
     saveThemeSettings();
 }
 
-function setAccentColor(color) {
+function setAccentColor(color, silent) {
     document.documentElement.style.setProperty('--accent', color);
     document.getElementById('accentColorPicker').value = color;
     document.getElementById('accentColorValue').textContent = color;
-    // Update meta theme-color
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
-    saveThemeSettings();
+    if (!silent) saveThemeSettings();
 }
 
 function applyThemePreset(name) {
@@ -10264,30 +10248,10 @@ function applyThemePreset(name) {
     const btn = document.querySelector(`.admin-theme-preset[data-preset="${name}"]`);
     if (btn) btn.classList.add('active');
     const panel = document.querySelector('.admin-panel');
-
-    switch (name) {
-        case 'default':
-            setAccentColor('#ff6b35');
-            if (panel) {
-                panel.style.background = '';
-                panel.style.setProperty('--panel-bg', '');
-            }
-            break;
-        case 'darkblack':
-            setAccentColor('#ff6b35');
-            if (panel) {
-                panel.style.background = '#000000';
-                panel.style.setProperty('--panel-bg', '#000000');
-            }
-            break;
-        case 'royal':
-            setAccentColor('#b388ff');
-            if (panel) {
-                panel.style.background = '#0a0015';
-                panel.style.setProperty('--panel-bg', '#0a0015');
-            }
-            break;
-    }
+    const p = ADMIN_PRESETS[name];
+    if (p) applyAdminVars(p, panel);
+    const toggle = document.getElementById('themeModeToggle');
+    if (toggle.classList.contains('active')) { toggle.classList.remove('active'); document.getElementById('themeModeLabel').textContent = 'Dark'; }
     saveThemeSettings();
 }
 
@@ -10296,55 +10260,47 @@ function setLayoutPattern(pattern) {
     const btn = document.querySelector(`.admin-theme-layout-btn[data-layout="${pattern}"]`);
     if (btn) btn.classList.add('active');
     const grid = document.querySelector('.admin-main-grid');
-    if (grid) {
-        grid.classList.remove('layout-centered', 'layout-full');
-        grid.classList.add('layout-' + pattern);
-    }
+    if (grid) { grid.classList.remove('layout-centered', 'layout-full'); grid.classList.add('layout-' + pattern); }
     saveThemeSettings();
 }
 
 function saveThemeSettings() {
-    const settings = {
+    const panel = document.querySelector('.admin-panel');
+    const s = (v) => panel?.style?.getPropertyValue('--a' + v)?.trim() || '';
+    const state = {
         mode: document.getElementById('themeModeToggle').classList.contains('active') ? 'light' : 'dark',
         accent: document.getElementById('accentColorPicker').value,
         preset: document.querySelector('.admin-theme-preset.active')?.dataset?.preset || 'default',
-        layout: document.querySelector('.admin-theme-layout-btn.active')?.dataset?.layout || 'centered'
+        layout: document.querySelector('.admin-theme-layout-btn.active')?.dataset?.layout || 'centered',
+        bg: s('bg'), card: s('card'), elevated: s('elevated'),
+        border: s('border'), text: s('text'), dim: s('dim'), mute: s('mute')
     };
-    localStorage.setItem('bf_theme', JSON.stringify(settings));
+    localStorage.setItem('bf_theme', JSON.stringify(state));
 }
 
 function loadThemeSettings() {
-    // Migrate old format
     try {
         const old = localStorage.getItem('bfTheme');
-        if (old) {
-            const parsed = JSON.parse(old);
-            if (parsed && parsed.mode) {
-                localStorage.setItem('bf_theme', old);
-            }
-            localStorage.removeItem('bfTheme');
-        }
+        if (old) { const parsed = JSON.parse(old); if (parsed && parsed.mode) localStorage.setItem('bf_theme', old); localStorage.removeItem('bfTheme'); }
     } catch(e) {}
-
     const saved = localStorage.getItem('bf_theme');
     if (!saved) return;
-
     try {
         const s = JSON.parse(saved);
+        const panel = document.querySelector('.admin-panel');
+        if (!panel) return;
         if (s.mode === 'light') {
+            applyAdminVars(ADMIN_LIGHT, panel);
             document.getElementById('themeModeToggle').classList.add('active');
             document.getElementById('themeModeLabel').textContent = 'Light';
-            document.querySelector('.admin-panel')?.classList.add('light-theme');
-        }
-        if (s.accent) setAccentColor(s.accent);
-        if (s.preset) {
+        } else if (s.preset && ADMIN_PRESETS[s.preset]) {
+            applyAdminVars(ADMIN_PRESETS[s.preset], panel);
             const btn = document.querySelector(`.admin-theme-preset[data-preset="${s.preset}"]`);
-            if (btn) {
-                document.querySelectorAll('.admin-theme-preset').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                applyThemePreset(s.preset);
-            }
+            if (btn) { document.querySelectorAll('.admin-theme-preset').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        } else if (s.bg) {
+            ['bg','card','elevated','border','text','dim','mute'].forEach(k => { if (s[k]) panel.style.setProperty('--a' + k, s[k]); });
         }
+        if (s.accent) setAccentColor(s.accent, true);
         if (s.layout) setLayoutPattern(s.layout);
     } catch(e) {}
 }
