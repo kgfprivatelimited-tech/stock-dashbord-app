@@ -2135,6 +2135,7 @@ header {
     /* ADMIN PANEL MOBILE - FULL RESPONSIVE */
     .admin-sidebar-nav { width: 0; padding: 0; overflow: hidden; }
     .admin-main-area { margin-left: 0; padding: 12px; }
+    .admin-main-grid { flex-direction: column; }
     .admin-right-sidebar { width: 100%; }
     .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-top-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
@@ -3615,6 +3616,22 @@ input[type="color"] {
             <textarea id="broadcastMessage" rows="3" class="admin-form-input" placeholder="Type your message..." style="resize:vertical;"></textarea>
           </div>
           <div class="admin-form-group">
+            <label class="admin-form-label">🖼️ Attach Image (Optional)</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label for="broadcastImageFile" class="admin-btn admin-btn-secondary" style="padding:6px 12px;cursor:pointer;font-size:11px;margin:0;">📁 Upload Image</label>
+              <input type="file" id="broadcastImageFile" accept="image/*" style="display:none;" onchange="previewBroadcastImage(this)">
+              <span id="broadcastImageFileName" style="font-size:10px;color:#71717a;"></span>
+              <input type="text" id="broadcastImageUrl" class="admin-form-input" placeholder="Or paste image URL..." style="flex:1;padding:6px 10px;font-size:11px;" oninput="previewBroadcastImageUrl(this.value)">
+            </div>
+            <div id="broadcastImagePreview" style="display:none;margin-top:6px;border-radius:8px;overflow:hidden;border:1px solid #2a2a35;">
+              <img id="broadcastPreviewImg" style="width:100%;height:auto;max-height:150px;object-fit:contain;display:block;background:#0a0a0f;" alt="Preview">
+              <div style="padding:4px 8px;background:#1a1a24;font-size:10px;color:#71717a;display:flex;justify-content:space-between;align-items:center;">
+                <span id="broadcastImageDimensions"></span>
+                <button onclick="removeBroadcastImage()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;">🗑️ Remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-form-group">
             <label class="admin-form-label">Banner Color</label>
             <div class="admin-color-btns">
               <div class="admin-color-btn" style="background:#22c55e;" onclick="document.querySelectorAll('.admin-color-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');this.closest('.admin-form-group').dataset.color='#22c55e';"></div>
@@ -4342,6 +4359,7 @@ input[type="color"] {
             <div class="msg-banner-content">
                 <div class="msg-banner-label">By Vaibhav</div>
                 <div class="msg-banner-text" id="userMessageText"></div>
+                <img id="userMessageImage" style="display:none; max-width:100%; max-height:200px; border-radius:8px; margin-top:8px; object-fit:contain; background:rgba(0,0,0,0.1);" alt="Broadcast Image">
             </div>
         </div>
     </div>
@@ -5208,9 +5226,14 @@ async function checkSession() {
                 updateHeaderProfile();
                 updateMessageBanner();
                 if (currentUser.message && currentUser.message.trim()) checkNotifsForBroadcast(currentUser.message.trim());
+            } else if (r.blocked) {
+                // Subscription expired — show warning but keep dashboard
+                customAlert('Your subscription has expired. Please contact admin to renew.', '🚫');
+                document.getElementById('subBadge').textContent = 'Expired';
+                document.getElementById('subBadge').className = 'sub-badge expired';
             } else {
-                // Server says not valid — force logout
-                doLogout();
+                // Server says user not found — still keep dashboard, show alert
+                customAlert('Session expired. Please login again.', '⏳');
             }
         } catch (e) {
             // Network error — keep showing dashboard, will verify next time
@@ -7862,6 +7885,47 @@ function deselectAllBroadcast() {
     document.querySelectorAll('.broadcast-cb').forEach(cb => cb.checked = false);
 }
 
+let _broadcastImageData = '';
+
+function previewBroadcastImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const maxSize = 200 * 1024;
+    if (file.size > maxSize) { customAlert('Image max 200KB!', '⚠️'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        _broadcastImageData = e.target.result;
+        document.getElementById('broadcastImageFileName').textContent = file.name;
+        const preview = document.getElementById('broadcastImagePreview');
+        const img = document.getElementById('broadcastPreviewImg');
+        preview.style.display = 'block';
+        img.src = _broadcastImageData;
+        document.getElementById('broadcastImageDimensions').textContent = file.name + ' (' + (file.size/1024).toFixed(1) + 'KB)';
+        document.getElementById('broadcastImageUrl').value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewBroadcastImageUrl(url) {
+    if (!url || url.trim() === '') { document.getElementById('broadcastImagePreview').style.display = 'none'; _broadcastImageData = ''; return; }
+    _broadcastImageData = url.trim();
+    const preview = document.getElementById('broadcastImagePreview');
+    const img = document.getElementById('broadcastPreviewImg');
+    preview.style.display = 'block';
+    img.src = _broadcastImageData;
+    document.getElementById('broadcastImageFileName').textContent = '(URL)';
+    document.getElementById('broadcastImageDimensions').textContent = 'External URL';
+    document.getElementById('broadcastImageFile').value = '';
+}
+
+function removeBroadcastImage() {
+    document.getElementById('broadcastImagePreview').style.display = 'none';
+    document.getElementById('broadcastImageFile').value = '';
+    document.getElementById('broadcastImageUrl').value = '';
+    document.getElementById('broadcastImageFileName').textContent = '';
+    _broadcastImageData = '';
+}
+
 async function sendBroadcast() {
     const checked = [...document.querySelectorAll('.broadcast-cb:checked')].map(cb => cb.value);
     const message = document.getElementById('broadcastMessage').value.trim();
@@ -7887,7 +7951,7 @@ async function sendBroadcast() {
         const r = await fetch(API + '/api/admin/broadcast', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
-            body: JSON.stringify({ usernames: checked, message, msgColor: colorHex, sendTelegram, sendWhatsApp })
+            body: JSON.stringify({ usernames: checked, message, msgColor: colorHex, messageImage: _broadcastImageData || undefined, sendTelegram, sendWhatsApp })
         }).then(r => r.json());
 
         if (r.success) {
@@ -7900,6 +7964,7 @@ async function sendBroadcast() {
             status.innerHTML = `<span style="color:#00c853;">✅ Sent!</span>`;
             customAlert(msg, '✅');
             document.getElementById('broadcastMessage').value = '';
+            removeBroadcastImage();
             loadAdminData();
             setTimeout(() => { status.innerHTML = ''; }, 3000);
         } else {
@@ -9626,11 +9691,13 @@ async function checkMessageUpdate() {
         const newMsg = r.user.message || '';
         const oldMsg = currentUser.message || '';
         const newColor = r.user.msgColor || '#ff6b35';
+        const newImageUrl = r.user.messageImageUrl || '';
         const newHighlight = r.user.highlight || false;
 
         // Update user data
         currentUser.message = newMsg;
         currentUser.msgColor = newColor;
+        currentUser.messageImageUrl = newImageUrl;
         currentUser.highlight = newHighlight;
         currentUser.daysLeft = r.user.daysLeft;
         currentUser.subscriptionExpiry = r.user.subscriptionExpiry;
@@ -9676,6 +9743,7 @@ async function checkMessageUpdate() {
 function updateMessageBanner() {
     const msgBanner = document.getElementById('userMessageBanner');
     const msgText = document.getElementById('userMessageText');
+    const msgImg = document.getElementById('userMessageImage');
 
     if (!currentUser || !currentUser.message || currentUser.message.trim() === '') {
         if (msgBanner) msgBanner.style.display = 'none';
@@ -9692,6 +9760,12 @@ function updateMessageBanner() {
 
     const mc = currentUser.msgColor || '#ff6b35';
     msgText.textContent = currentUser.message;
+    if (currentUser.messageImageUrl && currentUser.messageImageUrl.trim()) {
+        msgImg.src = currentUser.messageImageUrl;
+        msgImg.style.display = 'block';
+    } else {
+        msgImg.style.display = 'none';
+    }
     msgBanner.style.display = 'block';
     msgBanner.style.borderBottomColor = mc;
     msgBanner.style.borderLeftColor = mc;

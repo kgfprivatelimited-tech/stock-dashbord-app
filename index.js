@@ -1391,8 +1391,11 @@ app.get('/api/me', (req, res) => {
     const data = loadUsers();
     const user = data.users.find(u => u.id === userId);
     
-    if (!user || !isSubscriptionActive(user)) {
+    if (!user) {
         return res.json({ loggedIn: false });
+    }
+    if (!isSubscriptionActive(user)) {
+        return res.json({ loggedIn: false, blocked: true });
     }
     
     const today = new Date();
@@ -1420,6 +1423,7 @@ app.get('/api/me', (req, res) => {
             daysLeft: getDaysUntilExpiry(user),
             message: user.message || '',
             msgColor: user.msgColor || '#ff6b35',
+            messageImageUrl: user.messageImageUrl || '',
             highlight: user.highlight || false,
             dob: user.dob || '',
             isBirthday: !!isBirthday,
@@ -1850,7 +1854,7 @@ app.put('/api/admin/user/:username', checkAdmin, (req, res) => {
 // Broadcast message to multiple users
 app.post('/api/admin/broadcast', checkAdmin, async (req, res) => {
     try {
-        const { usernames, message, msgColor, sendTelegram, sendWhatsApp } = req.body;
+        const { usernames, message, msgColor, messageImage, sendTelegram, sendWhatsApp } = req.body;
         if (!usernames || !Array.isArray(usernames) || usernames.length === 0) {
             return res.json({ success: false, message: 'Select at least one user' });
         }
@@ -1864,6 +1868,7 @@ app.post('/api/admin/broadcast', checkAdmin, async (req, res) => {
             if (usernames.includes(u.username)) {
                 u.message = message.trim();
                 u.msgColor = msgColor || '#ff6b35';
+                if (messageImage) u.messageImageUrl = messageImage;
                 count++;
             }
         });
@@ -1908,6 +1913,7 @@ app.post('/api/admin/clear-messages', checkAdmin, (req, res) => {
             if (usernames.includes(u.username)) {
                 u.message = '';
                 u.msgColor = '#ff6b35';
+                u.messageImageUrl = '';
                 count++;
             }
         });
@@ -1927,6 +1933,7 @@ app.post('/api/admin/clear-all-messages', checkAdmin, (req, res) => {
             if (u.message && u.message.trim() !== '') {
                 u.message = '';
                 u.msgColor = '#ff6b35';
+                u.messageImageUrl = '';
                 count++;
             }
         });
