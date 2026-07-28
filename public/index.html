@@ -2538,6 +2538,149 @@ input[type="color"] {
     #holidayBannerMsg { font-size: 10px; }
 }
 
+/* ═══════ THEME SETTINGS PANEL ═══════ */
+.admin-theme-btn {
+    position: fixed; bottom: 20px; right: 20px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #f59e0b; color: #000;
+    border: none; cursor: pointer;
+    font-size: 18px; z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: all 0.2s;
+}
+.admin-theme-btn:hover { transform: scale(1.1); }
+.admin-theme-panel {
+    position: fixed; bottom: 74px; right: 20px;
+    width: 280px;
+    background: #12121a;
+    border: 1px solid #2a2a35;
+    border-radius: 14px;
+    padding: 18px;
+    z-index: 10000;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.admin-theme-panel.open { display: block; }
+.admin-theme-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 14px; }
+.admin-theme-group { margin-bottom: 14px; }
+.admin-theme-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #71717a; margin-bottom: 8px; }
+.admin-theme-presets { display: flex; gap: 8px; }
+.admin-theme-preset {
+    flex: 1; padding: 10px 8px;
+    border-radius: 8px;
+    border: 1px solid #2a2a35;
+    background: transparent;
+    color: #e4e4e7;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+.admin-theme-preset:hover { border-color: #f59e0b; }
+.admin-theme-preset.active { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f59e0b; }
+.admin-theme-layouts { display: flex; gap: 8px; }
+.admin-theme-layout-btn {
+    flex: 1; padding: 10px 8px;
+    border-radius: 8px;
+    border: 1px solid #2a2a35;
+    background: transparent;
+    color: #e4e4e7;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+.admin-theme-layout-btn:hover { border-color: #f59e0b; }
+.admin-theme-layout-btn.active { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f59e0b; }
+.admin-theme-accent-wrap { display: flex; align-items: center; gap: 10px; }
+.admin-theme-accent-wrap input[type="color"] {
+    width: 36px; height: 36px;
+    border: 1px solid #2a2a35;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    padding: 2px;
+}
+.admin-theme-accent-value { font-size: 11px; color: #71717a; font-family: 'JetBrains Mono', monospace; }
+.admin-theme-toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.admin-theme-toggle {
+    width: 44px; height: 24px;
+    background: #1a1a24;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #2a2a35;
+}
+.admin-theme-toggle.active { background: #22c55e; border-color: #22c55e; }
+.admin-theme-toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: all 0.3s;
+}
+.admin-theme-toggle.active::after { left: 22px; }
+
+/* Light theme overrides for admin panel */
+.admin-panel.light-theme {
+    background: #f5f5f0;
+}
+.admin-panel.light-theme .admin-sidebar-nav {
+    background: #ffffff;
+    border-right-color: #e0e0d8;
+}
+.admin-panel.light-theme .admin-sidebar-nav .sidebar-logo { color: #1a1a1a; }
+.admin-panel.light-theme .admin-nav-item { color: #666; }
+.admin-panel.light-theme .admin-nav-item:hover { background: rgba(0,0,0,0.03); color: #1a1a1a; }
+.admin-panel.light-theme .admin-main-area { background: #f5f5f0; }
+.admin-panel.light-theme .admin-card {
+    background: #ffffff;
+    border-color: #e0e0d8;
+}
+.admin-panel.light-theme .admin-card-title { color: #1a1a1a; }
+.admin-panel.light-theme .admin-card:hover { border-color: #ccc; }
+.admin-panel.light-theme .admin-stat-card {
+    background: #ffffff;
+    border-color: #e0e0d8;
+}
+.admin-panel.light-theme .admin-stat-label { color: #888; }
+.admin-panel.light-theme .admin-stat-value { color: #1a1a1a; }
+.admin-panel.light-theme .admin-top-bar h1 { color: #1a1a1a; }
+.admin-panel.light-theme .admin-table-row { border-bottom-color: rgba(0,0,0,0.05); }
+.admin-panel.light-theme .admin-user-name { color: #1a1a1a; }
+.admin-panel.light-theme .admin-form-input { background: #f5f5f0; border-color: #e0e0d8; color: #1a1a1a; }
+.admin-panel.light-theme .admin-btn-secondary { background: #f5f5f0; border-color: #e0e0d8; color: #1a1a1a; }
+.admin-panel.light-theme .admin-nav-label { color: #999; }
+.admin-panel.light-theme .admin-theme-panel { background: #ffffff; border-color: #e0e0d8; }
+.admin-panel.light-theme .admin-theme-title { color: #1a1a1a; }
+.admin-panel.light-theme .admin-theme-preset { border-color: #e0e0d8; color: #666; }
+.admin-panel.light-theme .admin-theme-layout-btn { border-color: #e0e0d8; color: #666; }
+.admin-panel.light-theme .admin-theme-label { color: #999; }
+.admin-panel.light-theme .admin-theme-accent-value { color: #999; }
+.admin-panel.light-theme .manual-nav-btn { background: #f0f0eb; border-color: #e0e0d8; color: #666; }
+.admin-panel.light-theme .admin-scheduled-item { background: #f0f0eb; }
+.admin-panel.light-theme .admin-activity-item { border-bottom-color: rgba(0,0,0,0.05); }
+.admin-panel.light-theme .admin-checkbox-item { background: #f0f0eb; }
+.admin-panel.light-theme #globalSearchDropdown { background: #ffffff; border-color: #e0e0d8; }
+.admin-panel.light-theme .admin-tip-type-btn { border-color: #e0e0d8; }
+.admin-panel.light-theme .sidebar-logo-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+/* Layout pattern: Centered */
+.admin-main-grid.layout-centered {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* Responsive for theme panel */
+@media (max-width: 600px) {
+    .admin-theme-panel { width: 240px; right: 10px; bottom: 64px; }
+    .admin-theme-btn { width: 38px; height: 38px; font-size: 15px; bottom: 14px; right: 14px; }
+}
+
 /* ═══════ RESPONSIVE ═══════ */
 @media (max-width: 900px) {
     /* Admin mobile rules are now in the main mobile responsive section */
@@ -2703,6 +2846,17 @@ input[type="color"] {
           </div>
         </div>
 
+        <!-- Live Indices -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">⬡ Live Indices</div>
+            <div id="dashIndicesStatus" style="font-size:10px;color:#71717a;"></div>
+          </div>
+          <div id="dashIndicesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;">
+            <div style="color:#71717a;font-size:11px;text-align:center;padding:12px;grid-column:1/-1;">Loading...</div>
+          </div>
+        </div>
+
         <!-- Stats -->
         <div class="admin-stats-grid" id="dashStats" style="grid-template-columns: repeat(11, 1fr);">
           <div class="admin-stat-card" onclick="showStatPopup('revenue')" style="cursor:pointer;" title="Click to view details">
@@ -2768,20 +2922,7 @@ input[type="color"] {
         </div>
 
         <!-- ═══ DASHBOARD SECTION ═══ -->
-        <div id="section-dashboard">
-
-        <!-- Live Indices -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div class="admin-card-title">⬡ Live Indices</div>
-            <div id="dashIndicesStatus" style="font-size:10px;color:#71717a;"></div>
-          </div>
-          <div id="dashIndicesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;">
-            <div style="color:#71717a;font-size:11px;text-align:center;padding:12px;grid-column:1/-1;">Loading...</div>
-          </div>
-        </div>
-
-        </div><!-- /section-dashboard -->
+        <div id="section-dashboard"></div><!-- /section-dashboard -->
 
         <!-- ═══ CREATE USER SECTION ═══ -->
         <div id="section-createUser" style="display:none;">
@@ -4103,6 +4244,45 @@ input[type="color"] {
     </div><!-- /admin-main-grid -->
   </div><!-- /admin-main-area -->
 </div><!-- /admin-layout -->
+
+  <!-- ═══ Theme Settings ═══ -->
+  <button class="admin-theme-btn" id="themePanelBtn" onclick="toggleThemePanel()" title="Theme Settings">🎨</button>
+  <div class="admin-theme-panel" id="themePanel">
+    <div class="admin-theme-title">🎨 Theme Settings</div>
+
+    <div class="admin-theme-group">
+      <div class="admin-theme-label">☀️ Dark / Light</div>
+      <div class="admin-theme-toggle-wrap">
+        <div class="admin-theme-toggle" id="themeModeToggle" onclick="toggleThemeMode()"></div>
+        <span id="themeModeLabel" style="font-size:11px;color:#71717a;">Dark</span>
+      </div>
+    </div>
+
+    <div class="admin-theme-group">
+      <div class="admin-theme-label">🎯 Accent Color</div>
+      <div class="admin-theme-accent-wrap">
+        <input type="color" id="accentColorPicker" value="#ff6b35" onchange="setAccentColor(this.value)">
+        <span class="admin-theme-accent-value" id="accentColorValue">#ff6b35</span>
+      </div>
+    </div>
+
+    <div class="admin-theme-group">
+      <div class="admin-theme-label">🌈 Preset</div>
+      <div class="admin-theme-presets">
+        <button class="admin-theme-preset active" data-preset="default" onclick="applyThemePreset('default')">Default</button>
+        <button class="admin-theme-preset" data-preset="darkblack" onclick="applyThemePreset('darkblack')">Black</button>
+        <button class="admin-theme-preset" data-preset="royal" onclick="applyThemePreset('royal')">Royal</button>
+      </div>
+    </div>
+
+    <div class="admin-theme-group">
+      <div class="admin-theme-label">📐 Layout</div>
+      <div class="admin-theme-layouts">
+        <button class="admin-theme-layout-btn active" data-layout="centered" onclick="setLayoutPattern('centered')">3-Centered</button>
+        <button class="admin-theme-layout-btn" data-layout="full" onclick="setLayoutPattern('full')">1-3Col</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════ DASHBOARD ═══════ -->
@@ -5548,6 +5728,7 @@ async function adminLogin() {
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     loadAdminData();
+    setTimeout(loadThemeSettings, 150);
     loadDisclaimerSettings();
     loadApiKeys();
     updateAdminSidebarClock();
@@ -10048,6 +10229,126 @@ document.addEventListener('keydown', function(e) {
         else if (document.getElementById('classesOverlay')?.style.display === 'block') closeClassesPage();
     }
 });
+
+/* ═══════ THEME SETTINGS ═══════ */
+function toggleThemePanel() {
+    document.getElementById('themePanel').classList.toggle('open');
+}
+
+function toggleThemeMode() {
+    const el = document.getElementById('themeModeToggle');
+    const label = document.getElementById('themeModeLabel');
+    const panel = document.querySelector('.admin-panel');
+    el.classList.toggle('active');
+    if (el.classList.contains('active')) {
+        label.textContent = 'Light';
+        if (panel) panel.classList.add('light-theme');
+    } else {
+        label.textContent = 'Dark';
+        if (panel) panel.classList.remove('light-theme');
+    }
+    saveThemeSettings();
+}
+
+function setAccentColor(color) {
+    document.documentElement.style.setProperty('--accent', color);
+    document.getElementById('accentColorPicker').value = color;
+    document.getElementById('accentColorValue').textContent = color;
+    // Update meta theme-color
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
+    saveThemeSettings();
+}
+
+function applyThemePreset(name) {
+    document.querySelectorAll('.admin-theme-preset').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.admin-theme-preset[data-preset="${name}"]`);
+    if (btn) btn.classList.add('active');
+    const panel = document.querySelector('.admin-panel');
+
+    switch (name) {
+        case 'default':
+            setAccentColor('#ff6b35');
+            if (panel) {
+                panel.style.background = '';
+                panel.style.setProperty('--panel-bg', '');
+            }
+            break;
+        case 'darkblack':
+            setAccentColor('#ff6b35');
+            if (panel) {
+                panel.style.background = '#000000';
+                panel.style.setProperty('--panel-bg', '#000000');
+            }
+            break;
+        case 'royal':
+            setAccentColor('#b388ff');
+            if (panel) {
+                panel.style.background = '#0a0015';
+                panel.style.setProperty('--panel-bg', '#0a0015');
+            }
+            break;
+    }
+    saveThemeSettings();
+}
+
+function setLayoutPattern(pattern) {
+    document.querySelectorAll('.admin-theme-layout-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.admin-theme-layout-btn[data-layout="${pattern}"]`);
+    if (btn) btn.classList.add('active');
+    const grid = document.querySelector('.admin-main-grid');
+    if (grid) {
+        grid.classList.remove('layout-centered', 'layout-full');
+        grid.classList.add('layout-' + pattern);
+    }
+    saveThemeSettings();
+}
+
+function saveThemeSettings() {
+    const settings = {
+        mode: document.getElementById('themeModeToggle').classList.contains('active') ? 'light' : 'dark',
+        accent: document.getElementById('accentColorPicker').value,
+        preset: document.querySelector('.admin-theme-preset.active')?.dataset?.preset || 'default',
+        layout: document.querySelector('.admin-theme-layout-btn.active')?.dataset?.layout || 'centered'
+    };
+    localStorage.setItem('bf_theme', JSON.stringify(settings));
+}
+
+function loadThemeSettings() {
+    // Migrate old format
+    try {
+        const old = localStorage.getItem('bfTheme');
+        if (old) {
+            const parsed = JSON.parse(old);
+            if (parsed && parsed.mode) {
+                localStorage.setItem('bf_theme', old);
+            }
+            localStorage.removeItem('bfTheme');
+        }
+    } catch(e) {}
+
+    const saved = localStorage.getItem('bf_theme');
+    if (!saved) return;
+
+    try {
+        const s = JSON.parse(saved);
+        if (s.mode === 'light') {
+            document.getElementById('themeModeToggle').classList.add('active');
+            document.getElementById('themeModeLabel').textContent = 'Light';
+            document.querySelector('.admin-panel')?.classList.add('light-theme');
+        }
+        if (s.accent) setAccentColor(s.accent);
+        if (s.preset) {
+            const btn = document.querySelector(`.admin-theme-preset[data-preset="${s.preset}"]`);
+            if (btn) {
+                document.querySelectorAll('.admin-theme-preset').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyThemePreset(s.preset);
+            }
+        }
+        if (s.layout) setLayoutPattern(s.layout);
+    } catch(e) {}
+}
+
 </script>
 </body>
 </html>
