@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Bear Fighter">
 <meta name="description" content="Live Stock Market Dashboard by Vaibhav">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0a' width='100' height='100' rx='20'/><text x='50' y='68' font-size='55' text-anchor='middle'>🐻</text></svg>">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg">
 <title>🐻 BEAR FIGHTER TRADING</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4294,6 +4294,7 @@ input[type="color"] {
                 <span class="sub-badge" id="subBadge">30d left</span>
             </div>
             <span id="countdown"></span>
+            <button id="installPwaBtn" style="display:none;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;align-items:center;gap:4px;" onclick="installPwa()">📲 App</button>
         </div>
     </header>
 
@@ -10378,6 +10379,30 @@ function loadThemeSettings() {
         if (s.accent) setAccentColor(s.accent, true);
         if (s.layout) setLayoutPattern(s.layout);
     } catch(e) {}
+}
+
+// ═══════ PWA: Service Worker ═══════
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+// ═══════ PWA: Install Prompt ═══════
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('installPwaBtn');
+    if (btn) btn.style.display = 'inline-flex';
+});
+window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    const btn = document.getElementById('installPwaBtn');
+    if (btn) btn.style.display = 'none';
+});
+function installPwa() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
 }
 
 </script>
