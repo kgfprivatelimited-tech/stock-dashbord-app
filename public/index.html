@@ -4230,8 +4230,8 @@ input[type="color"] {
   </div><!-- /admin-main-area -->
 </div><!-- /admin-layout -->
 
-  <!-- ═══ Theme Settings ═══ -->
-  <button class="admin-theme-btn" id="themePanelBtn" onclick="toggleThemePanel()" title="Theme Settings">🎨</button>
+  <!-- ═══ Theme Settings (admin only) ═══ -->
+  <button class="admin-theme-btn" id="themePanelBtn" onclick="toggleThemePanel()" title="Theme Settings" style="display:none;">🎨</button>
   <div class="admin-theme-panel" id="themePanel">
     <div class="admin-theme-title">🎨 Theme Settings</div>
 
@@ -4714,6 +4714,8 @@ function closeSplash() {
     setTimeout(() => {
         splash.style.display = 'none';
         if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') return;
+        // If already logged in (app visible), don't show login screen again
+        if (document.getElementById('appContainer').style.display === 'block') return;
         document.getElementById('loginScreen').style.display = 'flex';
         setTimeout(() => document.getElementById('username').focus(), 300);
     }, 500);
@@ -4898,6 +4900,7 @@ async function doLogin() {
             currentUser = r.user;
             sessionStorage.setItem('userId', r.user.id);
             sessionStorage.setItem('username', r.user.username);
+            localStorage.setItem('userId', r.user.id);
             localStorage.setItem('bf_uid', r.user.id);
             localStorage.setItem('bf_uname', r.user.username);
             showDashboard();
@@ -5164,10 +5167,10 @@ async function checkSession() {
         }
     }
 
-    var userId = sessionStorage.getItem('userId') || localStorage.getItem('bf_uid');
+    var userId = sessionStorage.getItem('userId') || localStorage.getItem('userId') || localStorage.getItem('bf_uid');
     if (userId && !sessionStorage.getItem('userId')) {
         sessionStorage.setItem('userId', userId);
-        var uname = localStorage.getItem('bf_uname');
+        var uname = localStorage.getItem('bf_uname') || localStorage.getItem('username');
         if (uname) sessionStorage.setItem('username', uname);
     }
     
@@ -5179,6 +5182,7 @@ async function checkSession() {
         document.getElementById('adminPanel').style.display = 'block';
         if (localStorage.getItem('bf_admin') === '1') {
             document.getElementById('adminLoginScreen').classList.remove('show');
+            document.getElementById('themePanelBtn').style.display = '';
             loadAdminData();
             loadDisclaimerSettings();
             loadApiKeys();
@@ -5642,10 +5646,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }).catch(() => {});
-        // When new SW takes over, reload once to get fresh HTML
-        let reloaded = false;
+        // When new SW takes over, reload once (max every 30s) to get fresh HTML
+        const lastReload = parseInt(sessionStorage.getItem('_swReloaded') || '0');
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!reloaded) { reloaded = true; location.reload(); }
+            const now = Date.now();
+            if (now - lastReload > 30000) {
+                sessionStorage.setItem('_swReloaded', String(now));
+                location.reload();
+            }
         });
     }
 
@@ -5720,6 +5728,7 @@ async function adminLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('themePanelBtn').style.display = '';
     loadAdminData();
     setTimeout(loadThemeSettings, 150);
     loadDisclaimerSettings();
