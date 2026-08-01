@@ -31,6 +31,14 @@
     --text: #e0e0e0;
     --text-dim: #888;
     --text-mute: #555;
+    /* Admin panel theme defaults (login screen & runtime modals live outside .admin-panel) */
+    --abg: #0a0a0f;
+    --acard: #12121a;
+    --aelevated: #1a1a24;
+    --aborder: #2a2a35;
+    --atext: #e4e4e7;
+    --adim: #71717a;
+    --amute: #555555;
 }
 
 body {
@@ -5913,9 +5921,10 @@ async function checkSession() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('sharedHeader').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
         if (localStorage.getItem('bf_admin') === '1') {
             document.getElementById('adminLoginScreen').classList.remove('show');
+            document.getElementById('adminPanel').style.display = 'block';
             document.getElementById('themePanelBtn').style.display = '';
             loadAdminData();
             loadDisclaimerSettings();
@@ -8583,19 +8592,93 @@ async function deleteClass(id) {
         if (r.success) { customAlert('Deleted', '🗑️'); loadClassesAdmin(); }
     } catch (e) { customAlert('Error', '❌'); }
 }
+function renderClassVideos(classId) {
+    const div = document.getElementById('clsVids_' + classId);
+    const cls = allClassesData.find(c => c.id === classId);
+    if (!cls || !cls.videos || !cls.videos.length) { div.innerHTML = '<div style="color:var(--adim);font-size:10px;">No videos</div>'; return; }
+    const total = cls.videos.length;
+    const sorted = cls.videos.slice().sort((a,b) => (a.order||0)-(b.order||0));
+    div.innerHTML = sorted.map((v, idx) => {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--acard);border:1px solid var(--aborder);border-radius:6px;margin-bottom:4px;">' +
+            '<div style="display:flex;flex-direction:column;align-items:center;margin-right:6px;">' +
+                '<button class="admin-btn admin-btn-secondary" onclick="moveClassVideo(\'' + classId + '\',\'' + v.id + '\',-1)" style="font-size:9px;padding:1px 6px;' + (idx === 0 ? 'opacity:0.35;pointer-events:none;' : '') + '">▲</button>' +
+                '<span style="font-size:9px;color:var(--adim);margin:2px 0;">' + (idx + 1) + '/' + total + '</span>' +
+                '<button class="admin-btn admin-btn-secondary" onclick="moveClassVideo(\'' + classId + '\',\'' + v.id + '\',1)" style="font-size:9px;padding:1px 6px;' + (idx === total - 1 ? 'opacity:0.35;pointer-events:none;' : '') + '">▼</button>' +
+            '</div>' +
+            '<div style="flex:1;min-width:0;"><div style="color:var(--atext);font-size:11px;font-weight:600;">' + _escH(v.title) + '</div>' +
+            '<div style="color:var(--adim);font-size:9px;word-break:break-all;">' + _escH(v.youtubeUrl || v.url) + '</div></div>' +
+            '<button class="admin-btn admin-btn-secondary" onclick="editClassVideo(\'' + classId + '\',\'' + v.id + '\')" style="font-size:9px;padding:2px 6px;margin-left:4px;">✏️</button>' +
+            '<button class="admin-btn admin-btn-danger" onclick="deleteClassVideo(\'' + classId + '\',\'' + v.id + '\')" style="font-size:9px;padding:2px 6px;margin-left:4px;">🗑️</button>' +
+            '</div>';
+    }).join('');
+}
 async function listClassVideos(classId) {
     const div = document.getElementById('clsVids_' + classId);
     if (div.style.display === 'block') { div.style.display = 'none'; return; }
-    const cls = allClassesData.find(c => c.id === classId);
-    if (!cls || !cls.videos || !cls.videos.length) { div.innerHTML = '<div style="color:var(--adim);font-size:10px;">No videos</div>'; div.style.display = 'block'; return; }
-    div.innerHTML = cls.videos.sort((a,b) => (a.order||0)-(b.order||0)).map(v => {
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--acard);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
-            '<div style="flex:1;"><div style="color:var(--atext);font-size:11px;font-weight:600;">' + v.title + '</div>' +
-            '<div style="color:var(--adim);font-size:9px;word-break:break-all;">' + v.youtubeUrl + '</div></div>' +
-            '<button class="admin-btn admin-btn-danger" onclick="deleteClassVideo(\'' + classId + '\',\'' + v.id + '\')" style="font-size:9px;padding:2px 6px;margin-left:6px;">🗑️</button>' +
-            '</div>';
-    }).join('');
+    renderClassVideos(classId);
     div.style.display = 'block';
+}
+let currentEditVideo = null;
+function editClassVideo(classId, videoId) {
+    const cls = allClassesData.find(c => c.id === classId);
+    const v = cls ? (cls.videos || []).find(x => x.id === videoId) : null;
+    if (!cls || !v) return;
+    currentEditVideo = { classId, videoId };
+    const modal = document.createElement('div');
+    modal.id = 'editVideoModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = '<div style="background:var(--aelevated);color:var(--atext);border:1px solid #f59e0b;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
+        '<h3 style="color:#f59e0b;margin:0 0 12px 0;font-size:14px;">✏️ Edit Video</h3>' +
+        '<input type="text" id="editVidTitle" class="admin-form-input" placeholder="Video title" value="' + _escH(v.title || '') + '" style="margin-bottom:8px;">' +
+        '<input type="text" id="editVidUrl" class="admin-form-input" placeholder="Video URL" value="' + _escH(v.url || v.youtubeUrl || '') + '" style="margin-bottom:8px;">' +
+        '<input type="text" id="editVidDuration" class="admin-form-input" placeholder="Duration (optional)" value="' + _escH(v.duration || '') + '" style="margin-bottom:12px;">' +
+        '<div style="display:flex;gap:8px;">' +
+        '<button class="admin-btn admin-btn-secondary" onclick="document.getElementById(\'editVideoModal\').remove();currentEditVideo=null;" style="flex:1;">Cancel</button>' +
+        '<button class="admin-btn admin-btn-primary" onclick="saveClassVideo()" style="flex:1;">💾 Save</button>' +
+        '</div></div>';
+    document.body.appendChild(modal);
+}
+async function saveClassVideo() {
+    if (!currentEditVideo) return;
+    const cid = currentEditVideo.classId;
+    const vid = currentEditVideo.videoId;
+    const title = document.getElementById('editVidTitle').value.trim();
+    const url = document.getElementById('editVidUrl').value.trim();
+    if (!title || !url) { customAlert('Title & URL required', '❌'); return; }
+    try {
+        const r = await fetch(API + '/api/admin/classes/' + cid + '/videos/' + vid, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ title, url, duration: document.getElementById('editVidDuration').value.trim() })
+        }).then(r => r.json());
+        if (r.success) {
+            const cls = allClassesData.find(c => c.id === cid);
+            const v = cls ? (cls.videos || []).find(x => x.id === vid) : null;
+            if (v) { v.title = title; v.url = url; v.youtubeUrl = url; v.duration = document.getElementById('editVidDuration').value.trim(); }
+            customAlert('Video updated!', '✅');
+            document.getElementById('editVideoModal')?.remove();
+            currentEditVideo = null;
+            renderClassVideos(cid);
+        } else { customAlert(r.message, '❌'); }
+    } catch (e) { customAlert('Error', '❌'); }
+}
+async function moveClassVideo(classId, videoId, dir) {
+    const cls = allClassesData.find(c => c.id === classId);
+    if (!cls) return;
+    const vids = cls.videos.slice().sort((a,b) => (a.order||0)-(b.order||0));
+    const idx = vids.findIndex(v => v.id === videoId);
+    const swapIdx = idx + dir;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= vids.length) return;
+    const tmp = vids[idx].order;
+    vids[idx].order = vids[swapIdx].order;
+    vids[swapIdx].order = tmp;
+    const orderedIds = vids.slice().sort((a,b) => (a.order||0)-(b.order||0)).map(v => v.id);
+    try {
+        const r = await fetch(API + '/api/admin/classes/' + classId + '/videos/reorder', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ orderedIds })
+        }).then(r => r.json());
+        if (r.success) { renderClassVideos(classId); } else { customAlert(r.message, '❌'); loadClassesAdmin(); }
+    } catch (e) { customAlert('Error', '❌'); }
 }
 let currentAddVideoClassId = null;
 function showAddVideoForm(classId) {
@@ -8604,8 +8687,8 @@ function showAddVideoForm(classId) {
     const modal = document.createElement('div');
     modal.id = 'addVideoModal';
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = '<div style="background:var(--aelevated);border:1px solid #22c55e;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
-        '<h3 style="color:#22c55e;margin:0 0 12px 0;font-size:14px;">🎬 Add Video to ' + (cls ? cls.title : '') + '</h3>' +
+    modal.innerHTML = '<div style="background:var(--aelevated);color:var(--atext);border:1px solid #22c55e;border-radius:12px;padding:20px;width:90%;max-width:400px;">' +
+        '<h3 style="color:#22c55e;margin:0 0 12px 0;font-size:14px;">🎬 Add Video to ' + (cls ? _escH(cls.title) : '') + '</h3>' +
         '<input type="text" id="newVidTitle" class="admin-form-input" placeholder="Video title" style="margin-bottom:8px;">' +
         '<input type="text" id="newVidUrl" class="admin-form-input" placeholder="Paste any URL (YouTube, Google Drive, MP4, etc.)" style="margin-bottom:8px;">' +
         '<div style="font-size:9px;color:var(--adim);margin:-4px 0 8px 0;">YouTube, Google Drive, Mega, OneDrive, MP4, Openbox etc.</div>' +

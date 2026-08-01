@@ -4044,6 +4044,43 @@ app.delete('/api/admin/classes/:classId/videos/:videoId', checkAdmin, (req, res)
     } catch (e) { res.json({ success: false }); }
 });
 
+// Admin: Update video (title/url/duration)
+app.put('/api/admin/classes/:classId/videos/:videoId', checkAdmin, (req, res) => {
+    try {
+        const { title, url, duration } = req.body;
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.classId);
+        if (!cls) return res.json({ success: false, message: 'Class not found' });
+        const v = (cls.videos || []).find(x => x.id === req.params.videoId);
+        if (!v) return res.json({ success: false, message: 'Video not found' });
+        if (title !== undefined && title.trim()) { v.title = title.trim(); }
+        if (url !== undefined && url.trim()) { v.url = url.trim(); v.youtubeUrl = url.trim(); }
+        if (duration !== undefined) v.duration = duration.trim();
+        cls.updatedAt = new Date().toISOString();
+        saveSettings(settings);
+        res.json({ success: true, message: 'Video updated', video: v });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
+// Admin: Reorder videos in a class
+app.post('/api/admin/classes/:classId/videos/reorder', checkAdmin, (req, res) => {
+    try {
+        const { orderedIds } = req.body;
+        const settings = loadSettings();
+        const cls = (settings.classes || []).find(c => c.id === req.params.classId);
+        if (!cls) return res.json({ success: false, message: 'Class not found' });
+        if (!Array.isArray(orderedIds) || !orderedIds.length) return res.json({ success: false, message: 'No order given' });
+        const vids = cls.videos || [];
+        orderedIds.forEach((id, idx) => {
+            const v = vids.find(x => x.id === id);
+            if (v) v.order = idx + 1;
+        });
+        cls.updatedAt = new Date().toISOString();
+        saveSettings(settings);
+        res.json({ success: true, message: 'Order updated' });
+    } catch (e) { res.json({ success: false, message: 'Server error' }); }
+});
+
 // ========================================
 // HEATMAP STOCK SETTINGS (Admin)
 // ========================================
