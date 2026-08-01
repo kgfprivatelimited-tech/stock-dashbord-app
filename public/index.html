@@ -329,6 +329,311 @@ body {
     animation: splashExit 0.5s ease-in forwards !important;
 }
 
+/* ═══════ FOREX CONTAINER ═══════ */
+@keyframes fxFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes fxShine { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+@keyframes fxPulse { 0%,100% { box-shadow: 0 10px 30px rgba(16,185,129,0.15); } 50% { box-shadow: 0 10px 40px rgba(16,185,129,0.3); } }
+@keyframes fxGlowBorder { 0%,100% { border-color: rgba(192,168,67,0.25); } 50% { border-color: rgba(192,168,67,0.6); } }
+@keyframes fxBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.forex-container {
+    display: none; margin-bottom: 80px;
+}
+.forex-container .fx-status {
+    padding: 10px 16px; margin: 8px 12px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(15,23,42,0.6); border: 1px solid rgba(59,130,246,0.15);
+}
+.forex-container .fx-status-label { font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; }
+.forex-container .fx-status-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.forex-container .fx-status-badge.open { background: rgba(34,197,94,0.15); color: #22c55e; }
+.forex-container .fx-status-badge.closed { background: rgba(239,68,68,0.15); color: #ef4444; }
+.fx-section-title {
+    font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    padding: 18px 16px 10px; color: #e4e4e7; display: flex; align-items: center; gap: 8px;
+}
+.fx-section-title .fx-st-accent { color: #60a5fa; }
+.fx-section-title .fx-st-badge {
+    font-size: 8px; background: rgba(59,130,246,0.15); color: #60a5fa;
+    padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px;
+    font-weight: 800;
+}
+.fx-section-title .fx-st-badge.live { background: rgba(34,197,94,0.15); color: #22c55e; }
+.fx-section-title .fx-st-badge.closed { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+/* Currency cards — horizontal scroll with 3D tilt */
+.fx-currency-row {
+    display: flex; gap: 12px; overflow-x: auto; padding: 4px 12px 16px;
+    -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
+}
+.fx-currency-row::-webkit-scrollbar { display: none; }
+.fx-card-3d {
+    min-width: 150px; padding: 16px 14px; border-radius: 16px;
+    background: linear-gradient(145deg, #052e23, #031a14);
+    border: 1px solid rgba(16,185,129,0.3);
+    box-shadow: 0 8px 30px rgba(16,185,129,0.08);
+    scroll-snap-align: start; position: relative; overflow: hidden;
+    transition: all 0.3s;
+}
+.fx-card-3d:hover { transform: translateY(-6px) scale(1.03); }
+.fx-card-3d.up { border-color: rgba(34,197,94,0.5); box-shadow: 0 8px 30px rgba(34,197,94,0.15); background: linear-gradient(145deg, #06301f, #042216); }
+.fx-card-3d.down { border-color: rgba(239,68,68,0.5); box-shadow: 0 8px 30px rgba(239,68,68,0.15); background: linear-gradient(145deg, #2a0f14, #1c0a0e); }
+.fx-card-3d .fx-pair { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+.fx-card-3d .fx-price { font-size: 20px; font-weight: 800; color: #a7f3d0; font-family: 'JetBrains Mono', monospace; margin: 6px 0 4px; transition: color 0.5s; }
+.fx-card-3d .fx-price.up { color: #22c55e; }
+.fx-card-3d .fx-price.down { color: #ef4444; }
+.fx-card-3d .fx-change { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 8px; display: inline-block; }
+.fx-card-3d .fx-change.up { color: #22c55e; background: rgba(34,197,94,0.1); }
+.fx-card-3d .fx-change.down { color: #ef4444; background: rgba(239,68,68,0.1); }
+.fx-card-3d .fx-rank {
+    position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
+    background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: #34d399;
+}
+
+/* Referral card */
+.fx-referral {
+    margin: 4px 12px; padding: 18px 16px; border-radius: 18px;
+    background: linear-gradient(135deg, rgba(192,168,67,0.1), rgba(255,107,53,0.05));
+    border: 1px solid rgba(192,168,67,0.25); position: relative; overflow: hidden;
+    animation: fxGlowBorder 3s ease-in-out infinite;
+}
+.fx-referral::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+    background: linear-gradient(90deg, transparent, #c0a843, transparent);
+    animation: fxShine 2.5s ease-in-out infinite;
+}
+.fx-referral-title { font-size: 12px; font-weight: 800; color: #e8d282; letter-spacing: 0.5px; margin-bottom: 2px; }
+.fx-referral-sub { font-size: 9px; color: #71717a; margin-bottom: 12px; }
+.fx-referral-row { display: flex; align-items: center; gap: 12px; }
+.fx-referral-logo {
+    width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+    background: rgba(192,168,67,0.15); border: 1px solid rgba(192,168,67,0.3);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    overflow: hidden;
+}
+.fx-referral-logo img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.fx-referral-info { flex: 1; min-width: 0; }
+.fx-referral-name { font-size: 14px; font-weight: 700; color: #e8d282; }
+.fx-referral-link-text { font-size: 9px; color: #52525b; word-break: break-all; }
+.fx-referral-btn {
+    flex-shrink: 0; padding: 8px 16px; border-radius: 10px;
+    background: linear-gradient(135deg, #c0a843, #e8d282); color: #1a1508;
+    font-size: 10px; font-weight: 800; text-decoration: none; letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(192,168,67,0.3); transition: all 0.3s;
+}
+.fx-referral-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(192,168,67,0.45); }
+
+/* Crypto grid */
+.fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px; }
+.fx-card {
+    padding: 14px; border-radius: 14px; position: relative; overflow: hidden;
+    background: linear-gradient(145deg, rgba(30,41,59,0.7), rgba(15,23,42,0.9));
+    border: 1px solid rgba(245,158,11,0.12);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3); transition: all 0.3s;
+}
+.fx-card:hover { transform: translateY(-4px) scale(1.02); border-color: rgba(245,158,11,0.3); }
+.fx-card:active { transform: scale(0.97); }
+.fx-card .fx-pair { font-size: 12px; font-weight: 700; color: #f59e0b; letter-spacing: 0.5px; }
+.fx-card .fx-price { font-size: 18px; font-weight: 800; color: #fff; font-family: 'JetBrains Mono', monospace; margin: 6px 0 4px; transition: color 0.5s; }
+.fx-card .fx-price.up { color: #22c55e; }
+.fx-card .fx-price.down { color: #ef4444; }
+.fx-card .fx-change { font-size: 11px; font-weight: 700; }
+.fx-card .fx-change.up { color: #22c55e; }
+.fx-card .fx-change.down { color: #ef4444; }
+.fx-card .fx-sector { font-size: 8px; color: #52525b; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+.fx-card.fx-crypto .fx-pair { color: #f59e0b; }
+.fx-card.fx-crypto.up { border-color: rgba(34,197,94,0.45); background: linear-gradient(145deg, #042a1d, #031d14); }
+.fx-card.fx-crypto.down { border-color: rgba(239,68,68,0.45); background: linear-gradient(145deg, #2a0f14, #1c0a0e); }
+.fx-card.fx-crypto .fx-price.up { color: #22c55e; }
+.fx-card.fx-crypto .fx-price.down { color: #ef4444; }
+.fx-card.fx-us .fx-pair { color: #3b82f6; }
+.fx-card.fx-us .fx-price.up { color: #22c55e; }
+.fx-card.fx-us .fx-price.down { color: #ef4444; }
+
+/* Banner */
+.fx-topbanner { margin: 10px 12px 2px; position: relative; border-radius: 18px; overflow: hidden; }
+.fx-topbanner img {
+    width: 100%; height: auto; display: block;
+    max-height: 200px; object-fit: cover;
+}
+.fx-topbanner .fx-banner-placeholder {
+    padding: 28px 16px; font-size: 12px;
+}
+.fx-banner-wrap { margin: 16px 12px; position: relative; border-radius: 18px; overflow: hidden; }
+.fx-banner-wrap img {
+    width: 100%; height: auto; display: block;
+    max-height: 200px; object-fit: cover;
+}
+.fx-banner-placeholder {
+    width: 100%; max-height: 200px; padding: 40px 20px; text-align: center;
+    background: linear-gradient(90deg, #7c3aed, #3b82f6, #06b6d4);
+    border: none; border-radius: 18px;
+    color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* US stocks cards */
+.fx-us-list { padding: 0 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fx-card.fx-us {
+    background: linear-gradient(145deg, #031a2a, #02111d);
+    border: 1px solid rgba(59,130,246,0.15);
+}
+.fx-card.fx-us.up { border-color: rgba(34,197,94,0.45); background: linear-gradient(145deg, #042a1d, #031d14); }
+.fx-card.fx-us.down { border-color: rgba(239,68,68,0.45); background: linear-gradient(145deg, #2a0f14, #1c0a0e); }
+.fx-card.fx-us .fx-full { font-size: 8px; color: #52525b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+/* Most traded cards */
+.fx-card-3d.fx-most.up { border-color: rgba(34,197,94,0.5); }
+.fx-card-3d.fx-most.down { border-color: rgba(239,68,68,0.5); }
+
+/* Signal cards */
+.fx-card.fx-signal {
+    background: linear-gradient(145deg, rgba(30,41,59,0.7), rgba(15,23,42,0.9));
+    border: 1px solid rgba(139,92,246,0.2);
+    text-align: left;
+}
+.fx-card.fx-signal .fx-pair { color: #a78bfa; }
+.fx-card.fx-signal .fx-trending { font-size: 10px; color: #ffab00; margin-top: 4px; font-weight: 600; letter-spacing: 0.2px; animation: fxTrendPulse 1.6s ease-in-out infinite; }
+@keyframes fxTrendPulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 0 rgba(255,171,0,0); }
+    50% { opacity: 0.75; text-shadow: 0 0 10px rgba(255,171,0,0.7); }
+}
+.fx-card.fx-signal.has-trending { border-color: rgba(255,171,0,0.45); box-shadow: 0 0 16px rgba(255,171,0,0.15), inset 0 0 20px rgba(255,171,0,0.05); animation: fxCardGlow 2.2s ease-in-out infinite; }
+@keyframes fxCardGlow {
+    0%, 100% { box-shadow: 0 0 16px rgba(255,171,0,0.15), inset 0 0 20px rgba(255,171,0,0.05); }
+    50% { box-shadow: 0 0 26px rgba(255,171,0,0.35), inset 0 0 26px rgba(255,171,0,0.12); }
+}
+.fx-card.fx-signal .fx-dir {
+    display: inline-block; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 8px; margin-top: 4px;
+}
+.fx-card.fx-signal .fx-dir.buy { color: #22c55e; background: rgba(34,197,94,0.1); }
+.fx-card.fx-signal .fx-dir.sell { color: #ef4444; background: rgba(239,68,68,0.1); }
+.fx-card.fx-signal .fx-meta { font-size: 9px; color: #52525b; margin-top: 6px; line-height: 1.5; }
+.fx-card.fx-signal .fx-meta b { color: #a1a1aa; font-weight: 700; }
+
+/* ═══════ MARKET SELECTOR ═══════ */
+@keyframes mktBgShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes mktFadeUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes mktScaleIn { 0% { opacity: 0; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes mktGlowPulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.1); } }
+@keyframes mktBorderGlow { 0%,100% { border-color: rgba(255,107,53,0.15); box-shadow: 0 0 15px rgba(255,107,53,0.05); } 50% { border-color: rgba(255,107,53,0.4); box-shadow: 0 0 25px rgba(255,107,53,0.12); } }
+@keyframes mktCardPop { 0% { opacity: 0; transform: scale(0.9) translateY(20px); } 60% { opacity: 1; transform: scale(1.02) translateY(-3px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes mktBtnGlow { 0%,100% { border-color: rgba(34,197,94,0.3); box-shadow: 0 0 8px rgba(34,197,94,0.1); } 50% { border-color: rgba(34,197,94,0.7); box-shadow: 0 0 16px rgba(34,197,94,0.25); } }
+
+.market-select {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1a0f0a 0%, #0f0f1a 40%, #0a0a0f 100%);
+    z-index: 10004;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden; padding: 24px;
+}
+
+.mkt-glow {
+    position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    filter: blur(140px); pointer-events: none;
+}
+.mkt-glow.g1 { background: rgba(255,107,53,0.07); top: -300px; right: -200px; animation: mktGlowPulse 7s ease-in-out infinite; }
+.mkt-glow.g2 { background: rgba(59,130,246,0.05); bottom: -250px; left: -200px; animation: mktGlowPulse 9s ease-in-out infinite reverse; }
+
+.mkt-header {
+    text-align: center; margin-bottom: 32px; z-index: 2;
+    animation: mktFadeUp 0.6s ease-out 0.1s forwards; opacity: 0;
+}
+.mkt-header .mkt-bear {
+    font-size: 52px; display: block; margin-bottom: 2px;
+}
+.mkt-header .mkt-brand {
+    font-size: 22px; font-weight: 900; letter-spacing: 5px;
+    background: linear-gradient(135deg, #ff6b35, #ffaa70);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.mkt-header .mkt-by {
+    font-size: 9px; color: #52525b; letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 500; margin-top: 2px;
+}
+
+.mkt-title {
+    font-size: 20px; font-weight: 800; letter-spacing: 2px; text-align: center; color: #e4e4e7;
+    animation: mktFadeUp 0.5s ease-out 0.25s forwards; opacity: 0; z-index: 2; line-height: 1.3; margin-bottom: 4px;
+}
+.mkt-sub {
+    font-size: 11px; color: #52525b; letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 500; text-align: center; margin-bottom: 32px;
+    animation: mktFadeUp 0.5s ease-out 0.35s forwards; opacity: 0; z-index: 2;
+}
+
+.mkt-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 380px; z-index: 2; }
+.mkt-card {
+    display: flex; align-items: center; gap: 18px;
+    padding: 20px 22px; border-radius: 18px; cursor: pointer;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: mktCardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0;
+    text-align: left; position: relative; overflow: hidden;
+}
+.mkt-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,107,53,0.03), transparent);
+    opacity: 0; transition: opacity 0.4s;
+}
+.mkt-card:nth-child(1) { animation-delay: 0.3s; }
+.mkt-card:nth-child(2) { animation-delay: 0.5s; }
+.mkt-card:active { transform: scale(0.97); }
+.mkt-card-ico {
+    width: 54px; height: 54px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; flex-shrink: 0; position: relative;
+}
+.mkt-card-ico.ico-india { background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,60,60,0.08)); }
+.mkt-card-ico.ico-forex { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(16,185,129,0.08)); }
+.mkt-card-ico::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.06); pointer-events: none;
+}
+.mkt-card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.mkt-card-name { font-size: 15px; font-weight: 800; color: #e4e4e7; letter-spacing: 0.5px; margin-bottom: 1px; }
+.mkt-card-desc { font-size: 10px; color: #52525b; letter-spacing: 0.3px; }
+.mkt-card-price { font-size: 10px; font-weight: 600; margin-top: 2px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px; }
+.mkt-card-price.green { color: #22c55e; }
+.mkt-card-price.red { color: #ef4444; }
+.mkt-card-status {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; width: fit-content; margin-top: 3px;
+}
+.mkt-card-status.live { background: rgba(34,197,94,0.12); color: #22c55e; }
+.mkt-card-status.closed { background: rgba(239,68,68,0.12); color: #ef4444; }
+.mkt-card-arrow {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff; transition: all 0.35s;
+    border: 1.5px solid rgba(34,197,94,0.4);
+    animation: mktBtnGlow 2s ease-in-out infinite;
+    align-self: center;
+}
+.mkt-card:hover {
+    background: rgba(255,255,255,0.04); border-color: rgba(255,107,53,0.25);
+    transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,53,0.08);
+}
+.mkt-card:hover::before { opacity: 1; }
+.mkt-card:hover .mkt-card-arrow {
+    background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.6);
+    color: #fff; transform: translateX(3px);
+}
+
+.mkt-card.locked { opacity: 0.45; cursor: not-allowed; }
+.mkt-card.locked:hover { transform: none; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); box-shadow: none; }
+.mkt-card.locked::before { display: none; }
+.mkt-card.locked .mkt-card-arrow {
+    background: transparent; border-color: rgba(255,255,255,0.06); color: #52525b; transform: none;
+    animation: none; content: '🔒';
+}
+.mkt-card.locked:hover .mkt-card-arrow { background: transparent; border-color: rgba(255,255,255,0.06); color: #f59e0b; animation: none; }
+.mkt-lock-msg { font-size: 9px; color: #f59e0b; font-weight: 600; margin-top: 2px; letter-spacing: 0.3px; }
+
+
+
 /* ═══════ LOGIN SCREEN ═══════ */
 @keyframes loginBgPulse {
     0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -364,7 +669,9 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 .login-screen::before {
     content: '';
@@ -534,15 +841,31 @@ header {
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     box-shadow: 0 2px 20px #ff6b3510;
+    position: relative;
 }
 
+.hdr-mkt-switch {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 14px; border-radius: 20px; cursor: pointer;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; transition: all 0.3s;
+    animation: mktBorderGlow 2.5s ease-in-out infinite;
+    margin-top: 3px; width: fit-content;
+}
+.hdr-mkt-switch:hover { background: rgba(255,255,255,0.08); border-color: #ff6b3588; color: #ff6b35; animation: none; }
+.hdr-mkt-switch:active { transform: scale(0.96); }
+.hdr-mkt-switch .mkt-sw-arr { font-size: 12px; transition: transform 0.3s; }
+.hdr-mkt-switch:hover .mkt-sw-arr { transform: translateX(3px); }
+
 .hdr-left { display: flex; align-items: center; gap: 12px; }
+.hdr-left .hdr-text { display:flex; flex-direction:column; line-height:1.1; justify-content:center; }
 .logo-box {
-    width: 60px; height: 60px; border-radius: 16px;
+    width: 52px; height: 52px; border-radius: 14px;
     background: linear-gradient(135deg, #1a1a2e, #2a1a1a);
     border: 1px solid #ff6b3566;
     display: flex; align-items: center; justify-content: center;
-    font-size: 34px; box-shadow: 0 0 10px #ff6b3520;
+    font-size: 30px; box-shadow: 0 0 10px #ff6b3520;
 }
 
 .hdr-center { text-align: center; }
@@ -1169,6 +1492,21 @@ header {
 }
 
 .admin-panel .admin-layout { display: flex; height: 100vh; }
+.admin-hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--aborder);
+    border-radius: 8px;
+    background: var(--acard);
+    color: var(--atext);
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.admin-nav-overlay { display: none; }
 .admin-sidebar-nav {
     width: 260px;
     background: var(--acard);
@@ -1263,6 +1601,23 @@ header {
 .admin-card:hover { border-color: rgba(245, 158, 11, 0.3); }
 .admin-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .admin-card-title { font-size: 13px; font-weight: 600; color: #fff; }
+
+/* Forex management cards row */
+.admin-fx-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px;
+}
+.admin-fx-tile {
+    background: linear-gradient(145deg, rgba(16,185,129,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 16px 12px;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.admin-fx-tile:hover { border-color: rgba(16,185,129,0.6); transform: translateY(-3px); background: linear-gradient(145deg, rgba(16,185,129,0.15), rgba(255,255,255,0.03)); }
+.admin-fx-tile-icon { font-size: 22px; margin-bottom: 6px; }
+.admin-fx-tile-label { font-size: 11px; font-weight: 600; color: #e4e4e7; }
+.admin-fx-panel { display: none; border: 1px solid var(--aborder); border-radius: 12px; padding: 16px; margin-bottom: 14px; background: rgba(255,255,255,0.02); }
+.admin-fx-panel.open { display: block; }
+.admin-fx-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; padding: 5px 10px; font-size: 11px; color: #e4e4e7; margin: 4px; }
+.admin-fx-chip button { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 13px; line-height: 1; padding: 0 2px; }
 
 /* Admin Stats Grid - 5 cols */
 .admin-stats-grid {
@@ -1956,10 +2311,10 @@ header {
 @media (max-width: 768px) {
     .dash-overview { grid-template-columns: repeat(2, 1fr); }
     .dash-row-2 { grid-template-columns: 1fr; }
-    #dashIndicesGrid { grid-template-columns: repeat(2, 1fr) !important; }
+    #dashIndicesGrid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 @media (max-width: 480px) {
-    #dashIndicesGrid { grid-template-columns: 1fr !important; }
+    #dashIndicesGrid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* ═══════ NOTIFICATION PANEL MOBILE ═══════ */
@@ -2005,6 +2360,8 @@ header {
     }
     .hdr-left { justify-content: center; }
     .logo-box { width: 36px; height: 36px; font-size: 20px; border-radius: 8px; }
+    .hdr-left .brand-name { font-size: 12px; letter-spacing: 1.5px; }
+    .hdr-left .brand-sub { font-size: 7px; letter-spacing: 1.5px; }
     .hdr-center { text-align: center; }
     .brand-name { font-size: 13px; letter-spacing: 2px; }
     .brand-sub { font-size: 8px; letter-spacing: 2px; }
@@ -2018,6 +2375,8 @@ header {
     .sub-badge { font-size: 8px; padding: 1px 5px; }
     #clock { font-size: 12px; }
     .market-status { font-size: 9px; padding: 2px 6px; }
+    .hdr-mkt-switch { font-size: 9px; padding: 3px 10px; margin-top: 2px; }
+    .hdr-mkt-switch .mkt-sw-arr { font-size: 10px; }
     #countdown { font-size: 9px; }
     .icon-nav-bar { padding: 5px 4px; gap: 2px; }
     .icon-nav-item { height: 32px; gap: 3px; }
@@ -2026,6 +2385,8 @@ header {
     .icon-nav-label { font-size: 9px; }
 
     /* LOGIN */
+    .login-screen { align-items: flex-start; justify-content: center; padding-top: 12vh; }
+    .login-screen:not(.kb-open) { align-items: center; justify-content: center; padding-top: 0; }
     .login-box {
         width: calc(100% - 32px);
         padding: 28px 20px;
@@ -2133,7 +2494,11 @@ header {
     .dash-stat-card .d-label { font-size: 8px; }
 
     /* ADMIN PANEL MOBILE - FULL RESPONSIVE */
-    .admin-sidebar-nav { width: 0; padding: 0; overflow: hidden; }
+    .admin-sidebar-nav { width: 280px; max-width: 80vw; transform: translateX(-100%); transition: transform 0.25s ease; position: fixed; top: 0; left: 0; height: 100vh; z-index: 10020; box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+    .admin-sidebar-nav.open { transform: translateX(0); }
+    .admin-nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10015; display: none; }
+    .admin-nav-overlay.open { display: block; }
+    .admin-hamburger { display: flex !important; }
     .admin-main-area { margin-left: 0; padding: 12px; }
     .admin-main-grid { flex-direction: column; }
     .admin-right-sidebar { width: 100%; }
@@ -2648,6 +3013,17 @@ input[type="color"] {
 @media (max-width: 600px) {
     .admin-theme-panel { width: 240px; right: 10px; bottom: 64px; }
     .admin-theme-btn { width: 38px; height: 38px; font-size: 15px; bottom: 14px; right: 14px; }
+    .fx-grid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 8px; }
+    .fx-card { padding: 10px; }
+    .fx-card .fx-price { font-size: 15px; }
+    .fx-currency-row { padding: 4px 8px 14px; gap: 8px; }
+    .fx-card-3d { min-width: 130px; padding: 12px 10px; }
+    .fx-card-3d .fx-price { font-size: 17px; }
+    .fx-referral { margin: 4px 8px; padding: 14px 12px; }
+    .fx-referral-btn { padding: 7px 12px; font-size: 9px; }
+    .fx-banner-wrap { margin: 12px 8px; }
+    .fx-us-list { padding: 0 8px; gap: 6px; }
+    .fx-card.fx-us .fx-full { font-size: 7px; }
 }
 
 /* ═══════ RESPONSIVE ═══════ */
@@ -2677,6 +3053,41 @@ input[type="color"] {
     <button class="splash-go-btn" onclick="closeSplash()">GO →</button>
 </div>
 
+<!-- ═══════ MARKET SELECTOR ═══════ -->
+<div class="market-select" id="marketSelect">
+    <div class="mkt-glow g1"></div>
+    <div class="mkt-glow g2"></div>
+    <div class="mkt-header">
+        <span class="mkt-bear">🐻</span>
+        <div class="mkt-brand">BEAR FIGHTER</div>
+        <div class="mkt-by">By Vaibhav</div>
+    </div>
+    <div class="mkt-title">Select Your Market</div>
+    <div class="mkt-sub">Choose a trading market to explore</div>
+    <div class="mkt-stack">
+        <div class="mkt-card" onclick="selectMarket('india')">
+            <div class="mkt-card-ico ico-india">🇮🇳</div>
+            <div class="mkt-card-info">
+                <div class="mkt-card-name">Indian Market</div>
+                <div class="mkt-card-desc">NSE • BSE • F&O</div>
+                <div class="mkt-card-price green" id="mktIndiaPrice">Nifty 24,850.50</div>
+                <div class="mkt-card-status live" id="mktIndiaStatus">Market Off</div>
+            </div>
+            <div class="mkt-card-arrow">→</div>
+        </div>
+        <div class="mkt-card" id="mktForexCard" onclick="selectMarket('forex')">
+            <div class="mkt-card-ico ico-forex">💱</div>
+            <div class="mkt-card-info">
+                <div class="mkt-card-name">Forex Market</div>
+                <div class="mkt-card-desc" id="mktForexDesc">Currency • BTC • US Stocks</div>
+                <div class="mkt-card-price green" id="mktForexPrice">BTC 67,540</div>
+                <div class="mkt-card-status" id="mktForexStatus">Market Off</div>
+            </div>
+            <div class="mkt-card-arrow" id="mktForexArrow">→</div>
+        </div>
+    </div>
+</div>
+
 <!-- ═══════ LOGIN SCREEN ═══════ -->
 <div class="login-screen" id="loginScreen" style="display:none;">
     <div class="login-box">
@@ -2686,11 +3097,11 @@ input[type="color"] {
         
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 14px;transition:all 0.3s ease;" onfocusin="this.style.borderColor='var(--accent)';this.style.animation='inputFocusGlow 2s ease-in-out infinite'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.animation='none'">
             <span style="font-size:16px;opacity:0.5;flex-shrink:0;line-height:1;">👤</span>
-            <input type="text" id="username" placeholder="Username" autocomplete="off" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
+            <input type="text" id="username" placeholder="Username" autocomplete="off" onfocus="handleLoginFocus()" onblur="handleLoginBlur()" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 14px;transition:all 0.3s ease;" onfocusin="this.style.borderColor='var(--accent)';this.style.animation='inputFocusGlow 2s ease-in-out infinite'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.animation='none'">
             <span style="font-size:16px;opacity:0.5;flex-shrink:0;line-height:1;">🔒</span>
-            <input type="password" id="password" placeholder="Password" autocomplete="off" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
+            <input type="password" id="password" placeholder="Password" autocomplete="off" onfocus="handleLoginFocus()" onblur="handleLoginBlur()" style="background:none;border:none;color:white;font-size:14px;outline:none;padding:14px 0;width:100%;font-family:'Inter',sans-serif;text-align:left;">
         </div>
         
         <button onclick="doLogin()" id="loginBtn">LOGIN</button>
@@ -2781,6 +3192,10 @@ input[type="color"] {
       <div class="admin-nav-item" onclick="showAdminSection('heatmapStocks', this)">📊 Heatmap Stocks</div>
     </div>
     <div class="admin-nav-section">
+      <div class="admin-nav-label">Forex</div>
+      <div class="admin-nav-item" onclick="showAdminSection('forex', this)">💱 Forex</div>
+    </div>
+    <div class="admin-nav-section">
       <div class="admin-nav-label">Analytics</div>
       <div class="admin-nav-item" onclick="showAdminSection('tipPerf', this)">🎯 Tip Performance</div>
     </div>
@@ -2796,6 +3211,9 @@ input[type="color"] {
     <div class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</div>
   </div>
 
+  <!-- Mobile nav overlay -->
+  <div class="admin-nav-overlay" id="adminNavOverlay" onclick="toggleAdminNav()"></div>
+
   <!-- Main Content Area -->
   <div class="admin-main-area">
     <div class="admin-main-grid">
@@ -2803,7 +3221,7 @@ input[type="color"] {
 
         <!-- Top Bar -->
         <div class="admin-top-bar">
-          <h1>Dashboard Overview</h1>
+          <h1 style="display:flex;align-items:center;gap:10px;"><button class="admin-hamburger" onclick="toggleAdminNav()" style="font-size:20px;">☰</button><span>Dashboard Overview</span></h1>
           <div class="admin-top-bar-actions" style="position:relative;">
             <div style="position:relative;">
               <input type="text" id="searchUser" placeholder="🔍 Search functions, users..." class="admin-form-input" style="width:240px;" oninput="handleGlobalSearch(this.value)" onfocus="handleGlobalSearch(this.value)" autocomplete="off">
@@ -2821,7 +3239,7 @@ input[type="color"] {
             <div class="admin-card-title">⬡ Live Indices</div>
             <div id="dashIndicesStatus" style="font-size:10px;color:#71717a;"></div>
           </div>
-          <div id="dashIndicesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;">
+          <div id="dashIndicesGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;justify-items:center;">
             <div style="color:#71717a;font-size:11px;text-align:center;padding:12px;grid-column:1/-1;">Loading...</div>
           </div>
         </div>
@@ -2993,7 +3411,8 @@ input[type="color"] {
               <div><span style="color:#f59e0b;">🖥️ Device:</span> <span id="infoDevice" style="color:#e4e4e7;"></span></div>
               <div><span style="color:#f59e0b;">📡 Platform:</span> <span id="infoPlatform" style="color:#e4e4e7;"></span></div>
               <div style="grid-column:1/2;"><span style="color:#f59e0b;">📍 Location:</span> <span id="infoLocation" style="color:#e4e4e7;"></span></div>
-              <div style="grid-column:1/2;"><span style="color:#f59e0b;">✅ Verified:</span> <span id="infoVerified" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">✅ Verified:</span> <span id="infoVerified" style="color:#e4e4e7;"></span></div>
+              <div><span style="color:#f59e0b;">💱 Forex:</span> <span id="infoForex" style="color:#e4e4e7;"></span></div>
             </div>
             <button onclick="toggleEditForm()" class="admin-btn admin-btn-primary" style="width:100%;margin-top:12px;padding:8px;">✏️ Edit This User</button>
           </div>
@@ -3493,6 +3912,167 @@ input[type="color"] {
             <div id="apiKeyStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
         </div>
+
+        <!-- ═══ FOREX HUB SECTION ═══ -->
+      <div id="section-forex" style="display:none;">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">💱 Forex Management</div>
+            </div>
+            <div style="font-size:11px;color:#888;margin-bottom:14px;">Neeche kisi bhi card par click karo, uska panel khul jayega.</div>
+            <div class="admin-fx-grid">
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelPairs')">
+                    <div class="admin-fx-tile-icon">💱</div>
+                    <div class="admin-fx-tile-label">Currency Pairs</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelMost')">
+                    <div class="admin-fx-tile-icon">🔥</div>
+                    <div class="admin-fx-tile-label">Most Traded</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelCrypto')">
+                    <div class="admin-fx-tile-icon">🪙</div>
+                    <div class="admin-fx-tile-label">Crypto</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelGlobal')">
+                    <div class="admin-fx-tile-icon">🌍</div>
+                    <div class="admin-fx-tile-label">Global Indices</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelAsian')">
+                    <div class="admin-fx-tile-icon">🌏</div>
+                    <div class="admin-fx-tile-label">Asian Indices</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelBroadcast')">
+                    <div class="admin-fx-tile-icon">📢</div>
+                    <div class="admin-fx-tile-label">Forex Broadcast</div>
+                </div>
+                <div class="admin-fx-tile" onclick="toggleForexPanel('fxPanelReferral')">
+                    <div class="admin-fx-tile-icon">🤝</div>
+                    <div class="admin-fx-tile-label">Referral & Banner</div>
+                </div>
+            </div>
+
+            <div id="fxPanelPairs" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">💱 Currency Pairs</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Simbol dalo jaise <b>EUR/USD</b>, <b>GBP/USD</b>. Enter dabao add karne ke liye.</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="fxNewPair" class="admin-form-input" placeholder="EUR/USD" style="flex:1;" onkeydown="if(event.key==='Enter')addForexItem('pairs','fxNewPair')">
+                    <button class="admin-btn admin-btn-primary" onclick="addForexItem('pairs','fxNewPair')">➕ Add</button>
+                </div>
+                <div id="fxPairsList" style="margin-bottom:12px;">Loading...</div>
+                <button class="admin-btn admin-btn-primary" onclick="saveFxList('pairs')" style="width:100%;">💾 Save Currency Pairs</button>
+                <div id="fxPairsStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelMost" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">🔥 Most Traded</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Simbol dalo jaise <b>XAU/USD</b>, <b>XAG/USD</b>, <b>USOIL</b>.</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="fxNewMost" class="admin-form-input" placeholder="XAU/USD" style="flex:1;" onkeydown="if(event.key==='Enter')addForexItem('most','fxNewMost')">
+                    <button class="admin-btn admin-btn-primary" onclick="addForexItem('most','fxNewMost')">➕ Add</button>
+                </div>
+                <div id="fxMostList" style="margin-bottom:12px;">Loading...</div>
+                <button class="admin-btn admin-btn-primary" onclick="saveFxList('most')" style="width:100%;">💾 Save Most Traded</button>
+                <div id="fxMostStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelCrypto" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">🪙 Crypto</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Simbol dalo jaise <b>BTC/USD</b>, <b>ETH/USD</b>, <b>USDT</b>.</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="fxNewCrypto" class="admin-form-input" placeholder="BTC/USD" style="flex:1;" onkeydown="if(event.key==='Enter')addForexItem('cryptos','fxNewCrypto')">
+                    <button class="admin-btn admin-btn-primary" onclick="addForexItem('cryptos','fxNewCrypto')">➕ Add</button>
+                </div>
+                <div id="fxCryptoList" style="margin-bottom:12px;">Loading...</div>
+                <button class="admin-btn admin-btn-primary" onclick="saveFxList('cryptos')" style="width:100%;">💾 Save Crypto</button>
+                <div id="fxCryptoStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelGlobal" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">🌍 Global Indices</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Simbol dalo jaise <b>S&P 500</b>, <b>NASDAQ</b>, <b>DAX 40</b>.</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="fxNewGlobal" class="admin-form-input" placeholder="S&P 500" style="flex:1;" onkeydown="if(event.key==='Enter')addForexItem('global','fxNewGlobal')">
+                    <button class="admin-btn admin-btn-primary" onclick="addForexItem('global','fxNewGlobal')">➕ Add</button>
+                </div>
+                <div id="fxGlobalList" style="margin-bottom:12px;">Loading...</div>
+                <button class="admin-btn admin-btn-primary" onclick="saveFxList('global')" style="width:100%;">💾 Save Global Indices</button>
+                <div id="fxGlobalStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelAsian" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">🌏 Asian Indices</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Simbol dalo jaise <b>NIFTY 50</b>, <b>SENSEX</b>, <b>NIKKEI 225</b>.</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="fxNewAsian" class="admin-form-input" placeholder="NIFTY 50" style="flex:1;" onkeydown="if(event.key==='Enter')addForexItem('asian','fxNewAsian')">
+                    <button class="admin-btn admin-btn-primary" onclick="addForexItem('asian','fxNewAsian')">➕ Add</button>
+                </div>
+                <div id="fxAdminAsianList" style="margin-bottom:12px;">Loading...</div>
+                <button class="admin-btn admin-btn-primary" onclick="saveFxList('asian')" style="width:100%;">💾 Save Asian Indices</button>
+                <div id="fxAsianStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelBroadcast" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">📢 Forex Broadcast</div>
+                <div style="font-size:11px;color:#888;margin-bottom:10px;">Ye India market broadcast se <b>alag</b> hai — sirf Forex page par dikhega.</div>
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <input type="text" id="fxBroadcastSearch" class="admin-form-input" placeholder="Search username..." style="flex:1;" oninput="renderForexBroadcastUsers(this.value)">
+                    <button class="admin-btn admin-btn-secondary" onclick="selectAllForexBcastUsers(true)">All</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="selectAllForexBcastUsers(false)">None</button>
+                </div>
+                <div id="forexBcastUsers" style="max-height:200px;overflow-y:auto;border:1px solid var(--aborder);border-radius:8px;padding:8px;margin-bottom:12px;">Loading...</div>
+                <label class="admin-form-label">✉️ Message</label>
+                <textarea id="forexBcastMessage" class="admin-form-input" rows="3" placeholder="Aaj ka forex signal... 🔥" style="resize:vertical;"></textarea>
+                <label class="admin-form-label">🎨 Message Color</label>
+                <input type="color" id="forexBcastColor" value="#ffb100" style="width:50px;height:36px;border:none;background:none;cursor:pointer;margin-bottom:8px;">
+                <div style="display:flex;gap:8px;margin-top:4px;">
+                    <button class="admin-btn admin-btn-primary" onclick="sendForexBcast()" style="flex:1;">📤 Send</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="clearForexBcast()">🧹 Clear Selected</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="clearAllForexBcast()">🧹 Clear All</button>
+                </div>
+                <div id="forexBcastStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+
+            <div id="fxPanelReferral" class="admin-fx-panel">
+                <div class="admin-card-title" style="margin-bottom:10px;">🤝 Referral & Banner</div>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#e4e4e7;margin-bottom:8px;">
+                    <input type="checkbox" id="settingsForexShowTopBanner" style="accent-color:#f59e0b;width:16px;height:16px;"> 🏠 Top Banner dikhayein (page ke uppar)
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#e4e4e7;margin-bottom:12px;">
+                    <input type="checkbox" id="settingsForexShowBanner" style="accent-color:#f59e0b;width:16px;height:16px;"> 📢 Middle Banner dikhayein
+                </label>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🤝 Referral Broker Name</label>
+                    <input type="text" id="settingsForexReferralName" class="admin-form-input" placeholder="e.g. Exness, OctaFX, Binance">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🔗 Referral Link</label>
+                    <input type="text" id="settingsForexReferralLink" class="admin-form-input" placeholder="https://partner.exness.com/...">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🖼️ Referral Logo URL</label>
+                    <input type="text" id="settingsForexReferralLogo" class="admin-form-input" placeholder="https://...logo.png">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">📢 Banner Image URL</label>
+                    <input type="text" id="settingsForexBannerImage" class="admin-form-input" placeholder="https://...banner.png (800x200 recommended)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🔗 Banner Click Link</label>
+                    <input type="text" id="settingsForexBannerLink" class="admin-form-input" placeholder="https://...">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🏠 Top Banner Image (page ke uppar, 800×200)</label>
+                    <input type="text" id="settingsForexTopBannerImage" class="admin-form-input" placeholder="https://...banner.png">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">🔗 Top Banner Click Link</label>
+                    <input type="text" id="settingsForexTopBannerLink" class="admin-form-input" placeholder="https://...">
+                </div>
+                <button class="admin-btn admin-btn-primary" onclick="saveForexSettings()" style="width:100%;">💾 Save Referral & Banner</button>
+                <div id="forexSettingsStatus2" style="font-size:11px;margin-top:8px;text-align:center;"></div>
+            </div>
+        </div>
+      </div>
 
       <!-- ═══ HEATMAP STOCKS SECTION ═══ -->
       <div id="section-heatmapStocks" style="display:none;">
@@ -4181,7 +4761,7 @@ input[type="color"] {
       <div class="admin-right-sidebar">
 
         <!-- Stock Tips -->
-        <div class="admin-card">
+        <div class="admin-card" id="adminStockTipsCard">
           <div class="admin-card-header">
             <div class="admin-card-title">📊 Stock Tips</div>
           </div>
@@ -4223,6 +4803,44 @@ input[type="color"] {
           </div>
           <button class="admin-btn admin-btn-primary" onclick="addStockTip()" style="width:100%;">➕ Add Tip</button>
           <div id="stockTipsList" style="margin-top:12px;max-height:200px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- Forex Signals -->
+        <div class="admin-card" id="adminForexSignalsCard" style="display:none;">
+          <div class="admin-card-header">
+            <div class="admin-card-title">📡 Forex Signals</div>
+          </div>
+          <div class="admin-tip-type-btns" id="fxSigTypeBtns">
+            <button class="admin-tip-type-btn buy selected" onclick="setFxSignalDir('buy',this)">BUY</button>
+            <button class="admin-tip-type-btn sell" onclick="setFxSignalDir('sell',this)">SELL</button>
+          </div>
+          <div class="admin-form-group" style="margin-bottom:10px;">
+            <input type="text" id="fxSignalPair" class="admin-form-input" placeholder="PAIR (e.g. GBP/USD)" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
+          </div>
+          <div class="admin-form-row">
+            <div class="admin-form-group" style="margin-bottom:0;">
+              <label class="admin-form-label">Entry Price</label>
+              <input type="text" id="fxSignalEntry" class="admin-form-input" placeholder="1.2645">
+            </div>
+            <div class="admin-form-group" style="margin-bottom:0;">
+              <label class="admin-form-label">Target</label>
+              <input type="text" id="fxSignalTp" class="admin-form-input" placeholder="1.2685">
+            </div>
+          </div>
+          <div class="admin-form-group" style="margin-bottom:10px;">
+            <label class="admin-form-label">Stop Loss</label>
+            <input type="text" id="fxSignalSl" class="admin-form-input" placeholder="1.2605">
+          </div>
+          <div class="admin-form-group" style="margin-bottom:10px;">
+            <label class="admin-form-label">Trending (Optional)</label>
+            <input type="text" id="fxSignalTrending" class="admin-form-input" placeholder="e.g. 🔥 Trending Buy Signal / Market Breakout">
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#22c55e;cursor:pointer;margin-bottom:8px;">
+            <input type="checkbox" id="fxSignalBroadcast" style="accent-color:#22c55e;"> 📢 Broadcast to all Forex users
+          </label>
+          <button class="admin-btn admin-btn-primary" onclick="addForexSignal()" style="width:100%;">➕ Add Signal</button>
+          <div id="fxSignalList" style="margin-top:12px;max-height:200px;overflow-y:auto;"></div>
+          <div id="fxSignalStatus" style="font-size:11px;margin-top:8px;text-align:center;"></div>
         </div>
 
       </div><!-- /admin-right-sidebar -->
@@ -4270,55 +4888,62 @@ input[type="color"] {
   </div>
 </div>
 
-<!-- ═══════ DASHBOARD ═══════ -->
+<!-- ═══════ SHARED HEADER ═══════ -->
+<div id="sharedHeader" style="display:none;">
+<header>
+    <div class="hdr-left">
+        <div class="logo-box">🐻</div>
+        <div class="hdr-text">
+            <div class="brand-name">BEAR FIGHTER</div>
+            <div class="brand-sub">BY VAIBHAV</div>
+        </div>
+    </div>
+    <div class="hdr-center">
+        <div id="headerHighlightBadge" style="display: none; margin-top: 4px; padding: 2px 8px; background: linear-gradient(135deg, #1a1a2e, #2a1a1a); border: 1px solid #ff6b3566; border-radius: 6px; font-size: 8px; font-weight: 700; color: #ff6b35; letter-spacing: 1.5px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 0 8px #ff6b3520;">⭐ PREMIUM</div>
+    </div>
+    <div class="hdr-right">
+        <div class="hdr-mkt-switch" id="hdrMktSwitch" onclick="showMarketSelect()" style="display:none;">
+            <span id="hdrMktLabel">Switch Market</span>
+            <span class="mkt-sw-arr">↔</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span class="market-status" id="mkt-badge">--</span>
+        </div>
+        <div class="user-info">
+            <span><img id="headerProfilePic" src="" style="display:none;width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #c0a843;vertical-align:middle;margin-right:2px;" onerror="this.style.display='none';document.getElementById('headerUserEmoji').style.display='inline';"><span id="headerUserEmoji">👤</span> <strong id="displayUsername">user</strong><span id="headerBlueTick" style="display:none;color:#22c55e;font-size:13px;vertical-align:middle;" title="Verified Account">✅</span></span>
+            <span class="sub-badge" id="subBadge">30d left</span>
+        </div>
+        <span id="countdown"></span>
+        <button id="installPwaBtn" style="display:none;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;align-items:center;gap:4px;" onclick="installPwa()">📲 App</button>
+    </div>
+</header>
+
+<!-- ═══════ SHARED NAV ═══════ -->
+<div class="icon-nav-bar" id="iconNavBar">
+    <div class="icon-nav-item" onclick="showUserProfile()" title="Profile"><img src="/icons/profile.png" class="icon-nav-img" alt="Profile"><span class="icon-nav-label">Profile</span></div>
+    <div class="icon-nav-item" onclick="openClassesPage()" title="Classes"><img src="/icons/class.png" class="icon-nav-img" alt="Class"><span class="icon-nav-label">Class</span></div>
+    <div class="icon-nav-item" onclick="openSelfRenewal()" title="Renew"><img src="/icons/renew.png" class="icon-nav-img" alt="Renew"><span class="icon-nav-label">Renew</span></div>
+    <div class="icon-nav-item" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram"><img src="/icons/telegram.png" class="icon-nav-img" alt="Telegram"><span class="icon-nav-label">Telegram</span></div>
+    <div class="icon-nav-item" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp"><img src="/icons/whatsapp.png" class="icon-nav-img" alt="WhatsApp"><span class="icon-nav-label">WhatsApp</span></div>
+    <div class="icon-nav-item" onclick="toggleNotifPanel()" title="Notifications" style="position:relative;"><span class="icon-nav-emoji">🔔<span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-6px;background:#ef4444;color:#fff;font-size:7px;font-weight:700;min-width:13px;height:13px;border-radius:7px;align-items:center;justify-content:center;padding:0 2px;line-height:13px;">0</span></span><span class="icon-nav-label">Alerts</span></div>
+    <div class="icon-nav-item icon-nav-logout" onclick="doLogout()" title="Logout"><img src="/icons/logout.png" class="icon-nav-img" alt="Logout"><span class="icon-nav-label">Logout</span></div>
+</div>
+
+<!-- ═══════ SHARED NOTIF ═══════ -->
+<div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+        <div class="notif-panel-title">🔔 Notifications</div>
+        <div class="notif-panel-clear" onclick="clearAllNotifs()">Clear All</div>
+    </div>
+    <div class="notif-panel-body" id="notifPanelBody">
+        <div class="notif-empty">No notifications</div>
+    </div>
+</div>
+
+</div>
+
+<!-- ═══════ INDIA DASHBOARD ═══════ -->
 <div class="app-container" id="appContainer">
-    
-    <!-- HEADER -->
-    <header>
-        <div class="hdr-left">
-            <div class="logo-box">🐻</div>
-            <div style="display:flex;flex-direction:column;line-height:1.1;">
-                <div class="brand-name">BEAR FIGHTER</div>
-                <div class="brand-sub">BY VAIBHAV</div>
-            </div>
-        </div>
-        <div class="hdr-center">
-            <div id="headerHighlightBadge" style="display: none; margin-top: 4px; padding: 2px 8px; background: linear-gradient(135deg, #1a1a2e, #2a1a1a); border: 1px solid #ff6b3566; border-radius: 6px; font-size: 8px; font-weight: 700; color: #ff6b35; letter-spacing: 1.5px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 0 8px #ff6b3520;">⭐ PREMIUM</div>
-        </div>
-        <div class="hdr-right">
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span class="market-status" id="mkt-badge">--</span>
-            </div>
-            <div class="user-info">
-                <span><img id="headerProfilePic" src="" style="display:none;width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #c0a843;vertical-align:middle;margin-right:2px;" onerror="this.style.display='none';document.getElementById('headerUserEmoji').style.display='inline';"><span id="headerUserEmoji">👤</span> <strong id="displayUsername">user</strong><span id="headerBlueTick" style="display:none;color:#22c55e;font-size:13px;vertical-align:middle;" title="Verified Account">✅</span></span>
-                <span class="sub-badge" id="subBadge">30d left</span>
-            </div>
-            <span id="countdown"></span>
-            <button id="installPwaBtn" style="display:none;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;align-items:center;gap:4px;" onclick="installPwa()">📲 App</button>
-        </div>
-    </header>
-
-    <!-- ICON NAV BAR -->
-    <div class="icon-nav-bar" id="iconNavBar">
-        <div class="icon-nav-item" onclick="showUserProfile()" title="Profile"><img src="/icons/profile.png" class="icon-nav-img" alt="Profile"><span class="icon-nav-label">Profile</span></div>
-        <div class="icon-nav-item" onclick="openClassesPage()" title="Classes"><img src="/icons/class.png" class="icon-nav-img" alt="Class"><span class="icon-nav-label">Class</span></div>
-        <div class="icon-nav-item" onclick="openSelfRenewal()" title="Renew"><img src="/icons/renew.png" class="icon-nav-img" alt="Renew"><span class="icon-nav-label">Renew</span></div>
-        <div class="icon-nav-item" id="hdrTelegram" onclick="openHeaderLink('telegram')" title="Telegram"><img src="/icons/telegram.png" class="icon-nav-img" alt="Telegram"><span class="icon-nav-label">Telegram</span></div>
-        <div class="icon-nav-item" id="hdrWhatsApp" onclick="openHeaderLink('whatsapp')" title="WhatsApp"><img src="/icons/whatsapp.png" class="icon-nav-img" alt="WhatsApp"><span class="icon-nav-label">WhatsApp</span></div>
-        <div class="icon-nav-item" onclick="toggleNotifPanel()" title="Notifications" style="position:relative;"><span class="icon-nav-emoji">🔔<span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-6px;background:#ef4444;color:#fff;font-size:7px;font-weight:700;min-width:13px;height:13px;border-radius:7px;align-items:center;justify-content:center;padding:0 2px;line-height:13px;">0</span></span><span class="icon-nav-label">Alerts</span></div>
-        <div class="icon-nav-item icon-nav-logout" onclick="doLogout()" title="Logout"><img src="/icons/logout.png" class="icon-nav-img" alt="Logout"><span class="icon-nav-label">Logout</span></div>
-    </div>
-
-    <!-- NOTIFICATION PANEL -->
-    <div class="notif-panel" id="notifPanel">
-        <div class="notif-panel-header">
-            <div class="notif-panel-title">🔔 Notifications</div>
-            <div class="notif-panel-clear" onclick="clearAllNotifs()">Clear All</div>
-        </div>
-        <div class="notif-panel-body" id="notifPanelBody">
-            <div class="notif-empty">No notifications</div>
-        </div>
-    </div>
 
     <!-- DISCLAIMER -->
     <div class="disclaimer-ticker" id="disclaimerTicker">
@@ -4459,6 +5084,93 @@ input[type="color"] {
     </div>
 </div>
 
+
+    <!-- ═══════ FOREX CONTAINER ═══════ -->
+    <div class="forex-container" id="forexContainer">
+        <!-- FOREX BROADCAST BANNER -->
+        <div id="fxMessageBanner" style="display:none;margin:8px 12px;padding:14px 16px;border-radius:14px;background:rgba(255,177,0,0.15);border:1px solid rgba(255,177,0,0.4);position:relative;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:18px;">📢</span>
+                <div style="flex:1;">
+                    <div style="font-size:9px;font-weight:700;color:#ffb100;letter-spacing:1px;margin-bottom:2px;" id="fxMessageLabel">FOREX UPDATE</div>
+                    <div id="fxMessageText" style="font-size:12px;color:#fff;font-weight:600;"></div>
+                </div>
+                <button onclick="document.getElementById('fxMessageBanner').style.display='none'" style="background:none;border:none;color:#aaa;font-size:14px;cursor:pointer;">✕</button>
+            </div>
+        </div>
+        <!-- TOP BANNER -->
+        <div class="fx-topbanner" id="fxTopBannerWrap">
+            <div class="fx-banner-placeholder" id="fxTopBannerPlaceholder">📢 Add top banner from Admin → Forex Settings<br><small>Recommended size: 800×200</small></div>
+        </div>
+
+        <!-- TOP TRADING CURRENCIES -->
+        <div class="fx-section-title">💱 <span class="fx-st-accent">Currency</span> Pairs <span class="fx-st-badge" id="fxCurrencyBadge">LIVE</span></div>
+        <div class="fx-currency-row" id="fxCurrencyRow">
+            <div class="fx-card-3d"><span class="fx-rank">1</span><div class="fx-pair">EUR/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d"><span class="fx-rank">2</span><div class="fx-pair">GBP/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d"><span class="fx-rank">3</span><div class="fx-pair">USD/JPY</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d"><span class="fx-rank">4</span><div class="fx-pair">USD/INR</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d"><span class="fx-rank">5</span><div class="fx-pair">AUD/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+        </div>
+
+        <!-- MOST TRADED -->
+        <div class="fx-section-title">🔥 <span class="fx-st-accent">Most</span> Traded <span class="fx-st-badge" id="fxMostBadge">LIVE</span></div>
+        <div class="fx-currency-row" id="fxMostRow">
+            <div class="fx-card-3d fx-most"><span class="fx-rank">1</span><div class="fx-pair">XAU/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d fx-most"><span class="fx-rank">2</span><div class="fx-pair">XAG/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d fx-most"><span class="fx-rank">3</span><div class="fx-pair">USOIL</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d fx-most"><span class="fx-rank">4</span><div class="fx-pair">BTC/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+            <div class="fx-card-3d fx-most"><span class="fx-rank">5</span><div class="fx-pair">EUR/USD</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+        </div>
+
+        <!-- REFERRAL -->
+        <div class="fx-section-title">🆓 Best <span class="fx-st-accent">Broker</span></div>
+        <div class="fx-referral" id="fxReferralCard">
+            <div class="fx-referral-title">Trade Forex With Trusted Broker</div>
+            <div class="fx-referral-row">
+                <div class="fx-referral-logo" id="fxReferralLogo">💱</div>
+                <div class="fx-referral-info">
+                    <div class="fx-referral-name" id="fxReferralName">Forex Broker</div>
+                    <div class="fx-referral-link-text" id="fxReferralLinkText">Configure referral link from admin</div>
+                </div>
+                <a class="fx-referral-btn" id="fxReferralBtn" href="#" target="_blank" rel="noopener">Open Account →</a>
+            </div>
+        </div>
+
+        <!-- FOREX SIGNALS -->
+        <div class="fx-section-title">📡 Forex <span class="fx-st-accent">Signals</span></div>
+        <div class="fx-grid" id="fxSignalGrid">
+            <div class="fx-card fx-signal"><div class="fx-pair">Loading...</div><div class="fx-price">--</div><div class="fx-change up">--</div></div>
+        </div>
+
+        <!-- TOP CRYPTO -->
+        <div class="fx-section-title">₿ Top <span class="fx-st-accent">Crypto</span> Currencies <span class="fx-st-badge" id="fxCryptoBadge">LIVE</span></div>
+        <div class="fx-grid" id="fxCryptoGrid">
+            <div class="fx-card fx-crypto"><div class="fx-pair">BTC/USD</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#1 Crypto</div></div>
+            <div class="fx-card fx-crypto"><div class="fx-pair">ETH/USD</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#2 Crypto</div></div>
+            <div class="fx-card fx-crypto"><div class="fx-pair">USDT</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#3 Stablecoin</div></div>
+            <div class="fx-card fx-crypto"><div class="fx-pair">BNB/USD</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#4 Crypto</div></div>
+            <div class="fx-card fx-crypto"><div class="fx-pair">SOL/USD</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#5 Crypto</div></div>
+            <div class="fx-card fx-crypto"><div class="fx-pair">XRP/USD</div><div class="fx-price">--</div><div class="fx-change">--</div><div class="fx-sector">#6 Crypto</div></div>
+        </div>
+
+        <!-- BANNER -->
+        <div class="fx-banner-wrap" id="fxBannerWrap">
+            <div class="fx-banner-placeholder" id="fxBannerPlaceholder">📢 Add a banner from Admin → Settings<br><small>Recommended size: 800×200</small></div>
+        </div>
+
+        <!-- GLOBAL INDICES -->
+        <div class="fx-section-title">🌍 <span class="fx-st-accent">Global</span> Indices <span class="fx-st-badge" id="fxUsBadge">LIVE</span></div>
+        <div class="fx-grid" id="fxUsList">
+            <div class="fx-card fx-us"><div class="fx-pair">Loading...</div><div class="fx-price">--</div><div class="fx-change">--</div></div>
+        </div>
+
+        <!-- ASIAN INDICES -->
+        <div class="fx-section-title">🌏 <span class="fx-st-accent">Asian</span> Indices <span class="fx-st-badge" id="fxAsianBadge">LIVE</span></div>
+        <div class="fx-grid" id="fxAsianList">
+            <div class="fx-card fx-us"><div class="fx-pair">Loading...</div><div class="fx-price">--</div><div class="fx-change">--</div></div>
+        </div>
+    </div>
 
     <!-- PASSWORD CHANGE POPUP -->
     <div id="passwordChangePopup" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center;">
@@ -4714,8 +5426,8 @@ function closeSplash() {
     setTimeout(() => {
         splash.style.display = 'none';
         if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') return;
-        // If already logged in (app visible), don't show login screen again
-        if (document.getElementById('appContainer').style.display === 'block') return;
+        // If already logged in (app, forex, or market visible), don't show login screen again
+        if (document.getElementById('appContainer').style.display === 'block' || document.getElementById('forexContainer').style.display === 'block' || document.getElementById('marketSelect').style.display === 'flex') return;
         document.getElementById('loginScreen').style.display = 'flex';
         setTimeout(() => document.getElementById('username').focus(), 300);
     }, 500);
@@ -4724,6 +5436,7 @@ if (window.location.pathname === '/admin' || window.location.pathname === '/admi
     document.getElementById('splashScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('sharedHeader').style.display = 'none';
 } else {
     setTimeout(closeSplash, 30000);
 }
@@ -4835,6 +5548,19 @@ function updateHeaderProfile() {
 }
 
 // Login
+function handleLoginFocus() {
+    if (window.innerWidth > 600) return;
+    const sc = document.getElementById('loginScreen');
+    if (sc) sc.classList.add('kb-open');
+    const box = document.querySelector('.login-box');
+    if (box) setTimeout(() => { try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) {} }, 200);
+}
+function handleLoginBlur() {
+    if (window.innerWidth > 600) return;
+    const sc = document.getElementById('loginScreen');
+    if (sc) sc.classList.remove('kb-open');
+}
+
 async function doLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
@@ -4903,7 +5629,14 @@ async function doLogin() {
             localStorage.setItem('userId', r.user.id);
             localStorage.setItem('bf_uid', r.user.id);
             localStorage.setItem('bf_uname', r.user.username);
-            showDashboard();
+            currentUser = r.user;
+            showMarketSelect();
+            const savedMkt = localStorage.getItem('bf_market');
+            if (savedMkt === 'forex' && r.user.forexAllowed) {
+                selectMarket('forex');
+            } else if (savedMkt === 'india') {
+                selectMarket('india');
+            }
         } else if (r.maintenance) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('maintenancePageMsg').innerHTML = (r.message || 'We are currently performing scheduled maintenance.').replace(/\n/g, '<br>');
@@ -5179,6 +5912,7 @@ async function checkSession() {
         isAdmin = true;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('sharedHeader').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         if (localStorage.getItem('bf_admin') === '1') {
             document.getElementById('adminLoginScreen').classList.remove('show');
@@ -5209,10 +5943,10 @@ async function checkSession() {
         }
     } catch (e) {}
     
-    // If we have stored session — IMMEDIATELY show dashboard, verify in background
+    // If we have stored session — IMMEDIATELY show market selector, verify in background
     if (userId) {
         currentUser = { id: userId, username: sessionStorage.getItem('username') || localStorage.getItem('bf_uname') || 'user' };
-        showDashboard();
+        showMarketSelect();
         // Background verification
         try {
             const controller = new AbortController();
@@ -5231,6 +5965,24 @@ async function checkSession() {
                 updateHeaderProfile();
                 updateMessageBanner();
                 if (currentUser.message && currentUser.message.trim()) checkNotifsForBroadcast(currentUser.message.trim());
+                // Update forex lock state in market selector
+                const forexCard2 = document.getElementById('mktForexCard');
+                if (forexCard2) {
+                    if (currentUser.forexAllowed) {
+                        forexCard2.classList.remove('locked');
+                        document.getElementById('mktForexArrow').textContent = '→';
+                    } else {
+                        forexCard2.classList.add('locked');
+                        document.getElementById('mktForexArrow').textContent = '🔒';
+                    }
+                }
+                // Auto-redirect to saved market
+                const savedMkt = localStorage.getItem('bf_market');
+                if (savedMkt === 'forex' && currentUser.forexAllowed) {
+                    selectMarket('forex');
+                } else if (savedMkt === 'india') {
+                    selectMarket('india');
+                }
             } else if (r.blocked) {
                 // Subscription expired — show warning but keep dashboard
                 customAlert('Your subscription has expired. Please contact admin to renew.', '🚫');
@@ -5285,10 +6037,361 @@ function _blockKeys(e) {
     if (e.key === 'F12') { e.preventDefault(); return false; }
 }
 
+// ═══════ MARKET SELECTOR ═══════
+function showMarketSelect() {
+    document.getElementById('splashScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('forexContainer').style.display = 'none';
+    document.getElementById('sharedHeader').style.display = 'none';
+    document.getElementById('marketSelect').style.display = 'flex';
+    // Lock forex card if not allowed
+    const forexCard = document.getElementById('mktForexCard');
+    if (currentUser && currentUser.forexAllowed) {
+        forexCard.classList.remove('locked');
+        document.getElementById('mktForexArrow').textContent = '→';
+    } else {
+        forexCard.classList.add('locked');
+        document.getElementById('mktForexArrow').textContent = '🔒';
+    }
+    // Update market status
+    const now = new Date();
+    const d = now.getDay(), h = now.getHours();
+    const indOpen = d >= 1 && d <= 5 && h >= 9 && h < 15;
+    const indStat = document.getElementById('mktIndiaStatus');
+    indStat.textContent = indOpen ? '● Live' : 'Market Off';
+    indStat.className = 'mkt-card-status ' + (indOpen ? 'live' : 'closed');
+    const indPrice = document.getElementById('mktIndiaPrice');
+    indPrice.className = 'mkt-card-price ' + (h < 12 ? 'green' : 'red');
+    const ny = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+    const nh = ny.getHours(), nd = ny.getDay();
+    const fxOpen = nd >= 1 && nd <= 5 && nh >= 9 && nh < 16;
+    const fxStat = document.getElementById('mktForexStatus');
+    fxStat.textContent = fxOpen ? '● Live' : 'Market Off';
+    fxStat.className = 'mkt-card-status ' + (fxOpen ? 'live' : 'closed');
+}
+
+function selectMarket(type) {
+    document.getElementById('marketSelect').style.display = 'none';
+    localStorage.setItem('bf_market', type);
+    if (type === 'india') {
+        showDashboard();
+    } else if (type === 'forex') {
+        showForexDashboard();
+    }
+}
+
+function showForexDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('marketSelect').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('forexContainer').style.display = 'block';
+    document.getElementById('sharedHeader').style.display = 'block';
+    document.getElementById('hdrMktSwitch').style.display = 'inline-flex';
+    document.getElementById('hdrMktLabel').textContent = 'Switch to Indian';
+    updateForexMarketStatus();
+    updateForexMessageBanner();
+    startForexUpdates();
+}
+
+function updateForexMarketStatus() {
+    const now = new Date();
+    const ny = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+    const h = ny.getHours(), d = ny.getDay();
+    const open = d >= 1 && d <= 5 && h >= 9 && h < 16;
+    const badge = document.getElementById('fxStatusBadge');
+    if (badge) {
+        badge.textContent = open ? '● Open' : '● Closed';
+        badge.className = 'fx-status-badge ' + (open ? 'open' : 'closed');
+    }
+    if (window.updateForexBadges) updateForexBadges();
+}
+
+function startForexUpdates() {
+    if (window._fxInterval) clearInterval(window._fxInterval);
+    updateForexMarketStatus();
+    loadForexSettings();
+    window._fxData = {
+        pairs: [
+            {id:'EUR/USD', full:'Euro / US Dollar', price:null, chg:null},
+            {id:'GBP/USD', full:'British Pound / US Dollar', price:null, chg:null},
+            {id:'USD/JPY', full:'US Dollar / Japanese Yen', price:null, chg:null},
+            {id:'USD/INR', full:'US Dollar / Indian Rupee', price:null, chg:null},
+            {id:'AUD/USD', full:'Australian Dollar / US Dollar', price:null, chg:null},
+        ],
+        most: [
+            {id:'XAU/USD', full:'Gold', price:null, chg:null},
+            {id:'XAG/USD', full:'Silver', price:null, chg:null},
+            {id:'USOIL', full:'Crude Oil WTI', price:null, chg:null},
+            {id:'BTC/USD', full:'Bitcoin', price:null, chg:null},
+            {id:'EUR/USD', full:'Euro / US Dollar', price:null, chg:null},
+        ],
+        cryptos: [
+            {id:'BTC/USD', price:null, chg:null},
+            {id:'ETH/USD', price:null, chg:null},
+            {id:'USDT', price:null, chg:null},
+            {id:'BNB/USD', price:null, chg:null},
+            {id:'SOL/USD', price:null, chg:null},
+            {id:'XRP/USD', price:null, chg:null},
+        ],
+        us: [
+            {id:'S&P 500', full:'US · S&P 500', price:null, chg:null},
+            {id:'NASDAQ', full:'US · Nasdaq Comp', price:null, chg:null},
+            {id:'DOW J', full:'US · Dow Jones', price:null, chg:null},
+            {id:'FTSE 100', full:'UK · FTSE', price:null, chg:null},
+            {id:'DAX 40', full:'Germany · DAX', price:null, chg:null},
+            {id:'CAC 40', full:'France · CAC', price:null, chg:null},
+            {id:'STOXX 50', full:'Euro · STOXX', price:null, chg:null},
+            {id:'USOIL', full:'Crude Oil WTI', price:null, chg:null},
+        ],
+        asia: [
+            {id:'NIFTY 50', full:'India · Nifty', price:null, chg:null},
+            {id:'SENSEX', full:'India · BSE Sensex', price:null, chg:null},
+            {id:'HANG SENG', full:'Hong Kong · HSI', price:null, chg:null},
+            {id:'SHANGHAI', full:'China · SSE', price:null, chg:null},
+            {id:'NIKKEI 225', full:'Japan · Nikkei', price:null, chg:null},
+            {id:'KOSPI', full:'Korea · KOSPI', price:null, chg:null},
+        ]
+    };
+    window._baseFxPrice = {};
+    const mkPrice = (id) => window._baseFxPrice[id] = window._baseFxPrice[id] || null;
+    const _fxFindPrice = (id) => {
+        if (window._baseFxPrice[id]) return window._baseFxPrice[id];
+        for (const k in window._fxData) {
+            const arr = window._fxData[k];
+            if (Array.isArray(arr)) {
+                const hit = arr.find(x => x && x.id === id);
+                if (hit && hit.price !== null && hit.price !== undefined) { window._baseFxPrice[id] = hit.price; return hit.price; }
+            }
+        }
+        return null;
+    };
+    const _fxFindChg = (id) => {
+        for (const k in window._fxData) {
+            const arr = window._fxData[k];
+            if (Array.isArray(arr)) {
+                const hit = arr.find(x => x && x.id === id);
+                if (hit && hit.chg !== null && hit.chg !== undefined) return hit.chg;
+            }
+        }
+        return 0;
+    };
+    // Map admin-stored lists (ids) to data objects
+    function applyFxLists(s) {
+        const build = (list, target, fulls) => {
+            if (!Array.isArray(list) || !list.length) return;
+            const out = list.map(it => {
+                const id = typeof it === 'string' ? it : (it.id || it.symbol || it.full || '');
+                return { id, full: fulls[id] || (typeof it === 'object' && it.full) || id, price: _fxFindPrice(id), chg: _fxFindChg(id) };
+            });
+            window._fxData[target] = out;
+        };
+        if (s) {
+            if (s.forexPairs && s.forexPairs.length) window._fxData.pairs = s.forexPairs.map(x => { const id = typeof x==='string'?x:(x.id||x.full); return {id, full:(typeof x==='object'&&x.full)||(typeof x==='string'?x:x.id||x.full), price:_fxFindPrice(id), chg:_fxFindChg(id)}; });
+            if (s.forexMost && s.forexMost.length) window._fxData.most = s.forexMost.map(x => { const id = typeof x==='string'?x:(x.id||x.full); return {id, full:(typeof x==='object'&&x.full)||(typeof x==='string'?x:x.id||x.full), price:_fxFindPrice(id), chg:_fxFindChg(id)}; });
+            if (s.forexCryptos && s.forexCryptos.length) window._fxData.cryptos = s.forexCryptos.map(x => { const id = typeof x==='string'?x:(x.id||x.full); return {id, price:_fxFindPrice(id), chg:_fxFindChg(id)}; });
+            if (s.forexGlobalIndices && s.forexGlobalIndices.length) window._fxData.us = s.forexGlobalIndices.map(x => { const id = typeof x==='string'?x:(x.id||x.full); return {id, full:(typeof x==='object'&&x.full)||(typeof x==='string'?x:x.id||x.full), price:_fxFindPrice(id), chg:_fxFindChg(id)}; });
+            if (s.forexAsianIndices && s.forexAsianIndices.length) window._fxData.asia = s.forexAsianIndices.map(x => { const id = typeof x==='string'?x:(x.id||x.full); return {id, full:(typeof x==='object'&&x.full)||(typeof x==='string'?x:x.id||x.full), price:_fxFindPrice(id), chg:_fxFindChg(id)}; });
+        }
+    }
+    window.applyFxLists = applyFxLists;
+    function fmtPrice(v, pair) {
+        if (v === null || v === undefined || isNaN(v) || v <= 0) return '--';
+        if (pair === 'USDT') return '1.000';
+        if (pair === 'XAU/USD' || pair === 'XAG/USD' || pair === 'USOIL' || pair === 'XRP/USD' || pair === 'DOGE/USD' || pair === 'ADA/USD' || pair === 'DOT/USD' || pair === 'LINK/USD' || pair === 'LTC/USD') return v.toFixed(2);
+        if (pair.includes('BTC') || pair.includes('ETH') || pair.includes('BNB') || pair.includes('SOL')) return v.toFixed(1);
+        if (pair.includes('JPY') || pair.includes('INR')) return v.toFixed(2);
+        if (pair.includes('USD') && pair !== 'USD/JPY' && pair !== 'USD/INR' && !window._fxData.us.some(u => u.id === pair)) return v.toFixed(5);
+        return v.toFixed(2);
+    }
+    function fmtChg(v) {
+        if (v === null || v === undefined || isNaN(v)) return '--';
+        return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+    }
+    function fillCurrencyRow(data, elId) {
+        const row = document.getElementById(elId);
+        if (!row) return;
+        row.innerHTML = data.map((d, i) => `<div class="fx-card-3d ${d.price === null || d.price === undefined ? '' : (d.chg >= 0 ? 'up' : 'down')}">
+            <div class="fx-pair">${d.id}</div>
+            <div class="fx-price ${d.price === null || d.price === undefined ? '' : (d.chg >= 0 ? 'up' : 'down')}">${fmtPrice(d.price, d.id)}</div>
+            <div class="fx-change ${d.price === null || d.price === undefined ? '' : (d.chg >= 0 ? 'up' : 'down')}">${fmtChg(d.chg)}</div>
+        </div>`).join('');
+    }
+    function fillCryptoGrid(data) {
+        const g = document.getElementById('fxCryptoGrid');
+        if (!g) return;
+        g.innerHTML = data.map((d, i) => `<div class="fx-card fx-crypto ${d.chg >= 0 ? 'up' : 'down'}">
+            <div class="fx-pair">${d.id}</div>
+            <div class="fx-price ${d.chg >= 0 ? 'up' : 'down'}">${fmtPrice(d.price, d.id)}</div>
+            <div class="fx-change ${d.chg >= 0 ? 'up' : 'down'}">${fmtChg(d.chg)}</div>
+            <div class="fx-sector">#${i+1} Crypto</div>
+        </div>`).join('');
+    }
+    function fillUsList(data) {
+        const g = document.getElementById('fxUsList');
+        if (!g) return;
+        g.innerHTML = data.map((d, i) => `<div class="fx-card fx-us ${d.chg >= 0 ? 'up' : 'down'}">
+            <div class="fx-pair">${d.id}</div>
+            <div class="fx-price ${d.chg >= 0 ? 'up' : 'down'}">${fmtPrice(d.price, d.id)}</div>
+            <div class="fx-change ${d.chg >= 0 ? 'up' : 'down'}">${fmtChg(d.chg)}</div>
+            <div class="fx-full">${d.full}</div>
+        </div>`).join('');
+    }
+    function fillAsianList(data) {
+        const g = document.getElementById('fxAsianList');
+        if (!g) return;
+        g.innerHTML = data.map((d, i) => `<div class="fx-card fx-us ${d.chg >= 0 ? 'up' : 'down'}">
+            <div class="fx-pair">${d.id}</div>
+            <div class="fx-price ${d.chg >= 0 ? 'up' : 'down'}">${fmtPrice(d.price, d.id)}</div>
+            <div class="fx-change ${d.chg >= 0 ? 'up' : 'down'}">${fmtChg(d.chg)}</div>
+            <div class="fx-full">${d.full}</div>
+        </div>`).join('');
+    }
+    function fillSignalGrid(signals) {
+        const g = document.getElementById('fxSignalGrid');
+        if (!g) return;
+        const visible = (signals || []).filter(s => s.active !== false);
+        if (!visible.length) {
+            g.innerHTML = '<div class="fx-card fx-signal" style="grid-column:1/-1;text-align:center;"><div class="fx-pair">No signals yet</div><div class="fx-meta">Signals add karne ke liye Admin → Forex</div></div>';
+            return;
+        }
+        g.innerHTML = visible.map((s, i) => {
+            const st = s.status || 'active';
+            const stBadge = st === 'target_done' ? '<span class="fx-dir buy">✅ TARGET</span>' : st === 'sl_hit' ? '<span class="fx-dir sell">❌ SL HIT</span>' : '';
+            const trendingHtml = s.trending ? `<div class="fx-trending">🔥 ${s.trending}</div>` : '';
+            return `<div class="fx-card fx-signal${s.trending ? ' has-trending' : ''}">
+            <div class="fx-pair">${s.pair || '—'}</div>
+            ${trendingHtml}
+            <span class="fx-dir ${(s.dir || 'buy').toLowerCase() === 'buy' ? 'buy' : 'sell'}">${(s.dir || 'BUY').toUpperCase()}</span>
+            ${stBadge}
+            <div class="fx-price">${s.entry || '—'}</div>
+            <div class="fx-meta">TP: <b>${s.tp || '—'}</b> · SL: <b>${s.sl || '—'}</b><br>${s.time || ''}</div>
+        </div>`;
+        }).join('');
+    }
+    window.fillSignalGrid = fillSignalGrid;
+    window.fillFxRows = function() {
+        fillCurrencyRow(window._fxData.pairs, 'fxCurrencyRow');
+        fillCurrencyRow(window._fxData.most, 'fxMostRow');
+        fillCryptoGrid(window._fxData.cryptos);
+        fillUsList(window._fxData.us);
+        fillAsianList(window._fxData.asia);
+    };
+    function updateForexBadges() {
+        const now = new Date();
+        const ny = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+        const ist = new Date(now.toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+        const nyH = ny.getHours(), nyD = ny.getDay();
+        const istH = ist.getHours(), istD = ist.getDay();
+        const nyWeekday = nyD >= 1 && nyD <= 5;
+        const nyOpen = nyWeekday && nyH >= 9 && nyH < 16;
+        const istWeekday = istD >= 1 && istD <= 5;
+        const asiaOpen = istWeekday && istH >= 9 && istH < 16;
+        const forexOpen = nyWeekday;
+        const cryptoOpen = true;
+        const map = [
+            ['fxCurrencyBadge','Currency', forexOpen],
+            ['fxMostBadge','Traded', forexOpen],
+            ['fxCryptoBadge','Crypto', cryptoOpen],
+            ['fxUsBadge','Indices', nyOpen],
+            ['fxAsianBadge','Asian', asiaOpen]
+        ];
+        map.forEach(([id, label, open]) => {
+            const b = document.getElementById(id);
+            if (b) { b.textContent = open ? '● LIVE' : '● OFF'; b.className = 'fx-st-badge ' + (open ? 'live' : 'closed'); }
+        });
+    }
+    window.updateForexBadges = updateForexBadges;
+    fillCurrencyRow(window._fxData.pairs, 'fxCurrencyRow');
+    fillCurrencyRow(window._fxData.most, 'fxMostRow');
+    fillCryptoGrid(window._fxData.cryptos);
+    fillUsList(window._fxData.us);
+    fillAsianList(window._fxData.asia);
+    fillSignalGrid(window._forexSignals);
+    window._fxInterval = setInterval(() => {
+        updateForexMarketStatus();
+        if (window._fxLiveBusy) { renderFxTicks(); return; }
+        window._fxLiveBusy = true;
+        fetch(API + '/api/forex/live').then(r => r.json()).then(live => {
+            window._fxLiveBusy = false;
+            const liveData = (live && live.data) ? live.data : live;
+            const apply = (arr) => (arr || []).forEach(d => { if (liveData && liveData[d.id]) { d.price = liveData[d.id].price; d.chg = liveData[d.id].chg; window._baseFxPrice[d.id] = d.price; } });
+            apply(window._fxData.pairs); apply(window._fxData.most); apply(window._fxData.cryptos);
+            apply(window._fxData.us); apply(window._fxData.asia);
+            renderFxTicks();
+        }).catch(() => { window._fxLiveBusy = false; renderFxTicks(); });
+    }, 3000);
+    function renderFxTicks() {
+        fillCurrencyRow(window._fxData.pairs, 'fxCurrencyRow');
+        fillCurrencyRow(window._fxData.most, 'fxMostRow');
+        fillCryptoGrid(window._fxData.cryptos);
+        fillUsList(window._fxData.us);
+        fillAsianList(window._fxData.asia);
+        fillSignalGrid(window._forexSignals);
+    }
+    if (!window._fxSettingsInterval) window._fxSettingsInterval = setInterval(() => { if (window._fxData) loadForexSettings(); }, 5000);
+}
+
+function loadForexSettings() {
+    fetch(API + '/api/settings').then(r => r.json()).then(d => {
+        const showTop = d.forexShowTopBanner !== false;
+        const showMid = d.forexShowBanner !== false;
+        const topWrap = document.getElementById('fxTopBannerWrap');
+        if (topWrap) topWrap.style.display = showTop ? '' : 'none';
+        const midWrap = document.getElementById('fxBannerWrap');
+        if (midWrap) midWrap.style.display = showMid ? '' : 'none';
+        if (d.forexReferralLink) {
+            document.getElementById('fxReferralBtn').href = d.forexReferralLink;
+            document.getElementById('fxReferralName').textContent = d.forexReferralName || 'Forex Broker';
+            const logo = document.getElementById('fxReferralLogo');
+            if (d.forexReferralLogo) {
+                logo.innerHTML = '<img src="' + d.forexReferralLogo + '" alt="logo" onerror="this.parentNode.textContent=\'💱\'">';
+            }
+            const lt = document.getElementById('fxReferralLinkText');
+            try { lt.textContent = new URL(d.forexReferralLink).hostname; } catch(e) { lt.textContent = d.forexReferralLink; }
+        }
+        if (d.forexBannerImage) {
+            const wrap = document.getElementById('fxBannerWrap');
+            const ph = document.getElementById('fxBannerPlaceholder');
+            if (wrap && ph) {
+                const img = document.createElement('img');
+                img.src = d.forexBannerImage;
+                img.alt = 'Promo';
+                if (d.forexBannerLink) { const a = document.createElement('a'); a.href = d.forexBannerLink; a.target = '_blank'; a.rel = 'noopener'; a.appendChild(img); wrap.innerHTML = ''; wrap.appendChild(a); }
+                else { wrap.innerHTML = ''; wrap.appendChild(img); }
+            }
+        }
+        window._forexSignals = d.forexSignals || [];
+        if (window.fillSignalGrid) fillSignalGrid(window._forexSignals);
+        if (window.applyFxLists && window._fxData) {
+            window.applyFxLists(d);
+            if (window.fillFxRows) window.fillFxRows();
+        }
+        if (d.forexTopBannerImage) {
+            const wrap = document.getElementById('fxTopBannerWrap');
+            const ph = document.getElementById('fxTopBannerPlaceholder');
+            if (wrap && ph) {
+                const img = document.createElement('img');
+                img.src = d.forexTopBannerImage;
+                img.alt = 'Top Banner';
+                if (d.forexTopBannerLink) { const a = document.createElement('a'); a.href = d.forexTopBannerLink; a.target = '_blank'; a.rel = 'noopener'; a.appendChild(img); wrap.innerHTML = ''; wrap.appendChild(a); }
+                else { wrap.innerHTML = ''; wrap.appendChild(img); }
+            }
+        }
+    }).catch(() => {});
+}
+
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('marketSelect').style.display = 'none';
+    document.getElementById('forexContainer').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('sharedHeader').style.display = 'block';
+    document.getElementById('hdrMktSwitch').style.display = 'inline-flex';
+    document.getElementById('hdrMktLabel').textContent = 'Switch to Forex';
     
     enableScreenshotBlock();
     
@@ -5770,17 +6873,34 @@ function updateAdminSidebarClock() {
     }
 }
 
+function toggleAdminNav(force) {
+    const nav = document.querySelector('.admin-sidebar-nav');
+    const ov = document.getElementById('adminNavOverlay');
+    if (!nav) return;
+    const open = typeof force === 'boolean' ? force : !nav.classList.contains('open');
+    nav.classList.toggle('open', open);
+    if (ov) ov.classList.toggle('open', open);
+}
+
 function showAdminSection(section, navEl) {
     if (section === 'registerRequests') { showStatPopup('regRequests'); section = 'dashboard'; }
+    if (window.innerWidth <= 600) toggleAdminNav(false);
     document.querySelectorAll('[id^="section-"]').forEach(el => { if (el.id !== 'section-dashboard') el.style.display = 'none'; });
     document.getElementById('section-dashboard').style.display = 'none';
     const target = document.getElementById('section-' + section);
     if (target) target.style.display = 'block';
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
     if (navEl) navEl.classList.add('active');
+    // Stock Tips card only on non-forex sections
+    const stCard = document.getElementById('adminStockTipsCard');
+    if (stCard) stCard.style.display = section === 'forex' ? 'none' : 'block';
+    // Forex Signals card only on forex section
+    const fxSigCard = document.getElementById('adminForexSignalsCard');
+    if (fxSigCard) fxSigCard.style.display = section === 'forex' ? 'block' : 'none';
     if (section === 'holidayBanners') loadBanners();
     if (section === 'maintenance') loadMaintenanceStatus();
     if (section === 'apiKeys') loadApiKeys();
+    if (section === 'forex') { loadForexManagement(); loadAdminForexSettings(); loadForexSignals(); }
     if (section === 'broadcast') { renderBroadcastUsers(); loadApiKeys(); loadPlansAdmin(); }
     if (section === 'offers') { loadOffers(); }
     if (section === 'scheduled') { loadScheduledMessages(); populateSchedUsers(); }
@@ -5801,6 +6921,7 @@ async function loadAdminData() {
             updateStats(r.users);
             renderBroadcastUsers();
             loadAdminStockTips();
+            loadForexSignals();
             loadDashboardData();
             renderShortcuts();
             loadMaintenanceStatus();
@@ -6122,13 +7243,14 @@ const ALL_SHORTCUTS = [
     { id:'disclaimer', icon:'⚙️', label:'Disclaimer', section:'disclaimer' },
     { id:'maintenance', icon:'🔧', label:'Maintenance', section:'maintenance' },
     { id:'apiKeys', icon:'🔑', label:'API Keys', section:'apiKeys' },
+    { id:'forex', icon:'💱', label:'Forex', section:'forex' },
     { id:'tipPerf', icon:'🎯', label:'Tip Performance', section:'tipPerf' },
     { id:'activity', icon:'🕐', label:'Activity', section:'activity' },
     { id:'loginHist', icon:'🔐', label:'Login History', section:'loginHist' },
     { id:'changePass', icon:'🔒', label:'Change Password', section:'changePass' },
     { id:'registerRequests', icon:'📝', label:'Registrations', section:'dashboard' }
 ];
-let _userShortcuts = ['broadcast','holidayBanners','offers','scheduled','createUser','allUsers'];
+let _userShortcuts = ['broadcast','forex','holidayBanners','offers','scheduled','createUser','allUsers'];
 
 function toggleShortcutEditor() {
     const e = document.getElementById('shortcutsEditor');
@@ -6150,7 +7272,7 @@ function saveShortcuts() {
 
 function renderShortcuts() {
     const saved = localStorage.getItem('admin_shortcuts');
-    if (saved) try { _userShortcuts = JSON.parse(saved); } catch(e) {}
+    if (saved) try { _userShortcuts = JSON.parse(saved).map(id => id === 'forexSettings' ? 'forex' : id); } catch(e) {}
     const el = document.getElementById('shortcutsRow');
     el.innerHTML = _userShortcuts.map(id => {
         const s = ALL_SHORTCUTS.find(x => x.id === id);
@@ -6300,10 +7422,10 @@ function renderAdminIndices() {
         const changed = prev !== undefined && prev !== ltp;
         const animClass = changed ? (isUp ? 'idx-blink-green' : 'idx-blink-red') : '';
         _prevIndicesPrices[d.name] = ltp;
-        return `<div class="idx-card ${animClass}" style="width:100%;background:var(--aelevated);border:1px solid var(--aborder);border-radius:10px;padding:14px 10px;border-left:4px solid ${color};text-align:center;box-sizing:border-box;">
-            <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;">${d.name}</div>
-            <div style="font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-            <div style="font-size:12px;color:${color};margin-top:4px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
+        return `<div class="idx-card ${animClass}" style="width:100%;background:var(--aelevated);border:1px solid var(--aborder);border-radius:8px;padding:8px 6px;border-left:3px solid ${color};text-align:center;box-sizing:border-box;">
+            <div style="font-size:9px;color:#888;letter-spacing:0.3px;margin-bottom:3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;white-space:nowrap;">${ltp.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+            <div style="font-size:10px;color:${color};margin-top:2px;font-weight:600;">${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${pct.toFixed(2)}%)</div>
         </div>`;
     }).join('');
     if (status) { status.textContent = 'Live'; status.style.color = '#22c55e'; }
@@ -6470,6 +7592,375 @@ async function saveApiKeys() {
         } else {
             status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
         }
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+async function loadAdminForexSettings() {
+    const el = (id) => document.getElementById(id);
+    try {
+        const r = await fetch(API + '/api/admin/settings', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        if (el('settingsForexReferralName')) el('settingsForexReferralName').value = r.forexReferralName || '';
+        if (el('settingsForexReferralLink')) el('settingsForexReferralLink').value = r.forexReferralLink || '';
+        if (el('settingsForexReferralLogo')) el('settingsForexReferralLogo').value = r.forexReferralLogo || '';
+        if (el('settingsForexBannerImage')) el('settingsForexBannerImage').value = r.forexBannerImage || '';
+        if (el('settingsForexBannerLink')) el('settingsForexBannerLink').value = r.forexBannerLink || '';
+        if (el('settingsForexTopBannerImage')) el('settingsForexTopBannerImage').value = r.forexTopBannerImage || '';
+        if (el('settingsForexTopBannerLink')) el('settingsForexTopBannerLink').value = r.forexTopBannerLink || '';
+        if (el('settingsForexShowBanner')) el('settingsForexShowBanner').checked = r.forexShowBanner !== false;
+        if (el('settingsForexShowTopBanner')) el('settingsForexShowTopBanner').checked = r.forexShowTopBanner !== false;
+    } catch (e) {}
+}
+
+async function saveForexSettings() {
+    const el = (id) => document.getElementById(id);
+    const status = el('forexSettingsStatus') || el('forexSettingsStatus2');
+    status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({
+                forexReferralName: el('settingsForexReferralName').value.trim(),
+                forexReferralLink: el('settingsForexReferralLink').value.trim(),
+                forexReferralLogo: el('settingsForexReferralLogo').value.trim(),
+                forexBannerImage: el('settingsForexBannerImage').value.trim(),
+                forexBannerLink: el('settingsForexBannerLink').value.trim(),
+                forexTopBannerImage: el('settingsForexTopBannerImage').value.trim(),
+                forexTopBannerLink: el('settingsForexTopBannerLink').value.trim(),
+                forexShowBanner: el('settingsForexShowBanner') ? el('settingsForexShowBanner').checked : true,
+                forexShowTopBanner: el('settingsForexShowTopBanner') ? el('settingsForexShowTopBanner').checked : true
+            })
+        }).then(r => r.json());
+        if (r.success) {
+            status.innerHTML = '<span style="color:#00c853;">✅ Forex settings saved!</span>';
+            setTimeout(() => { status.innerHTML = ''; }, 4000);
+        } else {
+            status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        }
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+/* ═══════ FOREX MANAGEMENT (lists + broadcast) ═══════ */
+
+// Catalog of ALL available symbols (admin tick se show/hide)
+const _fxCatalog = {
+    pairs: ['EUR/USD','GBP/USD','USD/JPY','USD/CHF','USD/INR','AUD/USD','NZD/USD','USD/CAD','EUR/GBP','EUR/JPY','GBP/JPY','AUD/JPY','EUR/INR','GBP/INR','USD/CNY'],
+    most: ['XAU/USD','XAG/USD','USOIL','BTC/USD','EUR/USD','GBP/USD','USD/JPY'],
+    cryptos: ['BTC/USD','ETH/USD','USDT','BNB/USD','SOL/USD','XRP/USD','DOGE/USD','ADA/USD','LTC/USD','DOT/USD','LINK/USD'],
+    global: ['S&P 500','NASDAQ','DOW J','FTSE 100','DAX 40','CAC 40','STOXX 50','IBEX 35','FTSE MIB','ASX 200','USOIL','BRENT'],
+    asian: ['NIFTY 50','SENSEX','HANG SENG','SHANGHAI','NIKKEI 225','KOSPI','TAIWAN SE','KOSPI 200']
+};
+let _fxLists = { pairs: [], most: [], cryptos: [], global: [], asian: [] };
+
+function toggleForexPanel(id) {
+    const panels = ['fxPanelPairs','fxPanelMost','fxPanelCrypto','fxPanelGlobal','fxPanelAsian','fxPanelBroadcast','fxPanelReferral'];
+    const clicked = document.getElementById(id);
+    const isOpen = clicked && clicked.classList.contains('open');
+    panels.forEach(pid => {
+        const p = document.getElementById(pid);
+        if (p) p.classList.remove('open');
+    });
+    if (clicked && !isOpen) clicked.classList.add('open');
+}
+
+async function loadForexManagement() {
+    try {
+        const r = await fetch(API + '/api/admin/settings', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        _fxLists.pairs = r.forexPairs || [];
+        _fxLists.most = r.forexMost || [];
+        _fxLists.cryptos = r.forexCryptos || [];
+        _fxLists.global = r.forexGlobalIndices || [];
+        _fxLists.asian = r.forexAsianIndices || [];
+        renderFxList('pairs', 'fxPairsList', 'fxPairsStatus');
+        renderFxList('most', 'fxMostList', 'fxMostStatus');
+        renderFxList('cryptos', 'fxCryptoList', 'fxCryptoStatus');
+        renderFxList('global', 'fxGlobalList', 'fxGlobalStatus');
+        renderFxList('asian', 'fxAdminAsianList', 'fxAsianStatus');
+        renderForexBcastUsers('');
+    } catch (e) {
+        ['fxPairsList','fxMostList','fxCryptoList','fxGlobalList','fxAdminAsianList'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '<div style="color:#ff1744;font-size:11px;">Error loading</div>';
+        });
+    }
+}
+
+function fxItemName(it) {
+    if (!it) return '';
+    return typeof it === 'string' ? it : (it.symbol || it.id || it.full || '');
+}
+
+function fxItemSelected(key, name) {
+    return _fxLists[key].some(it => fxItemName(it).toUpperCase() === name.toUpperCase());
+}
+
+function renderFxList(key, listId, statusId) {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    const cat = _fxCatalog[key] || [];
+    const rows = cat.map(name => {
+        const checked = fxItemSelected(key, name) ? ' checked' : '';
+        return `<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid #1a1a1a;cursor:pointer;font-size:12px;">
+            <input type="checkbox" class="fx-show-cb" data-key="${key}" data-name="${name}" ${checked} onchange="toggleFxShow('${key}','${name}',this.checked)">
+            <span style="flex:1;">${name}</span>
+            <span style="font-size:9px;color:#888;">${checked ? '<span style="color:#22c55e;">SHOW</span>' : '<span style="color:#555;">HIDE</span>'}</span>
+        </label>`;
+    }).join('');
+    list.innerHTML = rows || '<div style="color:var(--amute);font-size:11px;padding:6px 0;">Koi option nahi</div>';
+    if (statusId) { const s = document.getElementById(statusId); if (s) s.innerHTML = ''; }
+}
+
+function toggleFxShow(key, name, checked) {
+    const items = _fxLists[key];
+    if (checked) {
+        if (!fxItemSelected(key, name)) items.push({ id: name, full: name });
+    } else {
+        _fxLists[key] = items.filter(it => fxItemName(it).toUpperCase() !== name.toUpperCase());
+    }
+    renderFxList(key, fxAdminListId(key));
+}
+
+function addForexItem(key, inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const val = input.value.trim().toUpperCase();
+    if (!val) return;
+    if (!_fxCatalog[key].some(n => n.toUpperCase() === val)) {
+        _fxCatalog[key].push(val);
+    }
+    if (!fxItemSelected(key, val)) _fxLists[key].push({ id: val, full: val });
+    input.value = '';
+    renderFxList(key, fxAdminListId(key));
+}
+
+function fxAdminListId(key) {
+    return key === 'asian' ? 'fxAdminAsianList' : 'fx' + key.charAt(0).toUpperCase() + key.slice(1) + 'List';
+}
+
+async function saveFxList(key) {
+    const status = document.getElementById({
+        pairs: 'fxPairsStatus', most: 'fxMostStatus', cryptos: 'fxCryptoStatus', global: 'fxGlobalStatus', asian: 'fxAsianStatus'
+    }[key]);
+    if (status) status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    const body = {};
+    body['forex' + { pairs: 'Pairs', most: 'Most', cryptos: 'Cryptos', global: 'GlobalIndices', asian: 'AsianIndices' }[key]] = _fxLists[key];
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify(body)
+        }).then(r => r.json());
+        if (status) status.innerHTML = r.success ? '<span style="color:#00c853;">✅ Saved!</span>' : '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+    } catch (e) { if (status) status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+let _fxSignals = [];
+let _fxSignalDir = 'buy';
+
+function setFxSignalDir(dir, btn) {
+    _fxSignalDir = dir;
+    document.querySelectorAll('#fxSigTypeBtns .admin-tip-type-btn').forEach(b => b.classList.remove('selected'));
+    if (btn) btn.classList.add('selected');
+}
+
+async function loadForexSignals() {
+    const list = document.getElementById('fxSignalList');
+    if (!list) return;
+    list.innerHTML = '<div style="font-size:11px;color:#888;">Loading...</div>';
+    try {
+        const r = await fetch(API + '/api/admin/settings', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json());
+        _fxSignals = r.forexSignals || [];
+        renderFxSignals();
+    } catch (e) { list.innerHTML = '<div style="font-size:11px;color:#ff1744;">Error loading</div>'; }
+}
+
+function renderFxSignals() {
+    const list = document.getElementById('fxSignalList');
+    if (!list) return;
+    if (!_fxSignals.length) {
+        list.innerHTML = '<div style="color:var(--amute);font-size:10px;text-align:center;padding:8px;">No signals yet</div>';
+        return;
+    }
+    list.innerHTML = _fxSignals.map((s, i) => {
+        const isBuy = (s.dir || 'buy') === 'buy';
+        const color = isBuy ? '#00c853' : '#ff1744';
+        const status = s.status || 'active';
+        const active = s.active !== false;
+        const statusBadge = status === 'target_done' ? '<span style="font-size:8px; background:#00c853; color:#000; padding:1px 5px; border-radius:3px; font-weight:700;">✅ TARGET</span>'
+            : status === 'sl_hit' ? '<span style="font-size:8px; background:#ff1744; color:#fff; padding:1px 5px; border-radius:3px; font-weight:700;">❌ SL HIT</span>'
+            : '';
+        return `<div style="display:flex; align-items:center; gap:4px; padding:5px 6px; border-bottom:1px solid #1a1a1a; font-size:10px; ${(status !== 'active' || !active) ? 'opacity:0.5;' : ''}">
+            <span style="color:${color}; font-weight:700; min-width:30px;">${(s.dir||'buy').toUpperCase()}</span>
+            <span style="color:#fff; font-weight:600; flex:1;">${s.pair||'—'}${s.trending ? ' <span style="color:#ffab00;font-size:9px;font-weight:500;">🔥 ' + s.trending + '</span>' : ''}</span>
+            <span style="color:var(--amute); font-size:9px;">E:${s.entry||'—'}</span>
+            ${statusBadge}
+            <button onclick="markFxSignalTarget(${i})" title="Target Done" style="background:none; border:none; color:#00c853; cursor:pointer; font-size:11px;">✅</button>
+            <button onclick="markFxSignalSlHit(${i})" title="SL Hit" style="background:none; border:none; color:#ff1744; cursor:pointer; font-size:11px;">❌</button>
+            <button onclick="toggleFxSignalActive(${i})" title="${active ? 'Hide from page' : 'Show on page'}" style="background:none; border:none; color:#888; cursor:pointer; font-size:10px;">${active ? '👁' : '🚫'}</button>
+            <button onclick="removeForexSignal(${i})" style="background:none; border:none; color:#ff1744; cursor:pointer; font-size:10px;">✕</button>
+        </div>`;
+    }).join('');
+}
+
+async function markFxSignalTarget(i) {
+    _fxSignals[i].status = 'target_done';
+    renderFxSignals();
+    await saveForexSignals('✅ Target marked!');
+}
+
+async function markFxSignalSlHit(i) {
+    _fxSignals[i].status = 'sl_hit';
+    renderFxSignals();
+    await saveForexSignals('❌ SL Hit marked!');
+}
+
+async function toggleFxSignalActive(i) {
+    _fxSignals[i].active = _fxSignals[i].active === false;
+    renderFxSignals();
+    await saveForexSignals('👁 Visibility updated!');
+}
+
+async function addForexSignal() {
+    const el = (id) => document.getElementById(id);
+    const pair = (el('fxSignalPair').value || '').trim().toUpperCase();
+    if (!pair) { el('fxSignalStatus').innerHTML = '<span style="color:#ff1744;">Pair likho</span>'; return; }
+    const entry = el('fxSignalEntry').value.trim();
+    const tp = el('fxSignalTp').value.trim();
+    const sl = el('fxSignalSl').value.trim();
+    const trending = (el('fxSignalTrending') ? el('fxSignalTrending').value : '').trim();
+    const broadcast = el('fxSignalBroadcast') ? el('fxSignalBroadcast').checked : false;
+    const time = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+    _fxSignals.unshift({ pair, dir: _fxSignalDir, entry, tp, sl, trending, time, status: 'active', active: true });
+    el('fxSignalPair').value = ''; el('fxSignalEntry').value = ''; el('fxSignalTp').value = ''; el('fxSignalSl').value = '';
+    if (el('fxSignalTrending')) el('fxSignalTrending').value = '';
+    renderFxSignals();
+    await saveForexSignals('✅ Signal added!');
+    if (broadcast) {
+        const fxUsers = (window.allUsers || []).filter(u => u.forexAllowed).map(u => u.username);
+        if (fxUsers.length) {
+            const emoji = _fxSignalDir === 'buy' ? '🟢' : '🔴';
+            let msg = '';
+            if (trending) msg += `🔥 ${trending}\n`;
+            msg += `${emoji} ${(_fxSignalDir).toUpperCase()} — ${pair}\n`;
+            if (entry) msg += `Entry: ${entry}\n`;
+            if (tp) msg += `Target: ${tp}\n`;
+            if (sl) msg += `SL: ${sl}\n`;
+            msg += `\nBy Vaibhav`;
+            await fetch(API + '/api/admin/forex-broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+                body: JSON.stringify({ usernames: fxUsers, message: msg, msgColor: _fxSignalDir === 'buy' ? '#00c853' : '#ff1744' })
+            });
+            el('fxSignalStatus').innerHTML = '<span style="color:#00c853;">✅ Signal added & broadcasted to ' + fxUsers.length + ' Forex user(s)!</span>';
+            loadAdminData();
+            setTimeout(() => { el('fxSignalStatus').innerHTML = ''; }, 4000);
+        } else {
+            el('fxSignalStatus').innerHTML = '<span style="color:#ffab00;">Signal saved (koi Forex user nahi mila)</span>';
+            setTimeout(() => { el('fxSignalStatus').innerHTML = ''; }, 4000);
+        }
+    }
+}
+
+async function removeForexSignal(i) {
+    _fxSignals.splice(i, 1);
+    renderFxSignals();
+    await saveForexSignals('🗑 Signal removed!');
+}
+
+async function saveForexSignals(msg) {
+    const status = document.getElementById('fxSignalStatus');
+    if (status) status.innerHTML = '<span style="color:#ffab00;">Saving...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ forexSignals: _fxSignals })
+        }).then(r => r.json());
+        if (r.success && status) {
+            status.innerHTML = '<span style="color:#00c853;">' + msg + '</span>';
+            setTimeout(() => { status.innerHTML = ''; }, 3000);
+        } else if (status) {
+            status.innerHTML = '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        }
+    } catch (e) { if (status) status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+/* ═══════ FOREX BROADCAST (separate from India market) ═══════ */
+
+function renderForexBcastUsers(search) {
+    const container = document.getElementById('forexBcastUsers');
+    if (!container) return;
+    const term = (search || '').toLowerCase();
+    const users = (window.allUsers || []).filter(u => !term || u.username.toLowerCase().includes(term) || (u.fullName || '').toLowerCase().includes(term));
+    if (!users.length) {
+        container.innerHTML = '<div style="color:var(--amute);font-size:11px;padding:8px;">No users found</div>';
+        return;
+    }
+    const catEmoji = { Silver: '🥈', Gold: '🥇', Diamond: '💎', Premium: '⭐' };
+    container.innerHTML = users.map(u => {
+        const hasMsg = u.forexMessage && u.forexMessage.trim() !== '';
+        const emoji = catEmoji[u.category] || '🥈';
+        return `<label style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px solid #1a1a1a; cursor: pointer; font-size: 12px;">
+            <input type="checkbox" class="forex-bcast-cb" value="${u.username}">
+            <span style="flex:1;">${u.username}</span>
+            <span style="font-size:9px; color:#888;">${emoji} ${u.category || 'Silver'}</span>
+            ${hasMsg ? '<span style="font-size:8px; background:#ffb100; color:#000; padding:1px 5px; border-radius:3px; font-weight:600;">MSG</span>' : ''}
+        </label>`;
+    }).join('');
+}
+
+function selectAllForexBcastUsers(all) {
+    document.querySelectorAll('.forex-bcast-cb').forEach(cb => cb.checked = !!all);
+}
+
+function getSelectedForexBcastUsers() {
+    return [...document.querySelectorAll('.forex-bcast-cb:checked')].map(cb => cb.value);
+}
+
+async function sendForexBcast() {
+    const status = document.getElementById('forexBcastStatus');
+    const usernames = getSelectedForexBcastUsers();
+    const message = document.getElementById('forexBcastMessage').value.trim();
+    const msgColor = document.getElementById('forexBcastColor').value || '#ffb100';
+    if (!usernames.length) { status.innerHTML = '<span style="color:#ff1744;">❌ Select at least one user</span>'; return; }
+    if (!message) { status.innerHTML = '<span style="color:#ff1744;">❌ Enter a message</span>'; return; }
+    status.innerHTML = '<span style="color:#ffab00;">⏳ Sending...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/forex-broadcast', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ usernames, message, msgColor })
+        }).then(r => r.json());
+        status.innerHTML = r.success ? '<span style="color:#00c853;">✅ ' + r.message + '</span>' : '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        if (r.success) { document.getElementById('forexBcastMessage').value = ''; loadAdminData(); setTimeout(() => { status.innerHTML = ''; }, 4000); }
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+async function clearForexBcast() {
+    const status = document.getElementById('forexBcastStatus');
+    const usernames = getSelectedForexBcastUsers();
+    if (!usernames.length) { status.innerHTML = '<span style="color:#ff1744;">❌ Select at least one user</span>'; return; }
+    try {
+        const r = await fetch(API + '/api/admin/forex-clear-messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'admin-key': ADMIN_KEY },
+            body: JSON.stringify({ usernames })
+        }).then(r => r.json());
+        status.innerHTML = r.success ? '<span style="color:#00c853;">✅ ' + r.message + '</span>' : '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        if (r.success) loadAdminData();
+    } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
+}
+
+async function clearAllForexBcast() {
+    const status = document.getElementById('forexBcastStatus');
+    status.innerHTML = '<span style="color:#ffab00;">⏳ Clearing...</span>';
+    try {
+        const r = await fetch(API + '/api/admin/forex-clear-all-messages', {
+            method: 'POST',
+            headers: { 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        status.innerHTML = r.success ? '<span style="color:#00c853;">✅ ' + r.message + '</span>' : '<span style="color:#ff1744;">❌ ' + r.message + '</span>';
+        if (r.success) loadAdminData();
     } catch (e) { status.innerHTML = '<span style="color:#ff1744;">❌ Server error</span>'; }
 }
 
@@ -7163,7 +8654,7 @@ window.renderUsers = function(users) {
             <div class="admin-user-cell">
                 <div class="admin-user-avatar">${initials}</div>
                 <div>
-                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.classApproved ? ' <span title="Class Access Granted" style="color:#a855f7;font-size:12px;">📚</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
+                    <div class="admin-user-name">${u.username}${u.highlight ? ' <span class="admin-badge-highlight">★</span>' : ''}${u.isVerified ? ' <span title="Verified" style="color:#22c55e;font-size:12px;">✅</span>' : ''}${u.classApproved ? ' <span title="Class Access Granted" style="color:#a855f7;font-size:12px;">📚</span>' : ''}${u.forexAllowed ? ' <span title="Forex Access" style="color:#3b82f6;font-size:12px;">💱</span>' : ''}${u.lastDevice ? ' <span title="' + (u.lastDevice||'') + ' (' + (u.lastPlatform||'') + ')" style="font-size:9px;">📱</span>' : ''}</div>
                     <div class="admin-user-detail" style="font-size:10px;color:var(--adim);">${u.fullName || ''} | ${u.email || ''}</div>
                     <div class="admin-user-detail" style="font-size:9px;color:var(--amute);">${phone !== '-' ? '📱 ' + phone : ''}${u.lastDevice ? ' 🖥️ ' + u.lastDevice : ''}</div>
                 </div>
@@ -7178,6 +8669,9 @@ window.renderUsers = function(users) {
                 <button class="admin-action-btn" onclick="event.stopPropagation();editUser('${u.username}')" title="Edit">✏️</button>
                 <div onclick="event.stopPropagation();toggleClassAccess('${u.username}')" title="${u.classApproved ? 'Revoke Class Access' : 'Grant Class Access'}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;background:${u.classApproved ? 'rgba(34,197,94,0.15)' : 'rgba(113,113,122,0.15)'};border:1px solid ${u.classApproved ? 'rgba(34,197,94,0.3)' : 'rgba(113,113,122,0.3)'};color:${u.classApproved ? '#22c55e' : 'var(--adim)'};transition:all 0.2s;">
                     📚 ${u.classApproved ? 'ON' : 'OFF'}
+                </div>
+                <div onclick="event.stopPropagation();toggleForexAccess('${u.username}')" title="${u.forexAllowed ? 'Revoke Forex' : 'Grant Forex'}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;background:${u.forexAllowed ? 'rgba(59,130,246,0.15)' : 'rgba(113,113,122,0.15)'};border:1px solid ${u.forexAllowed ? 'rgba(59,130,246,0.3)' : 'rgba(113,113,122,0.3)'};color:${u.forexAllowed ? '#3b82f6' : 'var(--adim)'};transition:all 0.2s;">
+                    💱 ${u.forexAllowed ? 'ON' : 'OFF'}
                 </div>
                 ${u.active ? `<button class="admin-action-btn" onclick="event.stopPropagation();blockUser('${u.username}')" title="Block">🚫</button>` : `<button class="admin-action-btn" onclick="event.stopPropagation();renewUser('${u.username}')" title="Unblock/Renew">✅</button>`}
                 <button class="admin-action-btn" onclick="event.stopPropagation();deleteUser('${u.username}')" title="Delete" style="color:#ef4444;">🗑️</button>
@@ -7200,6 +8694,21 @@ async function toggleClassAccess(username) {
         }).then(r => r.json());
         if (r.success) {
             customAlert(r.message, '📚');
+            loadAdminData();
+        } else {
+            customAlert(r.message || 'Error', '❌');
+        }
+    } catch (e) { customAlert('Network error', '❌'); }
+}
+
+async function toggleForexAccess(username) {
+    try {
+        const r = await fetch(API + '/api/admin/user/' + username + '/forex-access', {
+            method: 'POST',
+            headers: { 'admin-key': ADMIN_KEY }
+        }).then(r => r.json());
+        if (r.success) {
+            customAlert(r.message, '💱');
             loadAdminData();
         } else {
             customAlert(r.message || 'Error', '❌');
@@ -7339,6 +8848,7 @@ function handleGlobalSearch(query) {
         { id:'maintenance', icon:'🔧', label:'Maintenance Mode', keywords:'maintenance off mode' },
         { id:'changePass', icon:'🔐', label:'Change Password', keywords:'password change reset admin' },
         { id:'apiKeys', icon:'🔑', label:'API Keys', keywords:'api key token telegram upstox' },
+        { id:'forexSettings', icon:'💱', label:'Forex Settings', keywords:'forex referral banner broker crypto' },
         { id:'tipPerf', icon:'🎯', label:'Tip Performance', keywords:'tips performance accuracy' },
         { id:'activity', icon:'🕐', label:'Recent Activity', keywords:'activity log history' },
         { id:'loginHist', icon:'📱', label:'Login History', keywords:'login history device' },
@@ -7647,6 +9157,7 @@ async function editUser(username) {
         if (!user.verifiedMobile) parts.push('Mobile');
         document.getElementById('infoVerified').innerHTML = '<span style="color:#f59e0b;">⚠ Not Verified</span> <span style="color:#888;font-size:10px;">(Missing: ' + parts.join(', ') + ')</span>';
     }
+    document.getElementById('infoForex').innerHTML = user.forexAllowed ? '<span style="color:#3b82f6;font-weight:700;">💱 Allowed</span>' : '<span style="color:#ef4444;">💱 Not Allowed</span>';
     document.getElementById('editFullName').value = user.fullName || user.username;
     document.getElementById('editCategory').value = user.category || 'Silver';
     document.getElementById('editDob').value = user.dob || '';
@@ -9666,7 +11177,7 @@ function startAutoRefresh() {
             // Stock tips: every 2 min
             refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardStockTips(); }, 120000));
             // Others
-            refreshIntervals.push(setInterval(() => { if (currentUser) checkMessageUpdate(); }, 30000));
+            refreshIntervals.push(setInterval(() => { if (currentUser) checkMessageUpdate(); }, 15000));
             refreshIntervals.push(setInterval(() => { if (currentUser) loadDashboardSettingsAndApply(); }, 60000));
             refreshIntervals.push(setInterval(() => { if (currentUser) loadDisclaimer(); }, 60000));
             refreshIntervals.push(setInterval(() => { startDynamicIntervals(); }, 300000));
@@ -9716,6 +11227,15 @@ async function checkMessageUpdate() {
         currentUser.isBirthday = r.user.isBirthday || false;
         currentUser.userAge = r.user.userAge || null;
         currentUser.birthdayWish = r.user.birthdayWish || '';
+
+        // Forex broadcast update
+        const fxMsgChanged = (r.user.forexMessage || '') !== (currentUser.forexMessage || '');
+        currentUser.forexMessage = r.user.forexMessage || '';
+        currentUser.forexMsgColor = r.user.forexMsgColor || '#ffb100';
+        currentUser.forexMessageImageUrl = r.user.forexMessageImageUrl || '';
+        if (fxMsgChanged || (currentUser.forexMessage && document.getElementById('fxMessageBanner') && document.getElementById('fxMessageBanner').style.display === 'none')) {
+            updateForexMessageBanner();
+        }
 
         // Birthday banner
         const bdayBanner = document.getElementById('birthdayBanner');
@@ -9836,6 +11356,24 @@ function updateMessageBanner() {
 
     // Scroll to banner
     setTimeout(() => { msgBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+}
+
+function updateForexMessageBanner() {
+    const banner = document.getElementById('fxMessageBanner');
+    const textEl = document.getElementById('fxMessageText');
+    if (!banner || !textEl) return;
+    const msg = (currentUser && currentUser.forexMessage) || '';
+    if (!msg || msg.trim() === '') {
+        banner.style.display = 'none';
+        return;
+    }
+    const mc = (currentUser && currentUser.forexMsgColor) || '#ffb100';
+    textEl.textContent = msg;
+    banner.style.display = 'block';
+    banner.style.background = `${mc}22`;
+    banner.style.borderColor = `${mc}80`;
+    const label = document.getElementById('fxMessageLabel');
+    if (label) label.style.color = mc;
 }
 
 /* ═══════ CUSTOM CONFIRM & ALERT MODAL ═══════ */

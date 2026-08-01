@@ -94,6 +94,21 @@ app.get('/api/settings', (req, res) => {
         plans: settings.plans || [{ id: 'standard', name: 'Standard Plan', days: 30, price: 0 }],
         upiQrImage: settings.upiQrImage || '',
         upiPaymentId: settings.upiPaymentId || '',
+        forexReferralName: settings.forexReferralName || '',
+        forexReferralLink: settings.forexReferralLink || '',
+        forexReferralLogo: settings.forexReferralLogo || '',
+        forexBannerImage: settings.forexBannerImage || '',
+        forexBannerLink: settings.forexBannerLink || '',
+        forexTopBannerImage: settings.forexTopBannerImage || '',
+        forexTopBannerLink: settings.forexTopBannerLink || '',
+        forexShowBanner: settings.forexShowBanner !== false,
+        forexShowTopBanner: settings.forexShowTopBanner !== false,
+        forexSignals: settings.forexSignals || [],
+        forexPairs: settings.forexPairs || [],
+        forexMost: settings.forexMost || [],
+        forexCryptos: settings.forexCryptos || [],
+        forexGlobalIndices: settings.forexGlobalIndices || [],
+        forexAsianIndices: settings.forexAsianIndices || [],
         telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME || ''
     });
 });
@@ -126,14 +141,29 @@ app.get('/api/admin/settings', checkAdmin, (req, res) => {
         maintenanceMode: settings.maintenanceMode || false,
         maintenanceMessage: settings.maintenanceMessage || '',
         maintenanceEndsAt: settings.maintenanceEndsAt || null,
-        dailyMaintenance: settings.dailyMaintenance || { enabled: false, startHour: 2, startMin: 0, endHour: 7, endMin: 0, message: '' }
+        dailyMaintenance: settings.dailyMaintenance || { enabled: false, startHour: 2, startMin: 0, endHour: 7, endMin: 0, message: '' },
+        forexReferralName: settings.forexReferralName || '',
+        forexReferralLink: settings.forexReferralLink || '',
+        forexReferralLogo: settings.forexReferralLogo || '',
+        forexBannerImage: settings.forexBannerImage || '',
+        forexBannerLink: settings.forexBannerLink || '',
+        forexTopBannerImage: settings.forexTopBannerImage || '',
+        forexTopBannerLink: settings.forexTopBannerLink || '',
+        forexShowBanner: settings.forexShowBanner !== false,
+        forexShowTopBanner: settings.forexShowTopBanner !== false,
+        forexSignals: settings.forexSignals || [],
+        forexPairs: settings.forexPairs || [],
+        forexMost: settings.forexMost || [],
+        forexCryptos: settings.forexCryptos || [],
+        forexGlobalIndices: settings.forexGlobalIndices || [],
+        forexAsianIndices: settings.forexAsianIndices || []
     });
 });
 
 // Admin: update settings
 app.put('/api/admin/settings', checkAdmin, (req, res) => {
     try {
-        const { disclaimerText, disclaimerBgColor, disclaimerTextColor, disclaimerSpeed, disclaimerFontSize, upstoxApiKey, upstoxAccessToken, telegramBotToken, telegramChatId, adminPersonalTelegramId, showTipSebiText, sebiDisclaimerText, showHeaderTelegram, showHeaderWhatsApp, headerTelegramLink, headerWhatsAppLink, birthdayWishes, plans, upiQrImage, upiPaymentId } = req.body;
+        const { disclaimerText, disclaimerBgColor, disclaimerTextColor, disclaimerSpeed, disclaimerFontSize, upstoxApiKey, upstoxAccessToken, telegramBotToken, telegramChatId, adminPersonalTelegramId, showTipSebiText, sebiDisclaimerText, showHeaderTelegram, showHeaderWhatsApp, headerTelegramLink, headerWhatsAppLink, birthdayWishes, plans, upiQrImage, upiPaymentId, forexReferralName, forexReferralLink, forexReferralLogo, forexBannerImage, forexBannerLink, forexTopBannerImage, forexTopBannerLink, forexShowBanner, forexShowTopBanner, forexSignals, forexPairs, forexMost, forexCryptos, forexGlobalIndices, forexAsianIndices } = req.body;
         const settings = loadSettings();
         if (disclaimerText !== undefined) settings.disclaimerText = disclaimerText;
         if (disclaimerBgColor !== undefined) settings.disclaimerBgColor = disclaimerBgColor;
@@ -155,6 +185,21 @@ app.put('/api/admin/settings', checkAdmin, (req, res) => {
         if (plans !== undefined) settings.plans = Array.isArray(plans) ? plans : settings.plans || [];
         if (upiQrImage !== undefined) settings.upiQrImage = upiQrImage;
         if (upiPaymentId !== undefined) settings.upiPaymentId = upiPaymentId;
+        if (forexReferralName !== undefined) settings.forexReferralName = forexReferralName;
+        if (forexReferralLink !== undefined) settings.forexReferralLink = forexReferralLink;
+        if (forexReferralLogo !== undefined) settings.forexReferralLogo = forexReferralLogo;
+        if (forexBannerImage !== undefined) settings.forexBannerImage = forexBannerImage;
+        if (forexBannerLink !== undefined) settings.forexBannerLink = forexBannerLink;
+        if (forexTopBannerImage !== undefined) settings.forexTopBannerImage = forexTopBannerImage;
+        if (forexTopBannerLink !== undefined) settings.forexTopBannerLink = forexTopBannerLink;
+        if (forexShowBanner !== undefined) settings.forexShowBanner = !!forexShowBanner;
+        if (forexShowTopBanner !== undefined) settings.forexShowTopBanner = !!forexShowTopBanner;
+        if (forexSignals !== undefined) settings.forexSignals = Array.isArray(forexSignals) ? forexSignals : [];
+        if (forexPairs !== undefined) settings.forexPairs = Array.isArray(forexPairs) ? forexPairs : [];
+        if (forexMost !== undefined) settings.forexMost = Array.isArray(forexMost) ? forexMost : [];
+        if (forexCryptos !== undefined) settings.forexCryptos = Array.isArray(forexCryptos) ? forexCryptos : [];
+        if (forexGlobalIndices !== undefined) settings.forexGlobalIndices = Array.isArray(forexGlobalIndices) ? forexGlobalIndices : [];
+        if (forexAsianIndices !== undefined) settings.forexAsianIndices = Array.isArray(forexAsianIndices) ? forexAsianIndices : [];
         saveSettings(settings);
         res.json({ success: true, message: 'Settings updated' });
     } catch (error) {
@@ -1226,7 +1271,8 @@ app.post('/api/login', loginLimiter, async (req, res) => {
                 fullName: user.fullName || '',
                 verifiedEmail: user.verifiedEmail || '',
                 verifiedMobile: user.verifiedMobile || '',
-                isVerified: isVerified
+                isVerified: isVerified,
+                forexAllowed: !!user.forexAllowed
             }
         });
     } catch (error) {
@@ -1424,6 +1470,9 @@ app.get('/api/me', (req, res) => {
             message: user.message || '',
             msgColor: user.msgColor || '#ff6b35',
             messageImageUrl: user.messageImageUrl || '',
+            forexMessage: user.forexMessage || '',
+            forexMsgColor: user.forexMsgColor || '#ffb100',
+            forexMessageImageUrl: user.forexMessageImageUrl || '',
             highlight: user.highlight || false,
             dob: user.dob || '',
             isBirthday: !!isBirthday,
@@ -1433,7 +1482,8 @@ app.get('/api/me', (req, res) => {
             isVerified: !!(user.fullName && user.fullName.trim().length > 1 && user.verifiedEmail && user.verifiedMobile),
             googleLinked: !!user.googleSub,
             telegramLinked: !!user.telegramId,
-            classApproved: !!user.classApproved
+            classApproved: !!user.classApproved,
+            forexAllowed: !!user.forexAllowed
         }
     });
 });
@@ -1671,6 +1721,8 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         message: u.message || '',
         msgColor: u.msgColor || '#ff6b35',
         highlight: u.highlight || false,
+        forexMessage: u.forexMessage || '',
+        forexMsgColor: u.forexMsgColor || '#ffb100',
         passwordPlain: u.passwordPlain || '',
         verifiedEmail: u.verifiedEmail || '',
         verifiedMobile: u.verifiedMobile || '',
@@ -1679,7 +1731,8 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
         telegramId: u.telegramId || '',
         telegramUsername: u.telegramUsername || '',
         profilePhoto: u.profilePhoto || '',
-        classApproved: !!u.classApproved
+        classApproved: !!u.classApproved,
+        forexAllowed: !!u.forexAllowed
     }));
     res.json({ success: true, users });
 });
@@ -1942,6 +1995,191 @@ app.post('/api/admin/clear-all-messages', checkAdmin, (req, res) => {
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
     }
+});
+
+// ========================================
+// FOREX BROADCAST (separate from India market)
+// ========================================
+
+// Send forex broadcast to selected users
+app.post('/api/admin/forex-broadcast', checkAdmin, async (req, res) => {
+    try {
+        const { usernames, message, msgColor, messageImage } = req.body;
+        if (!usernames || !Array.isArray(usernames) || usernames.length === 0) {
+            return res.json({ success: false, message: 'Select at least one user' });
+        }
+        if (!message || message.trim() === '') {
+            return res.json({ success: false, message: 'Message cannot be empty' });
+        }
+        const data = loadUsers();
+        let count = 0;
+        data.users.forEach(u => {
+            if (usernames.includes(u.username)) {
+                u.forexMessage = message.trim();
+                u.forexMsgColor = msgColor || '#ffb100';
+                if (messageImage) u.forexMessageImageUrl = messageImage;
+                count++;
+            }
+        });
+        saveUsers(data);
+        logActivity('forex_broadcast_sent', `Forex message sent to ${count} user(s)`);
+        res.json({ success: true, message: `Forex message sent to ${count} user(s)` });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Clear forex messages for multiple users
+app.post('/api/admin/forex-clear-messages', checkAdmin, (req, res) => {
+    try {
+        const { usernames } = req.body;
+        const data = loadUsers();
+        let count = 0;
+        data.users.forEach(u => {
+            if (usernames.includes(u.username)) {
+                u.forexMessage = '';
+                u.forexMsgColor = '#ffb100';
+                u.forexMessageImageUrl = '';
+                count++;
+            }
+        });
+        saveUsers(data);
+        res.json({ success: true, message: `Forex messages cleared for ${count} user(s)` });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Clear ALL forex messages for ALL users
+app.post('/api/admin/forex-clear-all-messages', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        let count = 0;
+        data.users.forEach(u => {
+            if (u.forexMessage && u.forexMessage.trim() !== '') {
+                u.forexMessage = '';
+                u.forexMsgColor = '#ffb100';
+                u.forexMessageImageUrl = '';
+                count++;
+            }
+        });
+        saveUsers(data);
+        res.json({ success: true, message: `All forex messages cleared for ${count} user(s)` });
+    } catch (error) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// ========================================
+// FOREX REAL DATA ENGINE (Yahoo Finance)
+// Free real-time quotes - separate from India/Upstox data
+// ========================================
+const FOREX_YAHOO_SYMBOLS = {
+    'EUR/USD':'EURUSD=X','GBP/USD':'GBPUSD=X','USD/JPY':'JPY=X','USD/CHF':'CHF=X','USD/INR':'INR=X','AUD/USD':'AUDUSD=X',
+    'NZD/USD':'NZDUSD=X','USD/CAD':'CAD=X','EUR/GBP':'EURGBP=X','EUR/JPY':'EURJPY=X','GBP/JPY':'GBPJPY=X','AUD/JPY':'AUDJPY=X',
+    'EUR/INR':'EURINR=X','GBP/INR':'GBPINR=X','USD/CNY':'CNY=X',
+    'XAU/USD':'GC=F','XAG/USD':'SI=F','USOIL':'CL=F','BRENT':'BZ=F',
+    'BTC/USD':'BTC-USD','ETH/USD':'ETH-USD','USDT':'USDT-USD','BNB/USD':'BNB-USD','SOL/USD':'SOL-USD','XRP/USD':'XRP-USD',
+    'DOGE/USD':'DOGE-USD','ADA/USD':'ADA-USD','LTC/USD':'LTC-USD','DOT/USD':'DOT-USD','LINK/USD':'LINK-USD',
+    'S&P 500':'^GSPC','NASDAQ':'^IXIC','DOW J':'^DJI','FTSE 100':'^FTSE','DAX 40':'^GDAXI','CAC 40':'^FCHI',
+    'STOXX 50':'^STOXX50E','IBEX 35':'^IBEX','ASX 200':'^AXJO',
+    'NIFTY 50':'^NSEI','SENSEX':'^BSESN','HANG SENG':'^HSI','SHANGHAI':'000001.SS','NIKKEI 225':'^N225',
+    'KOSPI':'^KS11','TAIWAN SE':'^TWII'
+};
+let _fxLivePrices = {};
+let _fxLiveStatus = { lastUpdate: 0, source: 'loading', ok: false };
+function seedFxLivePrices() {
+    const p = _fxLivePrices = {};
+    Object.keys(FOREX_YAHOO_SYMBOLS).forEach(id => {
+        p[id] = { base: 100, price: 100, chg: 0 };
+    });
+}
+seedFxLivePrices();
+
+async function fetchFxRealData() {
+    try {
+        const ids = Object.keys(FOREX_YAHOO_SYMBOLS);
+        const chunkSize = 20;
+        for (let i = 0; i < ids.length; i += chunkSize) {
+            const chunkIds = ids.slice(i, i + chunkSize);
+            const symStr = chunkIds.map(id => FOREX_YAHOO_SYMBOLS[id]).join(',');
+            const url = 'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + encodeURIComponent(symStr) + '&range=1d&interval=1m';
+            const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(12000) });
+            if (!res.ok) continue;
+            const j = await res.json();
+            if (j && j.spark && j.spark.result) {
+                j.spark.result.forEach(r => {
+                    const id = chunkIds.find(x => FOREX_YAHOO_SYMBOLS[x] === r.symbol);
+                    if (!id || !r.response || !r.response[0]) return;
+                    const meta = r.response[0].meta;
+                    const price = parseFloat(meta.regularMarketPrice);
+                    const prev = parseFloat(meta.chartPreviousClose) || parseFloat(meta.previousClose) || price;
+                    if (isFinite(price) && price > 0) {
+                        const s = _fxLivePrices[id];
+                        s.price = price;
+                        s.base = prev;
+                        s.chg = prev > 0 ? Math.round(((price - prev) / prev) * 10000) / 100 : 0;
+                    }
+                });
+            }
+        }
+        _fxLiveStatus = { lastUpdate: Date.now(), source: 'yahoo-real', ok: true };
+    } catch (e) {
+        _fxLiveStatus = { lastUpdate: Date.now(), source: 'last-known', ok: _fxLiveStatus.ok };
+    }
+}
+fetchFxRealData();
+setInterval(fetchFxRealData, 5000);
+
+app.get('/api/forex/live', (req, res) => {
+    const out = {};
+    Object.keys(_fxLivePrices).forEach(id => {
+        const s = _fxLivePrices[id];
+        out[id] = { price: s.price, chg: s.chg };
+    });
+    // Backward-compatible: both top-level ids AND {data, status} so old cached clients work
+    res.json(Object.assign({}, out, { data: out, status: _fxLiveStatus }));
+});
+
+// GIFT NIFTY scraper - price is server-rendered in giftnifty.com HTML
+let _giftNifty = { price: null, chg: 0, base: 0 };
+async function fetchGiftNifty() {
+    try {
+        const res = await fetch('https://giftnifty.com/', { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(12000) });
+        if (!res.ok) return;
+        const html = await res.text();
+        const pm = html.match(/id="heroPrice">\s*([\d,.]+)/);
+        const cm = html.match(/id="changePill">\s*([-+]?[\d,.]+)\s*\(([-+]?[\d.]+)%\)/);
+        if (pm) {
+            const price = parseFloat(pm[1].replace(/,/g, ''));
+            const chg = cm ? parseFloat(cm[1].replace(/,/g, '')) : 0;
+            const pct = cm ? parseFloat(cm[2]) : 0;
+            if (isFinite(price) && price > 0) {
+                _giftNifty = { price, base: price - chg, chg: pct };
+            }
+        }
+    } catch (e) {}
+}
+fetchGiftNifty();
+setInterval(fetchGiftNifty, 10000);
+
+// Admin Live Indices - Upstox India data + real forex/global symbols + GIFT NIFTY
+const FOREX_LIVE_INDICES = ['S&P 500','NASDAQ','DOW J','HANG SENG','SHANGHAI','XAU/USD','USOIL','BTC/USD'];
+app.get('/api/admin/indices', checkAdmin, async (req, res) => {
+    const list = [];
+    if (marketCache.indices.data && marketCache.indices.data.length > 0) {
+        list.push(...marketCache.indices.data);
+    }
+    if (_giftNifty.price) {
+        list.push({ name: 'GIFT NIFTY', ltp: +_giftNifty.price.toFixed(2), change: +((_giftNifty.price - _giftNifty.base).toFixed(2)), pct: _giftNifty.chg });
+    }
+    FOREX_LIVE_INDICES.forEach(name => {
+        const s = _fxLivePrices[name];
+        if (s) {
+            list.push({ name, ltp: +s.price.toFixed(2), change: +((s.price - s.base).toFixed(2)), pct: s.chg });
+        }
+    });
+    res.json(list);
 });
 
 // ========================================
@@ -2752,18 +2990,6 @@ app.get('/api/indices', checkUserAuth, async (req, res) => {
     res.json([]);
 });
 
-// Admin indices endpoint
-app.get('/api/admin/indices', checkAdmin, async (req, res) => {
-    if (marketCache.indices.data && marketCache.indices.data.length > 0) {
-        return res.json(marketCache.indices.data);
-    }
-    const liveData = await fetchIndicesData();
-    if (liveData && liveData.length > 0) {
-        return res.json(liveData);
-    }
-    res.json([]);
-});
-
 app.get('/api/gainers-losers', checkUserAuth, async (req, res) => {
     const symbols = [...TOP_GAINERS, ...TOP_LOSERS];
     const liveData = await fetchStockQuote(symbols);
@@ -3455,6 +3681,18 @@ app.post('/api/admin/user/:username/class-access', checkAdmin, (req, res) => {
         logActivity('class_access_toggled', `Class access ${user.classApproved ? 'granted' : 'revoked'} for ${user.username}`);
         saveUsers(data);
         res.json({ success: true, classApproved: user.classApproved, message: user.classApproved ? 'Class access granted' : 'Class access revoked' });
+    } catch (e) { res.json({ success: false }); }
+});
+
+app.post('/api/admin/user/:username/forex-access', checkAdmin, (req, res) => {
+    try {
+        const data = loadUsers();
+        const user = data.users.find(u => u.username === req.params.username);
+        if (!user) return res.json({ success: false, message: 'User not found' });
+        user.forexAllowed = !user.forexAllowed;
+        logActivity('forex_access_toggled', `Forex access ${user.forexAllowed ? 'granted' : 'revoked'} for ${user.username}`);
+        saveUsers(data);
+        res.json({ success: true, forexAllowed: user.forexAllowed, message: user.forexAllowed ? 'Forex access granted' : 'Forex access revoked' });
     } catch (e) { res.json({ success: false }); }
 });
 

@@ -8,7 +8,7 @@
       "passwordPlain": "test123",
       "approved": true,
       "subscriptionExpiry": "2026-08-18T12:30:21.020Z",
-      "lastLogin": "2026-07-28T13:12:47.592Z",
+      "lastLogin": "2026-08-01T17:22:31.629Z",
       "createdAt": "2026-07-24T22:55:07.447Z",
       "fullName": "Test User",
       "paymentAmount": 6000,
@@ -21,9 +21,9 @@
       "highlight": true,
       "category": "Gold",
       "dob": "1995-06-15",
-      "lastDevice": "Android 16",
+      "lastDevice": "Linux",
       "lastPlatform": "Linux armv81",
-      "lastUserAgent": "Mozilla/5.0 (Android 16; Mobile; rv:145.0) Gecko/145.0 Firefox/145.0",
+      "lastUserAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36",
       "notifications": [
         {
           "id": "offer_1785162717982_np2b",
@@ -36,11 +36,15 @@
       ],
       "locationHistory": [],
       "approvedDevices": [
-        "Android 16|Linux armv81|Mozilla/5.0 (Android 16; Mobile; rv:145.0) Gecko/145.0 Firefox/145.0"
+        "Linux|Linux armv81|Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome"
       ],
       "pendingDevice": null,
       "lastRenewDate": "2026-07-27T14:32:14.404Z",
-      "classApproved": true
+      "classApproved": true,
+      "forexAllowed": true,
+      "forexMessage": "🔥 Tranding\n🟢 BUY — EUR/USD\nEntry: 1.08450\nTarget: 1.08900\nSL: 1.08300\n\nBy Vaibhav",
+      "forexMsgColor": "#00c853",
+      "forexMessageImageUrl": ""
     },
     {
       "id": "usr_1784936148933_pkzhluazq",
