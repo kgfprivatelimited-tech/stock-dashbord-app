@@ -6073,6 +6073,10 @@ function showMarketSelect() {
 }
 
 function selectMarket(type) {
+    if (type === 'forex' && !(currentUser && currentUser.forexAllowed)) {
+        customAlert('Forex access is locked. Contact admin to grant access.', '🔒');
+        return;
+    }
     document.getElementById('marketSelect').style.display = 'none';
     localStorage.setItem('bf_market', type);
     if (type === 'india') {
@@ -6083,6 +6087,11 @@ function selectMarket(type) {
 }
 
 function showForexDashboard() {
+    if (!(currentUser && currentUser.forexAllowed)) {
+        document.getElementById('marketSelect').style.display = 'flex';
+        customAlert('Forex access is locked. Contact admin to grant access.', '🔒');
+        return;
+    }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('marketSelect').style.display = 'none';
@@ -6316,6 +6325,15 @@ function startForexUpdates() {
         window._fxLiveBusy = true;
         fetch(API + '/api/forex/live').then(r => r.json()).then(live => {
             window._fxLiveBusy = false;
+            if (live && live.forexBlocked) {
+                window._fxBlocked = true;
+                if (window._fxInterval) { clearInterval(window._fxInterval); window._fxInterval = null; }
+                if (currentUser) currentUser.forexAllowed = false;
+                localStorage.setItem('bf_market', 'india');
+                showMarketSelect();
+                customAlert('Forex access was revoked by admin.', '🔒');
+                return;
+            }
             const liveData = (live && live.data) ? live.data : live;
             const apply = (arr) => (arr || []).forEach(d => { if (liveData && liveData[d.id]) { d.price = liveData[d.id].price; d.chg = liveData[d.id].chg; window._baseFxPrice[d.id] = d.price; } });
             apply(window._fxData.pairs); apply(window._fxData.most); apply(window._fxData.cryptos);

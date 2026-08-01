@@ -914,6 +914,27 @@ function checkUserAuth(req, res, next) {
     next();
 }
 
+// Middleware: Check forex access (user must be forexAllowed by admin)
+function checkForexAccess(req, res, next) {
+    const userId = req.headers['user-id'];
+    if (!userId) {
+        return res.status(401).json({ error: 'Not logged in' });
+    }
+    const data = loadUsers();
+    const user = data.users.find(u => u.id === userId);
+    if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+    }
+    if (!isSubscriptionActive(user)) {
+        return res.status(403).json({ error: 'Subscription expired', blocked: true });
+    }
+    if (!user.forexAllowed) {
+        return res.status(403).json({ error: 'Forex access not granted', forexBlocked: true });
+    }
+    req.user = user;
+    next();
+}
+
 // Middleware: Check maintenance mode (blocks user routes, allows admin)
 function checkMaintenance(req, res, next) {
     const settings = loadSettings();
@@ -2131,7 +2152,7 @@ async function fetchFxRealData() {
 fetchFxRealData();
 setInterval(fetchFxRealData, 5000);
 
-app.get('/api/forex/live', (req, res) => {
+app.get('/api/forex/live', checkForexAccess, (req, res) => {
     const out = {};
     Object.keys(_fxLivePrices).forEach(id => {
         const s = _fxLivePrices[id];

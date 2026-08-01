@@ -38,7 +38,13 @@
       "approvedDevices": [
         "Linux|Linux armv81|Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome"
       ],
-      "pendingDevice": null,
+      "pendingDevice": {
+        "fingerprint": "Test|Windows|",
+        "device": "Test",
+        "platform": "Windows",
+        "userAgent": "",
+        "requestedAt": "2026-08-01T17:47:38.631Z"
+      },
       "lastRenewDate": "2026-07-27T14:32:14.404Z",
       "classApproved": true,
       "forexAllowed": true,
