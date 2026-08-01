@@ -7,25 +7,50 @@
       "password": "$2b$10$U65d6AyRiXqmMcFuYy103u9BBLb798EtGkUt0ObWZLftz93LjUidW",
       "passwordPlain": "test123",
       "approved": true,
-      "subscriptionExpiry": "2027-12-31T23:59:59.999Z",
-      "lastLogin": "2026-07-24T23:23:54.597Z",
+      "subscriptionExpiry": "2026-08-18T12:30:21.020Z",
+      "lastLogin": "2026-08-01T17:22:31.629Z",
       "createdAt": "2026-07-24T22:55:07.447Z",
       "fullName": "Test User",
-      "paymentAmount": 1000,
+      "paymentAmount": 6000,
       "paymentId": "DEMO-UPI-001",
       "paymentMethod": "UPI",
       "telegramChatId": "",
       "whatsappNumber": "9876543210",
       "message": "",
-      "msgColor": "#00c853",
+      "msgColor": "#f59e0b",
       "highlight": true,
       "category": "Gold",
       "dob": "1995-06-15",
       "lastDevice": "Linux",
       "lastPlatform": "Linux armv81",
       "lastUserAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36",
-      "notifications": [],
-      "locationHistory": []
+      "notifications": [
+        {
+          "id": "offer_1785162717982_np2b",
+          "type": "offer",
+          "title": "🎁 Summer Sale",
+          "message": "Get 10 bonus days on renewal! | Code: SUMMER10",
+          "time": "2026-07-27T14:31:57.982Z",
+          "read": false
+        }
+      ],
+      "locationHistory": [],
+      "approvedDevices": [
+        "Linux|Linux armv81|Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome"
+      ],
+      "pendingDevice": {
+        "fingerprint": "Test|Windows|",
+        "device": "Test",
+        "platform": "Windows",
+        "userAgent": "",
+        "requestedAt": "2026-08-01T17:47:38.631Z"
+      },
+      "lastRenewDate": "2026-07-27T14:32:14.404Z",
+      "classApproved": true,
+      "forexAllowed": true,
+      "forexMessage": "🔥 Tranding\n🟢 BUY — EUR/USD\nEntry: 1.08450\nTarget: 1.08900\nSL: 1.08300\n\nBy Vaibhav",
+      "forexMsgColor": "#00c853",
+      "forexMessageImageUrl": ""
     },
     {
       "id": "usr_1784936148933_pkzhluazq",
@@ -44,7 +69,17 @@
       "dob": "",
       "subscriptionExpiry": "2026-07-31T23:35:49.081Z",
       "lastLogin": null,
-      "createdAt": "2026-07-24T23:35:49.081Z"
+      "createdAt": "2026-07-24T23:35:49.081Z",
+      "notifications": [
+        {
+          "id": "offer_1785162717982_lq1q",
+          "type": "offer",
+          "title": "🎁 Summer Sale",
+          "message": "Get 10 bonus days on renewal! | Code: SUMMER10",
+          "time": "2026-07-27T14:31:57.982Z",
+          "read": false
+        }
+      ]
     },
     {
       "id": "usr_1784936753224_alfk2rqrq",
@@ -69,7 +104,17 @@
       "dob": "2002-07-10",
       "lastDevice": "",
       "lastPlatform": "",
-      "lastUserAgent": ""
+      "lastUserAgent": "",
+      "notifications": [
+        {
+          "id": "offer_1785162717982_ttyn",
+          "type": "offer",
+          "title": "🎁 Summer Sale",
+          "message": "Get 10 bonus days on renewal! | Code: SUMMER10",
+          "time": "2026-07-27T14:31:57.982Z",
+          "read": false
+        }
+      ]
     },
     {
       "id": "usr_1784936757596_xwedwkvkj",
@@ -94,7 +139,17 @@
       "dob": "1987-09-26",
       "lastDevice": "",
       "lastPlatform": "",
-      "lastUserAgent": ""
+      "lastUserAgent": "",
+      "notifications": [
+        {
+          "id": "offer_1785162717982_tamt",
+          "type": "offer",
+          "title": "🎁 Summer Sale",
+          "message": "Get 10 bonus days on renewal! | Code: SUMMER10",
+          "time": "2026-07-27T14:31:57.982Z",
+          "read": false
+        }
+      ]
     },
     {
       "id": "usr_1784938065921_kzfozysgd",
@@ -119,7 +174,17 @@
       "dob": "2002-05-22",
       "lastDevice": "",
       "lastPlatform": "",
-      "lastUserAgent": ""
+      "lastUserAgent": "",
+      "notifications": [
+        {
+          "id": "offer_1785162717982_d1cb",
+          "type": "offer",
+          "title": "🎁 Summer Sale",
+          "message": "Get 10 bonus days on renewal! | Code: SUMMER10",
+          "time": "2026-07-27T14:31:57.982Z",
+          "read": false
+        }
+      ]
     }
   ]
 }
