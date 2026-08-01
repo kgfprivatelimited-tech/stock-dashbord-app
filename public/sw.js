@@ -1,4 +1,4 @@
-const CACHE = 'bf-v16';
+const CACHE = 'bf-v17';
 const STATIC = [
   '/', '/manifest.json',
   '/icons/icon-192.svg', '/icons/icon-512.svg', '/icons/apple-touch-icon.svg',

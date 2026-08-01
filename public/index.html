@@ -3148,10 +3148,13 @@ input[type="color"] {
 <!-- ═══════ ADMIN LOGIN ═══════ -->
 <div class="admin-login-screen" id="adminLoginScreen">
     <div class="admin-login-box">
-        <h1>🔐 ADMIN ACCESS</h1>
-        <p style="color: var(--text-dim); font-size: 11px; margin-bottom: 20px;">Enter password to access admin panel</p>
+        <h1 id="adminLoginHead">🔐 ADMIN ACCESS</h1>
+        <p id="adminLoginSub" style="color: var(--text-dim); font-size: 11px; margin-bottom: 20px;">Enter password to access admin panel</p>
         <input type="password" id="adminPassword" placeholder="Admin Password" autocomplete="off">
-        <button onclick="adminLogin()">🔓 LOGIN</button>
+        <div id="adminOtpWrap" style="display:none;">
+            <input type="text" id="adminOtp" placeholder="Enter 6-digit OTP from Telegram" autocomplete="off" inputmode="numeric" maxlength="6" style="letter-spacing:6px;font-weight:700;">
+        </div>
+        <button id="adminLoginBtn" onclick="adminLogin()">🔓 LOGIN</button>
         <div class="admin-error" id="adminError"></div>
     </div>
 </div>
@@ -5923,18 +5926,25 @@ async function checkSession() {
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('sharedHeader').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'none';
-        if (localStorage.getItem('bf_admin') === '1') {
-            document.getElementById('adminLoginScreen').classList.remove('show');
-            document.getElementById('adminPanel').style.display = 'block';
-            document.getElementById('themePanelBtn').style.display = '';
-            loadAdminData();
-            loadDisclaimerSettings();
-            loadApiKeys();
-            updateAdminSidebarClock();
-            if (!window._adminClockInterval) window._adminClockInterval = setInterval(updateAdminSidebarClock, 1000);
-            if (!window._adminIndicesInterval) window._adminIndicesInterval = setInterval(renderAdminIndices, 30);
-            if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
-            setTimeout(loadThemeSettings, 150);
+        if (localStorage.getItem('bf_admin') === '1' && sessionStorage.getItem('bf_admin_token')) {
+            try {
+                const me = await fetch(API + '/api/admin/me', { headers: { 'admin-key': sessionStorage.getItem('bf_admin_token') } }).then(r => r.json());
+                if (me.success) {
+                    ADMIN_KEY = sessionStorage.getItem('bf_admin_token');
+                    enterAdminPanel();
+                    setTimeout(loadThemeSettings, 150);
+                } else {
+                    localStorage.removeItem('bf_admin');
+                    sessionStorage.removeItem('bf_admin_token');
+                    ADMIN_KEY = '';
+                    document.getElementById('adminLoginScreen').classList.add('show');
+                }
+            } catch (e) {
+                localStorage.removeItem('bf_admin');
+                sessionStorage.removeItem('bf_admin_token');
+                ADMIN_KEY = '';
+                document.getElementById('adminLoginScreen').classList.add('show');
+            }
         } else {
             document.getElementById('adminLoginScreen').classList.add('show');
         }
@@ -6831,31 +6841,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ═══════ ADMIN PANEL ═══════ */
 
-const ADMIN_KEY = 'bearfighter@admin';
+let ADMIN_KEY = sessionStorage.getItem('bf_admin_token') || '';
+let _adminPass = '';
+let _adminLoginStep = 1;
 
 function showAdmin() {
     window.location.href = '/admin';
 }
 
-async function adminLogin() {
-    const pass = document.getElementById('adminPassword').value;
-    const err = document.getElementById('adminError');
-    
-    if (!pass) {
-        err.textContent = 'Please enter password';
-        return;
-    }
-    
-    if (pass !== ADMIN_KEY) {
-        err.textContent = '❌ Wrong password';
-        document.getElementById('adminPassword').value = '';
-        return;
-    }
-    
+function enterAdminPanel() {
     isAdmin = true;
     localStorage.setItem('bf_admin', '1');
     document.getElementById('adminLoginScreen').classList.remove('show');
     document.getElementById('adminPassword').value = '';
+    document.getElementById('adminOtp').value = '';
+    document.getElementById('adminOtpWrap').style.display = 'none';
+    document.getElementById('adminPassword').style.display = '';
+    document.getElementById('adminLoginBtn').textContent = '🔓 LOGIN';
+    document.getElementById('adminLoginHead').textContent = '🔐 ADMIN ACCESS';
+    document.getElementById('adminLoginSub').textContent = 'Enter password to access admin panel';
+    _adminLoginStep = 1;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
@@ -6870,9 +6875,70 @@ async function adminLogin() {
     if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
 }
 
+function resetAdminLoginForm() {
+    _adminLoginStep = 1;
+    document.getElementById('adminOtpWrap').style.display = 'none';
+    document.getElementById('adminPassword').style.display = '';
+    document.getElementById('adminLoginBtn').textContent = '🔓 LOGIN';
+    document.getElementById('adminLoginHead').textContent = '🔐 ADMIN ACCESS';
+    document.getElementById('adminLoginSub').textContent = 'Enter password to access admin panel';
+}
+
+async function adminLogin() {
+    const err = document.getElementById('adminError');
+    if (_adminLoginStep === 1) {
+        _adminPass = document.getElementById('adminPassword').value;
+        if (!_adminPass) { err.textContent = 'Please enter password'; return; }
+        try {
+            const r = await fetch(API + '/api/admin/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: _adminPass })
+            }).then(r => r.json());
+            if (r.locked) { err.textContent = '⏳ ' + (r.message || 'Too many attempts. Wait 5 minutes.'); return; }
+            if (!r.success) {
+                err.textContent = '❌ ' + (r.message || 'Wrong password');
+                document.getElementById('adminPassword').value = '';
+                return;
+            }
+            _adminLoginStep = 2;
+            document.getElementById('adminPassword').style.display = 'none';
+            document.getElementById('adminOtpWrap').style.display = 'block';
+            document.getElementById('adminLoginBtn').textContent = '✅ VERIFY';
+            document.getElementById('adminLoginHead').textContent = '🔐 ENTER OTP';
+            document.getElementById('adminLoginSub').textContent = 'Enter the 6-digit OTP sent to your Telegram (valid 3 min)';
+            document.getElementById('adminOtp').focus();
+            err.textContent = '';
+            return;
+        } catch (e) { err.textContent = 'Server error'; return; }
+    }
+    const otp = document.getElementById('adminOtp').value.trim();
+    if (!otp) { err.textContent = 'Enter the OTP'; return; }
+    try {
+        const r = await fetch(API + '/api/admin/login/verify', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: _adminPass, otp })
+        }).then(r => r.json());
+        if (r.locked) { err.textContent = '⏳ ' + (r.message || 'Too many attempts. Wait 5 minutes.'); resetAdminLoginForm(); return; }
+        if (!r.success) {
+            err.textContent = '❌ ' + (r.message || 'Invalid OTP');
+            document.getElementById('adminOtp').value = '';
+            if (r.message && r.message.indexOf('expired') !== -1) resetAdminLoginForm();
+            return;
+        }
+        ADMIN_KEY = r.token;
+        sessionStorage.setItem('bf_admin_token', r.token);
+        err.textContent = '';
+        enterAdminPanel();
+    } catch (e) { err.textContent = 'Server error'; }
+}
+
 function adminLogout() {
+    const token = ADMIN_KEY;
     isAdmin = false;
     localStorage.removeItem('bf_admin');
+    sessionStorage.removeItem('bf_admin_token');
+    ADMIN_KEY = '';
+    if (token) { try { fetch(API + '/api/admin/logout', { method: 'POST', headers: { 'admin-key': token } }).catch(() => {}); } catch (e) {} }
     if (window._adminIndicesInterval) { clearInterval(window._adminIndicesInterval); window._adminIndicesInterval = null; }
     if (window._adminFetchInterval) { clearInterval(window._adminFetchInterval); window._adminFetchInterval = null; }
     document.getElementById('adminLoginScreen').style.display = 'none';
@@ -7561,7 +7627,6 @@ async function changeAdminPassword() {
         }).then(r => r.json());
         if (r.success) {
             status.innerHTML = '<span style="color:#00c853;">✅ Updated! Use new password next login.</span>';
-            ADMIN_KEY = newPw;
             document.getElementById('newAdminPassword').value = '';
             document.getElementById('confirmAdminPassword').value = '';
         } else {

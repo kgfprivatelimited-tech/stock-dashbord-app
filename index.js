@@ -939,8 +939,7 @@ function checkForexAccess(req, res, next) {
 function checkMaintenance(req, res, next) {
     const settings = loadSettings();
     if (settings.maintenanceMode) {
-        const adminKey = req.headers['admin-key'];
-        if (adminKey !== ADMIN_PASSWORD) {
+        if (!isValidAdminRequest(req)) {
             return res.status(503).json({ 
                 error: 'Maintenance mode active', 
                 maintenance: true,
@@ -1703,9 +1702,120 @@ let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bearfighter@admin';
 const _savedSettings = loadSettings();
 if (_savedSettings.adminPassword) ADMIN_PASSWORD = _savedSettings.adminPassword;
 
+// ========== SECURE ADMIN AUTH (Password + Telegram OTP + Session) ==========
+const ADMIN_SESSION_TTL = 30 * 60 * 1000;   // 30 min sliding expiry
+const ADMIN_OTP_TTL = 3 * 60 * 1000;        // OTP valid 3 min
+const adminSessions = new Map();            // token -> { expiresAt }
+const adminOtps = new Map();                // otp -> { expiresAt, attempts }
+const adminFails = new Map();               // ip -> { count, lockedUntil }
+
+function getClientIp(req) {
+    return req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.ip || (req.connection && req.connection.remoteAddress) || 'unknown');
+}
+function adminLoginLocked(ip) {
+    const rec = adminFails.get(ip);
+    return !!(rec && rec.lockedUntil && Date.now() < rec.lockedUntil);
+}
+function recordAdminFail(ip) {
+    const rec = adminFails.get(ip) || { count: 0, lockedUntil: 0 };
+    rec.count++;
+    if (rec.count >= 5) { rec.lockedUntil = Date.now() + 5 * 60 * 1000; rec.count = 0; }
+    adminFails.set(ip, rec);
+}
+function clearAdminFails(ip) { adminFails.delete(ip); }
+function genAdminOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
+function createAdminToken() {
+    const token = crypto.randomBytes(32).toString('hex');
+    adminSessions.set(token, { expiresAt: Date.now() + ADMIN_SESSION_TTL });
+    return token;
+}
+function isValidAdminRequest(req) {
+    const token = req.headers['admin-key'];
+    if (!token) return false;
+    const sess = adminSessions.get(token);
+    if (!sess || Date.now() > sess.expiresAt) {
+        if (sess) adminSessions.delete(token);
+        return false;
+    }
+    sess.expiresAt = Date.now() + ADMIN_SESSION_TTL; // sliding expiry
+    return true;
+}
+function adminOriginOk(req) {
+    const origin = req.headers.origin || req.headers.referer;
+    if (!origin) return true; // non-browser clients (curl, server-to-server)
+    try {
+        const o = new URL(origin);
+        return o.host === req.headers.host;
+    } catch (e) { return false; }
+}
+
+// Step 1: verify password, send OTP
+app.post('/api/admin/login', (req, res) => {
+    const ip = getClientIp(req);
+    if (adminLoginLocked(ip)) {
+        return res.json({ success: false, locked: true, message: 'Too many failed attempts. Try again in 5 minutes.' });
+    }
+    const { password } = req.body || {};
+    if (!password || password !== ADMIN_PASSWORD) {
+        recordAdminFail(ip);
+        return res.json({ success: false, message: 'Wrong password' });
+    }
+    clearAdminFails(ip);
+    const otp = genAdminOtp();
+    adminOtps.set(otp, { expiresAt: Date.now() + ADMIN_OTP_TTL, attempts: 0 });
+    const settings = loadSettings();
+    const adminTg = settings.adminPersonalTgId || process.env.ADMIN_PERSONAL_TG_ID || '';
+    let channel = 'console';
+    if (adminTg) {
+        sendToTelegramChat(adminTg, '🔐 <b>Bear Fighter Admin Login</b>\n\nYour one-time password (OTP) is:\n\n<b>' + otp + '</b>\n\nValid for 3 minutes. Ignore if it was not you.');
+        channel = 'telegram';
+    }
+    console.log('[ADMIN LOGIN] Password OK. OTP [' + channel + ']:', otp);
+    logActivity('admin_login', 'Password OK, OTP via ' + channel);
+    res.json({ success: true, message: 'OTP sent to your Telegram', otpSent: true, channel });
+});
+
+// Step 2: verify OTP, issue session token
+app.post('/api/admin/login/verify', (req, res) => {
+    const ip = getClientIp(req);
+    if (adminLoginLocked(ip)) {
+        return res.json({ success: false, locked: true, message: 'Too many attempts. Try again in 5 minutes.' });
+    }
+    const { password, otp } = req.body || {};
+    if (!password || password !== ADMIN_PASSWORD) {
+        recordAdminFail(ip);
+        return res.json({ success: false, message: 'Wrong password' });
+    }
+    const otpKey = String(otp || '').trim();
+    const rec = adminOtps.get(otpKey);
+    if (!rec) { recordAdminFail(ip); return res.json({ success: false, message: 'Invalid or expired OTP' }); }
+    if (Date.now() > rec.expiresAt) { adminOtps.delete(otpKey); return res.json({ success: false, message: 'OTP expired. Request a new one.' }); }
+    rec.attempts++;
+    if (rec.attempts > 5) { adminOtps.delete(otpKey); recordAdminFail(ip); return res.json({ success: false, message: 'Too many OTP attempts. Request a new OTP.' }); }
+    adminOtps.delete(otpKey);
+    clearAdminFails(ip);
+    const token = createAdminToken();
+    logActivity('admin_login', 'Admin login successful (OTP verified)');
+    res.json({ success: true, message: 'Login successful', token });
+});
+
+// Logout: invalidate session
+app.post('/api/admin/logout', (req, res) => {
+    const token = req.headers['admin-key'];
+    if (token) adminSessions.delete(token);
+    res.json({ success: true });
+});
+
+// Session validity check
+app.get('/api/admin/me', (req, res) => {
+    res.json({ success: isValidAdminRequest(req) });
+});
+
 function checkAdmin(req, res, next) {
-    const adminKey = req.headers['admin-key'];
-    if (adminKey !== ADMIN_PASSWORD) {
+    if (!adminOriginOk(req)) {
+        return res.status(403).json({ error: 'Cross-origin request blocked' });
+    }
+    if (!isValidAdminRequest(req)) {
         return res.status(403).json({ error: 'Admin access required' });
     }
     next();
