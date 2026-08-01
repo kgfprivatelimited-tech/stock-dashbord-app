@@ -990,6 +990,25 @@ app.post('/api/register', registerLimiter, (req, res) => {
         reqData.requests.unshift(newReq);
         saveRegisterRequests(reqData);
         logActivity('Registration Request', username);
+        // Notify admin on Telegram for quick approval
+        const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        try {
+            const regSettings = loadSettings();
+            const regAdminTg = regSettings.adminPersonalTgId || process.env.ADMIN_PERSONAL_TG_ID || '';
+            const regMsg = '🆕 <b>New Registration Request</b>\n\n' +
+                '👤 <b>Name:</b> ' + esc(fullName) + '\n' +
+                '📅 <b>DOB:</b> ' + esc(dob) + '\n' +
+                '📱 <b>Phone:</b> ' + esc(phone) + '\n' +
+                '💬 <b>WhatsApp:</b> ' + esc(whatsapp || 'N/A') + '\n' +
+                '📧 <b>Email:</b> ' + esc(email) + '\n' +
+                '🔑 <b>Username:</b> @' + esc(username) + '\n' +
+                '📋 <b>Plan:</b> ' + esc(plan || 'default') + '\n' +
+                '🌐 <b>Source:</b> ' + esc(source || 'N/A') + '\n' +
+                '⏰ <b>Time:</b> ' + new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + '\n\n' +
+                '✅ Approve in Admin Panel → Registration Requests';
+            if (regAdminTg) sendToTelegramChat(regAdminTg, regMsg).catch(() => {});
+            else console.log('⚠️ Admin TG ID not set - no registration alert sent');
+        } catch (e) { console.error('[REGISTER] TG alert failed:', e.message); }
         // Return UPI details for payment
         const settings = loadSettings();
         const upiQr = settings.upiQrImage || '';
@@ -1027,10 +1046,11 @@ app.post('/api/register/payment', (req, res) => {
         saveRegisterRequests(reqData);
         // Notify admin via Telegram with screenshot as photo
         const settings = loadSettings();
-        const adminChatId = settings.adminPersonalTelegramId || settings.telegramChatId;
-        console.log('[PAYMENT] adminChatId:', adminChatId, 'botToken:', settings.telegramBotToken ? 'YES' : 'NO');
+        const botToken = settings.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || '';
+        const adminChatId = settings.adminPersonalTgId || process.env.ADMIN_PERSONAL_TG_ID || settings.adminPersonalTelegramId || settings.telegramChatId || '';
+        console.log('[PAYMENT] adminChatId:', adminChatId, 'botToken:', botToken ? 'YES' : 'NO');
         console.log('[PAYMENT] screenshot present:', !!cleanScreenshot, 'starts with data:image:', cleanScreenshot ? cleanScreenshot.startsWith('data:image') : false, 'len:', cleanScreenshot ? cleanScreenshot.length : 0);
-        if (settings.telegramBotToken && adminChatId) {
+        if (botToken && adminChatId) {
             const adminMsg = `💳 *Payment Received*\n\n👤 ${reg.fullName}\n🔑 @${reg.username}\n📱 +91${reg.phone}\n📋 Plan: ${reg.plan || 'N/A'}\n🆔 Txn ID: ${transactionId}\n⏰ ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
             if (cleanScreenshot && cleanScreenshot.startsWith('data:image')) {
                 const ext = cleanScreenshot.match(/^data:image\/(\w+);/)?.[1] || 'jpeg';
@@ -1043,22 +1063,22 @@ app.post('/api/register/payment', (req, res) => {
                 form.append('photo', buf, { filename: `payment.${ext}`, contentType: `image/${ext}` });
                 form.append('caption', adminMsg);
                 form.append('parse_mode', 'Markdown');
-                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
+                axios.post(`https://api.telegram.org/bot${botToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
                     .then(r => console.log('[PAYMENT] sendPhoto SUCCESS:', r.data.ok))
                     .catch(e => {
                         console.error('[PAYMENT] sendPhoto FAILED:', e.message, e.response ? JSON.stringify(e.response.data) : 'no response');
-                        axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                        axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                             chat_id: adminChatId, text: adminMsg, parse_mode: 'Markdown'
                         }).catch(() => {});
                     });
             } else {
-                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     chat_id: adminChatId, text: adminMsg, parse_mode: 'Markdown'
                 }).catch(() => {});
             }
         }
         // Also notify user via Telegram if they have chat ID
-        if (settings.telegramBotToken && reg.telegram && reg.telegram !== 'NA') {
+        if (botToken && reg.telegram && reg.telegram !== 'NA') {
             const userMsg = `✅ *Payment Received!*\n\nHi ${reg.fullName}, your payment of Txn ID: ${transactionId} has been received.\nAdmin will verify and approve your account shortly.\n\n🐻 Bear Fighter Trading`;
             if (cleanScreenshot && cleanScreenshot.startsWith('data:image')) {
                 const ext = cleanScreenshot.match(/^data:image\/(\w+);/)?.[1] || 'jpeg';
@@ -1070,15 +1090,15 @@ app.post('/api/register/payment', (req, res) => {
                 form.append('photo', buf, { filename: `payment.${ext}`, contentType: `image/${ext}` });
                 form.append('caption', userMsg);
                 form.append('parse_mode', 'Markdown');
-                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
+                axios.post(`https://api.telegram.org/bot${botToken}/sendPhoto`, form, { headers: form.getHeaders(), timeout: 30000 })
                     .catch(e => {
                         console.error('sendPhoto to user failed:', e.message);
-                        axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                        axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                             chat_id: reg.telegram, text: userMsg, parse_mode: 'Markdown'
                         }).catch(() => {});
                     });
             } else {
-                axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+                axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     chat_id: reg.telegram, text: userMsg, parse_mode: 'Markdown'
                 }).catch(() => {});
             }
@@ -1146,9 +1166,10 @@ app.post('/api/admin/approve-register', checkAdmin, (req, res) => {
         reg.approvedAt = new Date().toISOString();
         saveRegisterRequests(reqData);
         logActivity('Registration Approved', reg.username);
-        if (settings.telegramBotToken && reg.telegram) {
+        const approveBotToken = settings.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || '';
+        if (approveBotToken && reg.telegram) {
             const msg = `🎉 *Welcome to Bear Fighter Trading!*\n\nHi ${reg.fullName}, your account has been approved!\n\n🔑 Username: ${reg.username}\n📅 Expiry: ${new Date(newUser.subscriptionExpiry).toLocaleDateString('en-IN')}\n\nLogin now: https://bearfighter.in`;
-            axios.post(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+            axios.post(`https://api.telegram.org/bot${approveBotToken}/sendMessage`, {
                 chat_id: reg.telegram, text: msg, parse_mode: 'Markdown'
             }).catch(() => {});
         }
