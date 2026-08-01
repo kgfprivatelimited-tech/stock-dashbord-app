@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Bear Fighter">
 <meta name="description" content="Live Stock Market Dashboard by Vaibhav">
 <link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg">
 <title>🐻 BEAR FIGHTER TRADING</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7161,7 +7162,7 @@ function showStatPopup(type) {
         html += '<div id="pStockTipsList" style="margin-top:8px;max-height:150px;overflow-y:auto;"></div>';
         p.innerHTML = html;
         p.style.display = 'block';
-        fetch(API + '/api/stocktips', { headers: getAuthHeaders() }).then(r => r.json()).then(d => {
+        fetch(API + '/api/admin/stocktips', { headers: { 'admin-key': ADMIN_KEY } }).then(r => r.json()).then(d => {
             const list = document.getElementById('pStockTipsList');
             if (!list) return;
             const tips = d.tips || d || [];
@@ -7383,7 +7384,7 @@ async function loadDashboardData() {
         }).catch(() => {});
 
         // Load stock tips count
-        fetch(API + '/api/stocktips', { headers: getAuthHeaders() }).then(r4 => r4.json()).then(r4 => {
+        fetch(API + '/api/admin/stocktips', { headers: { 'admin-key': ADMIN_KEY } }).then(r4 => r4.json()).then(r4 => {
             const tips = r4.tips || r4 || [];
             if (el('dashStockTipsCount')) el('dashStockTipsCount').textContent = tips.length;
         }).catch(() => {});
