@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b3d2e"/>
+      <stop offset="50%" stop-color="#0a2540"/>
+      <stop offset="100%" stop-color="#1a1040"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f5d976"/>
+      <stop offset="100%" stop-color="#c9a227"/>
+    </linearGradient>
+    <linearGradient id="btn" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="800" height="200" rx="18" fill="url(#bg)"/>
+  <circle cx="700" cy="40" r="120" fill="#22c55e" opacity="0.06"/>
+  <circle cx="90" cy="180" r="100" fill="#f5d976" opacity="0.05"/>
+  <text x="40" y="80" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#fff">TRADE</text>
+  <text x="40" y="128" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="url(#gold)">FOREX</text>
+  <text x="40" y="160" font-family="Arial, sans-serif" font-size="15" fill="#9fe8c5" filter="url(#glow)">💱 EUR/USD · XAU/USD · BTC · Crude Oil</text>
+  <rect x="560" y="78" width="200" height="52" rx="26" fill="url(#btn)"/>
+  <text x="660" y="111" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#052e16" text-anchor="middle">OPEN NOW</text>
+</svg>

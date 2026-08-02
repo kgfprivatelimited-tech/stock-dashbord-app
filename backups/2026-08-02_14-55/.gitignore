@@ -1,0 +1,13 @@
+node_modules/
+.env
+*.log
+*.bak
+activitylog.json
+loginhistory.json
+marketcache.json
+scheduledmsgs.json
+settings.json
+stocktips.json
+registerrequests.json
+server.log
+error.log

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📚 Trading Classes — Bear Fighter</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg: #0a0a12; --bg-card: #12121a; --border: #1f1f2e;
+            --text: #e4e4e7; --text-dim: #71717a; --accent: #a855f7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* Header */
+        .cls-header {
+            background: linear-gradient(135deg, #0a0a18, #1a0a2e);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .cls-header .back-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3);
+            color: #a855f7; font-size: 16px; cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .cls-header .back-btn:hover { background: rgba(168,85,247,0.25); }
+        .cls-header h1 {
+            font-size: 18px; font-weight: 700;
+            background: linear-gradient(135deg, #a855f7, #60a5fa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .cls-header .cls-count {
+            margin-left: auto; font-size: 11px; color: var(--text-dim);
+            background: var(--bg-card); padding: 4px 10px; border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        /* Content */
+        .cls-content { max-width: 800px; margin: 0 auto; padding: 16px; }
+
+        /* Loading / Empty */
+        .cls-msg {
+            text-align: center; padding: 60px 20px; color: var(--text-dim);
+        }
+        .cls-msg .emoji { font-size: 48px; margin-bottom: 12px; }
+        .cls-msg h3 { font-size: 16px; margin-bottom: 6px; color: var(--text); }
+        .cls-msg p { font-size: 12px; }
+
+        /* Module Card */
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .module-card:hover { border-color: rgba(168,85,247,0.4); }
+        .module-card.expanded { border-color: #a855f7; }
+
+        .module-header {
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .module-header:hover { background: rgba(168,85,247,0.06); }
+
+        .module-num {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .module-info { flex: 1; min-width: 0; }
+        .module-info h3 {
+            font-size: 14px; font-weight: 700; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .module-info .module-meta {
+            font-size: 11px; color: var(--text-dim); margin-top: 2px;
+        }
+        .module-arrow {
+            font-size: 14px; color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+        .module-card.expanded .module-arrow { transform: rotate(90deg); }
+
+        /* Module Body (video list) */
+        .module-body {
+            display: none;
+            border-top: 1px solid var(--border);
+            padding: 0;
+        }
+        .module-card.expanded .module-body { display: block; }
+
+        .video-item {
+            padding: 10px 16px 10px 64px;
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(31,31,46,0.5);
+        }
+        .video-item:last-child { border-bottom: none; }
+        .video-item:hover { background: rgba(168,85,247,0.08); }
+        .video-item.active { background: rgba(168,85,247,0.15); }
+
+        .video-play-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(168,85,247,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .video-item.active .video-play-icon { background: #a855f7; }
+
+        .video-info { flex: 1; min-width: 0; }
+        .video-info h4 {
+            font-size: 12px; font-weight: 600; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .video-info .video-dur { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+
+        /* Video Player Modal */
+        .video-player-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
+            align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .video-player-overlay.visible { display: flex; }
+
+        .player-container {
+            width: 100%; max-width: 720px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .player-top {
+            padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .player-top h4 { flex: 1; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-close {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: rgba(239,68,68,0.15); border: none;
+            color: #ef4444; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .player-close:hover { background: rgba(239,68,68,0.3); }
+
+        .player-video-wrap {
+            position: relative; padding-bottom: 56.25%; height: 0;
+        }
+        .player-video-wrap iframe {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
+        .player-nav {
+            padding: 8px 14px;
+            display: flex; gap: 8px;
+            border-top: 1px solid var(--border);
+        }
+        .player-nav button {
+            flex: 1; padding: 8px; border-radius: 8px;
+            font-size: 11px; font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--bg); color: var(--text);
+            cursor: pointer; transition: all 0.15s;
+        }
+        .player-nav button:hover { border-color: #a855f7; color: #a855f7; }
+        .player-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .cls-header h1 { font-size: 15px; }
+            .module-header { padding: 12px 12px; }
+            .video-item { padding-left: 48px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="cls-header">
+    <a href="index.html" class="back-btn">←</a>
+    <h1>📚 Trading Classes</h1>
+    <div class="cls-count" id="moduleCount">Loading...</div>
+</div>
+
+<!-- Content -->
+<div class="cls-content" id="classesContent">
+    <div class="cls-msg">
+        <div class="emoji">📚</div>
+        <h3>Loading classes...</h3>
+    </div>
+</div>
+
+<!-- Video Player Overlay -->
+<div class="video-player-overlay" id="videoOverlay">
+    <div class="player-container">
+        <div class="player-top">
+            <h4 id="playerTitle">Video Title</h4>
+            <button class="player-close" onclick="closePlayer()">✕</button>
+        </div>
+        <div class="player-video-wrap" id="playerWrap"></div>
+        <div class="player-nav">
+            <button id="prevVidBtn" onclick="playAdjacent(-1)">⬅ Previous</button>
+            <button id="nextVidBtn" onclick="playAdjacent(1)">Next ➡</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let allModules = [];
+let currentVideoIndex = -1;
+let flatVideoList = [];
+let userData = null;
+
+function getUserId() {
+    return sessionStorage.getItem('userId');
+}
+
+function checkAuth() {
+    const uid = getUserId();
+    if (!uid) {
+        window.location.href = 'index.html';
+        return false;
+    }
+    return true;
+}
+
+function getYouTubeId(url) {
+    if (!url) return '';
+    let match = url.match(/[?&]v=([^&]+)/);
+    if (match) return match[1];
+    match = url.match(/youtu\.be\/([^?&]+)/);
+    if (match) return match[1];
+    match = url.match(/youtube\.com\/embed\/([^?&]+)/);
+    if (match) return match[1];
+    match = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+    if (match) return match[1];
+    return '';
+}
+
+async function loadClasses() {
+    const uid = getUserId();
+    if (!uid) return;
+    try {
+        const meR = await fetch(API + '/api/me', { headers: { 'user-id': uid } }).then(r => r.json());
+        if (meR.loggedIn) userData = meR.user;
+        const r = await fetch(API + '/api/classes', {
+            headers: { 'user-id': uid }
+        }).then(r => r.json());
+        if (r.success && r.classes && r.classes.length) {
+            allModules = r.classes.sort((a,b) => (a.order||0) - (b.order||0));
+            renderModules();
+        } else {
+            document.getElementById('classesContent').innerHTML =
+                '<div class="cls-msg"><div class="emoji">🔒</div><h3>No Classes Available</h3><p>Classes will appear here once the admin adds them.</p></div>';
+            document.getElementById('moduleCount').textContent = '0 modules';
+        }
+    } catch (e) {
+        document.getElementById('classesContent').innerHTML =
+            '<div class="cls-msg"><div class="emoji">⚠️</div><h3>Error Loading</h3><p>Check your connection and try again.</p></div>';
+    }
+}
+
+function renderModules() {
+    flatVideoList = [];
+    allModules.forEach(m => {
+        (m.videos || []).sort((a,b) => (a.order||0)-(b.order||0)).forEach(v => {
+            flatVideoList.push({ moduleTitle: m.title, ...v });
+        });
+    });
+    document.getElementById('moduleCount').textContent = allModules.length + ' module' + (allModules.length !== 1 ? 's' : '') + ' | ' + flatVideoList.length + ' video' + (flatVideoList.length !== 1 ? 's' : '');
+
+    if (!allModules.length) {
+        document.getElementById('classesContent').innerHTML =
+            '<div class="cls-msg"><div class="emoji">📖</div><h3>Coming Soon</h3><p>Trading classes will be available soon!</p></div>';
+        return;
+    }
+
+    document.getElementById('classesContent').innerHTML = (userData && !userData.classApproved ? '<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">🔒</span><div><div style="font-size:12px;font-weight:700;color:#eab308;">Class Access Pending</div><div style="font-size:10px;color:#a1a1aa;">Contact admin to watch videos.</div></div></div>' : '') + allModules.map((m, idx) => {
+        const vids = (m.videos || []).sort((a,b) => (a.order||0)-(b.order||0));
+        const vidCount = vids.length;
+        const totalDur = vids.reduce((acc, v) => acc + (v.duration || ''), '');
+        return '<div class="module-card" id="mod_' + m.id + '">' +
+            '<div class="module-header" onclick="toggleModule(\'' + m.id + '\')">' +
+            '<div class="module-num">' + (m.order || idx + 1) + '</div>' +
+            '<div class="module-info">' +
+            '<h3>' + escapeHtml(m.title) + '</h3>' +
+            '<div class="module-meta">' + vidCount + ' video' + (vidCount !== 1 ? 's' : '') + (totalDur ? ' • ' + totalDur : '') + '</div>' +
+            '</div>' +
+            '<div class="module-arrow">▶</div>' +
+            '</div>' +
+            '<div class="module-body">' +
+            (m.description ? '<div style="padding:10px 16px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border);">' + escapeHtml(m.description) + '</div>' : '') +
+            (vids.length ? vids.map(v => {
+                const vidId = getYouTubeId(v.youtubeUrl);
+                const thumbUrl = vidId ? 'https://img.youtube.com/vi/' + vidId + '/default.jpg' : '';
+                return '<div class="video-item" onclick="playVideo(\'' + v.id + '\')" id="vidItem_' + v.id + '">' +
+                    '<div class="video-play-icon">' + (thumbUrl ? '<img src="' + thumbUrl + '" style="width:32px;height:24px;border-radius:4px;object-fit:cover;">' : '▶') + '</div>' +
+                    '<div class="video-info">' +
+                    '<h4>' + escapeHtml(v.title) + '</h4>' +
+                    (v.duration ? '<div class="video-dur">⏱ ' + escapeHtml(v.duration) + '</div>' : '') +
+                    '</div></div>';
+            }).join('') : '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:11px;">No videos in this module yet</div>') +
+            '</div></div>';
+    }).join('');
+}
+
+function toggleModule(id) {
+    const card = document.getElementById('mod_' + id);
+    if (!card) return;
+    const wasExpanded = card.classList.contains('expanded');
+    document.querySelectorAll('.module-card.expanded').forEach(c => c.classList.remove('expanded'));
+    if (!wasExpanded) card.classList.add('expanded');
+}
+
+function playVideo(vidId) {
+    if (userData && !userData.classApproved) {
+        let ov = document.getElementById('deniedOverlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'deniedOverlay';
+            ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+            ov.innerHTML = '<div style="text-align:center;max-width:340px;padding:32px;"><div style="font-size:64px;margin-bottom:16px;">🔒</div><div style="font-size:22px;font-weight:800;color:#e4e4e7;margin-bottom:10px;">Class Access Restricted</div><div style="font-size:13px;color:#a1a1aa;margin-bottom:24px;line-height:1.6;">You need admin approval to watch classes.<br>Please contact admin.</div><button onclick="document.getElementById(\'deniedOverlay\').style.display=\'none\';window.location.href=\'index.html\';" style="background:linear-gradient(135deg,#c0a843,#a89030);color:#000;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Go Back</button></div>';
+            document.body.appendChild(ov);
+        }
+        ov.style.display = 'flex';
+        return;
+    }
+    const idx = flatVideoList.findIndex(v => v.id === vidId);
+    if (idx === -1) return;
+    currentVideoIndex = idx;
+    renderPlayer();
+}
+
+function renderPlayer() {
+    if (currentVideoIndex < 0 || currentVideoIndex >= flatVideoList.length) return;
+    const vid = flatVideoList[currentVideoIndex];
+    const vidId = getYouTubeId(vid.youtubeUrl);
+    if (!vidId) { customAlert && customAlert('Invalid YouTube URL', '❌'); return; }
+
+    document.getElementById('playerTitle').textContent = vid.title || 'Video';
+    document.getElementById('playerWrap').innerHTML = '<iframe src="https://www.youtube.com/embed/' + vidId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+
+    document.getElementById('prevVidBtn').disabled = currentVideoIndex <= 0;
+    document.getElementById('nextVidBtn').disabled = currentVideoIndex >= flatVideoList.length - 1;
+
+    const overlay = document.getElementById('videoOverlay');
+    overlay.classList.add('visible');
+
+    // highlight active video
+    document.querySelectorAll('.video-item.active').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById('vidItem_' + vid.id);
+    if (el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+}
+
+function playAdjacent(dir) {
+    const newIdx = currentVideoIndex + dir;
+    if (newIdx >= 0 && newIdx < flatVideoList.length) {
+        currentVideoIndex = newIdx;
+        renderPlayer();
+    }
+}
+
+function closePlayer() {
+    document.getElementById('playerWrap').innerHTML = '';
+    document.getElementById('videoOverlay').classList.remove('visible');
+    document.querySelectorAll('.video-item.active').forEach(el => el.classList.remove('active'));
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close on overlay click
+document.getElementById('videoOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closePlayer();
+});
+
+// Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePlayer();
+});
+
+// Init
+if (checkAuth()) loadClasses();
+</script>
+</body>
+</html>
