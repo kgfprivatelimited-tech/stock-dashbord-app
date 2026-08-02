@@ -6343,7 +6343,7 @@ function startForexUpdates() {
         updateForexMarketStatus();
         if (window._fxLiveBusy) { renderFxTicks(); return; }
         window._fxLiveBusy = true;
-        fetch(API + '/api/forex/live').then(r => r.json()).then(live => {
+        fetch(API + '/api/forex/live', { headers: getAuthHeaders() }).then(r => r.json()).then(live => {
             window._fxLiveBusy = false;
             if (live && live.forexBlocked) {
                 window._fxBlocked = true;
