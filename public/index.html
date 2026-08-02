@@ -11014,9 +11014,22 @@ async function loadHolidayBanners() {
                 else emojiEl.textContent = banner.emoji || '🎊';
             }
             const inner = wrap.querySelector('#holidayBannerInner');
-            if (inner) inner.style.display = 'flex';
+            if (inner) inner.style.display = banner.imageUrl ? 'none' : 'flex';
             const dismissBtn = wrap.querySelector('#holidayBannerDismissBtn');
-            if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
+            if (dismissBtn) {
+                dismissBtn.dataset.bannerId = banner.id;
+                if (banner.imageUrl) {
+                    wrap.appendChild(dismissBtn);
+                    dismissBtn.style.position = 'absolute';
+                    dismissBtn.style.top = '8px';
+                    dismissBtn.style.right = '8px';
+                    dismissBtn.style.zIndex = '2';
+                    dismissBtn.style.background = 'rgba(0,0,0,0.45)';
+                    dismissBtn.style.border = 'none';
+                    dismissBtn.style.color = '#fff';
+                    dismissBtn.style.opacity = '0.85';
+                }
+            }
             positionBanner(wrap, banner.position || 'afterDisclaimer');
             shown++;
         }
