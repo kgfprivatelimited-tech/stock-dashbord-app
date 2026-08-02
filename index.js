@@ -13,6 +13,7 @@ const compression = require('compression');
 const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const webpush = require('web-push');
 require('dotenv').config();
 const db = require('./db');
 
@@ -516,6 +517,58 @@ const ACTIVITYLOG_FILE = path.join(__dirname, 'activitylog.json');
 const LOGINHISTORY_FILE = path.join(__dirname, 'loginhistory.json');
 const REGISTERREQ_FILE = path.join(__dirname, 'registerrequests.json');
 const SCHEDULED_MSGS_FILE = path.join(__dirname, 'scheduledmsgs.json');
+const PUSHSUBS_FILE = path.join(__dirname, 'pushsubs.json');
+
+// ---- Web Push (VAPID) ----
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@bearfighter.com';
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    console.log('📣 Web Push enabled');
+} else {
+    console.log('⚠️ VAPID keys not set — push notifications disabled');
+}
+
+function loadPushSubs() {
+    try { return JSON.parse(fs.readFileSync(PUSHSUBS_FILE, 'utf8')); } catch (e) { return { subs: [] }; }
+}
+
+function savePushSubs(data) {
+    try { fs.writeFileSync(PUSHSUBS_FILE, JSON.stringify(data, null, 2)); } catch(e) {}
+}
+
+function createTipPushPayload(tip) {
+    const dir = tip.action === 'SELL' ? '🔴 SELL' : '🟢 BUY';
+    return {
+        title: `${dir} ${tip.symbol}`,
+        body: `Entry: ${tip.entry || 'N/A'} | Target: ${tip.target || 'N/A'} | SL: ${tip.sl || 'N/A'}${tip.note ? '\n' + tip.note : ''}`,
+        tag: 'bf-tip-' + tip.id,
+        data: { url: '/' }
+    };
+}
+
+async function sendPushToAll(payload) {
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return 0;
+    const data = loadPushSubs();
+    if (!data.subs || data.subs.length === 0) return 0;
+    let sent = 0;
+    const valid = [];
+    for (const sub of data.subs) {
+        try {
+            await webpush.sendNotification(sub, JSON.stringify(payload));
+            sent++;
+            valid.push(sub);
+        } catch (e) {
+            // 404/410 = subscription expired/invalid — drop it
+            if (e.statusCode !== 404 && e.statusCode !== 410) {
+                valid.push(sub);
+            }
+        }
+    }
+    if (valid.length !== data.subs.length) savePushSubs({ subs: valid });
+    return sent;
+}
 
 const DEFAULT_SETTINGS = {
     disclaimerText: '⚠️ I AM NOT SEBI REGISTERED - This is for educational purposes only. Not a financial advisor.',
@@ -2402,6 +2455,56 @@ app.get('/api/admin/indices', checkAdmin, async (req, res) => {
 });
 
 // ========================================
+// WEB PUSH NOTIFICATIONS
+// ========================================
+
+// Public VAPID public key (needed for browser to create subscription)
+app.get('/api/push/vapid-public-key', (req, res) => {
+    res.json({ success: true, key: VAPID_PUBLIC_KEY });
+});
+
+// Save push subscription (authenticated user)
+app.post('/api/push/subscribe', checkUserAuth, (req, res) => {
+    try {
+        const { endpoint, keys } = req.body;
+        if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+            return res.json({ success: false, message: 'Invalid subscription' });
+        }
+        const data = loadPushSubs();
+        data.subs = (data.subs || []).filter(s => s.endpoint !== endpoint);
+        data.subs.push({
+            endpoint,
+            keys,
+            user: req.user.username,
+            at: new Date().toISOString()
+        });
+        savePushSubs(data);
+        res.json({ success: true, message: 'Subscribed' });
+    } catch (e) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Remove push subscription (unsubscribe)
+app.post('/api/push/unsubscribe', checkUserAuth, (req, res) => {
+    try {
+        const { endpoint } = req.body;
+        const data = loadPushSubs();
+        data.subs = (data.subs || []).filter(s => s.endpoint !== endpoint);
+        savePushSubs(data);
+        res.json({ success: true });
+    } catch (e) {
+        res.json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: list subscriptions count
+app.get('/api/admin/push-subs', checkAdmin, (req, res) => {
+    const data = loadPushSubs();
+    res.json({ success: true, count: (data.subs || []).length });
+});
+
+// ========================================
 // STOCK TIPS (Admin posts, users see)
 // ========================================
 
@@ -2588,6 +2691,10 @@ app.post('/api/admin/stocktips', checkAdmin, async (req, res) => {
         data.tips.unshift(tip);
         saveStockTips(data);
 
+        // Send browser push notification to all subscribed devices
+        let pushCount = 0;
+        try { pushCount = await sendPushToAll(createTipPushPayload(tip)); } catch (e) { console.log('[PUSH] send error:', e.message); }
+
         // Send to Telegram if requested
         let telegramCount = 0;
         if (sendTelegram) {
@@ -2603,7 +2710,7 @@ app.post('/api/admin/stocktips', checkAdmin, async (req, res) => {
             }
         }
 
-        logActivity('stocktip_added', `${tip.action} ${tip.symbol} — Entry: ${tip.entry || 'N/A'} — Telegram: ${telegramCount} users`);
+        logActivity('stocktip_added', `${tip.action} ${tip.symbol} — Entry: ${tip.entry || 'N/A'} — Telegram: ${telegramCount} users — Push: ${pushCount}`);
 
         // Generate WhatsApp links for all active users with WhatsApp numbers
         const whatsappLinks = [];
@@ -2615,7 +2722,7 @@ app.post('/api/admin/stocktips', checkAdmin, async (req, res) => {
             }
         }
 
-        res.json({ success: true, message: `Stock tip added. Telegram: ${telegramCount}, WhatsApp: ${whatsappLinks.length}`, tip, whatsappLinks });
+        res.json({ success: true, message: `Stock tip added. Push: ${pushCount}, Telegram: ${telegramCount}, WhatsApp: ${whatsappLinks.length}`, tip, whatsappLinks });
     } catch (error) {
         res.json({ success: false, message: 'Server error' });
     }

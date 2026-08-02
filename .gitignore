@@ -9,5 +9,6 @@ scheduledmsgs.json
 settings.json
 stocktips.json
 registerrequests.json
+pushsubs.json
 server.log
 error.log

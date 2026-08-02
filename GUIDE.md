@@ -394,6 +394,10 @@ TELEGRAM_CHAT_ID=...        # Admin ka chat ID
 | GET | `/api/fno-all` | All F&O stocks |
 | GET | `/api/signals` | Buy/Sell signals |
 | GET | `/api/stocktips` | Active stock tips |
+| GET | `/api/whatsapp/tips?key=` | Latest tip (WhatsApp auto-forward, key protected) |
+| GET | `/api/push/vapid-public-key` | Web Push public key |
+| POST | `/api/push/subscribe` | Save browser push subscription (auth) |
+| POST | `/api/push/unsubscribe` | Remove push subscription (auth) |
 
 ### Admin Routes (Admin Login Required)
 | Method | Endpoint | Kya karta hai |
@@ -417,6 +421,7 @@ TELEGRAM_CHAT_ID=...        # Admin ka chat ID
 | POST | `/api/admin/send-reminders` | Payment reminders |
 | PUT | `/api/admin/settings` | Update settings |
 | POST | `/api/admin/maintenance` | Toggle maintenance |
+| GET | `/api/admin/push-subs` | Push subscription count |
 
 ---
 

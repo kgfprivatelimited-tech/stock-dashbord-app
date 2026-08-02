@@ -1,4 +1,4 @@
-const CACHE = 'bf-v18';
+const CACHE = 'bf-v19';
 const STATIC = [
   '/', '/manifest.json',
   '/icons/icon-192.svg', '/icons/icon-512.svg', '/icons/apple-touch-icon.svg',
@@ -39,3 +39,31 @@ async function netFirst(req) {
     return cached || new Response('Offline', { status: 503 });
   }
 }
+
+// ─── Push notifications ───
+self.addEventListener('push', e => {
+  let data = {};
+  try { data = e.data.json(); } catch (err) {
+    data = { title: 'Bear Fighter Trading', body: e.data ? e.data.text() : 'New update' };
+  }
+  const options = {
+    body: data.body || '',
+    icon: '/icons/icon-192.svg',
+    badge: '/icons/icon-192.svg',
+    data: data.data || {},
+    tag: data.tag || 'bf-notification',
+    vibrate: [100, 50, 100]
+  };
+  e.waitUntil(self.registration.showNotification(data.title || 'Bear Fighter Trading', options));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const target = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+    for (const c of clientList) {
+      if ('focus' in c) { c.focus(); return; }
+    }
+    if (clients.openWindow) return clients.openWindow(target);
+  }));
+});
