@@ -2422,14 +2422,14 @@ app.get('/api/whatsapp/tips', (req, res) => {
         const active = (data.tips || []).filter(t => t.active).slice();
         active.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
         const latest = active[0] || null;
-        if (!latest) return res.json({ ts: Date.now(), latest: null });
+        if (!latest) return res.json({ latest: null });
         const emoji = String(latest.action || '').toUpperCase() === 'SELL' ? '🔴' : '🟢';
         const msg = emoji + ' ' + (latest.action || 'BUY') + ' ' + (latest.symbol || '') +
             '\nEntry: ' + (latest.entry || '-') +
             ' | Target: ' + (latest.target || '-') +
             ' | SL: ' + (latest.sl || '-') +
             (latest.note ? '\nNote: ' + latest.note : '');
-        res.json({ ts: Date.now(), latest: { id: latest.id, msg: msg, at: latest.createdAt } });
+        res.json({ id: latest.id, msg: msg, at: latest.createdAt });
     } catch (e) {
         res.status(500).json({ error: 'Server error' });
     }
