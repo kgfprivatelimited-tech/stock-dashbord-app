@@ -5021,7 +5021,6 @@ input[type="color"] {
                 <div id="holidayBannerTitle" style="font-size:14px; font-weight:800; letter-spacing:0.5px;"></div>
                 <div id="holidayBannerMsg" style="font-size:11px; opacity:0.9; margin-top:3px;"></div>
             </div>
-            <button onclick="dismissHolidayBanner(this.dataset.bannerId)" data-banner-id="" id="holidayBannerDismissBtn" style="background:rgba(255,255,255,0.15); border:none; color:inherit; opacity:0.6; width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0;">✕</button>
         </div>
     </div>
 
@@ -10953,7 +10952,6 @@ async function loadHolidayBanners() {
         if (!r.success || !r.banners || !r.banners.length) { template.style.display = 'none'; return; }
         let shown = 0;
         for (const banner of r.banners) {
-            if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) continue;
             const wrap = template.cloneNode(true);
             wrap.id = 'holidayBannerWrap_' + banner.id;
             wrap.classList.add('holidayBannerWrap');
@@ -11015,21 +11013,6 @@ async function loadHolidayBanners() {
             }
             const inner = wrap.querySelector('#holidayBannerInner');
             if (inner) inner.style.display = banner.imageUrl ? 'none' : 'flex';
-            const dismissBtn = wrap.querySelector('#holidayBannerDismissBtn');
-            if (dismissBtn) {
-                dismissBtn.dataset.bannerId = banner.id;
-                if (banner.imageUrl) {
-                    wrap.appendChild(dismissBtn);
-                    dismissBtn.style.position = 'absolute';
-                    dismissBtn.style.top = '8px';
-                    dismissBtn.style.right = '8px';
-                    dismissBtn.style.zIndex = '2';
-                    dismissBtn.style.background = 'rgba(0,0,0,0.45)';
-                    dismissBtn.style.border = 'none';
-                    dismissBtn.style.color = '#fff';
-                    dismissBtn.style.opacity = '0.85';
-                }
-            }
             positionBanner(wrap, banner.position || 'afterDisclaimer');
             shown++;
         }
@@ -11054,16 +11037,6 @@ function positionBanner(wrap, pos) {
     if (target) {
         target.parentNode.insertBefore(wrap, target.nextSibling);
     }
-}
-
-function dismissHolidayBanner(bannerId) {
-    let wrap = bannerId ? document.querySelector('[data-banner-id="' + bannerId + '"]') : null;
-    if (!wrap) wrap = document.getElementById('holidayBannerWrap');
-    if (!wrap) return;
-    wrap.style.transition = 'all 0.3s ease';
-    wrap.style.maxHeight = '0'; wrap.style.opacity = '0'; wrap.style.margin = '0';
-    setTimeout(() => { if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 300);
-    try { sessionStorage.setItem('hbanner_dismissed_' + (bannerId || 'current'), '1'); } catch(e) {}
 }
 
 async function loadActiveOffers() {
