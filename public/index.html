@@ -2911,13 +2911,13 @@ input[type="color"] {
 }
 
 /* ═══════ HOLIDAY BANNER ═══════ */
-#holidayBannerWrap { animation: bannerSlideIn 0.5s ease-out; }
+.holidayBannerWrap { animation: bannerSlideIn 0.5s ease-out; }
 @keyframes bannerSlideIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 600px) {
-    #holidayBannerWrap { margin: 6px 8px; border-radius: 10px; }
+    .holidayBannerWrap { margin: 6px 8px; border-radius: 10px; }
     #holidayBannerInner { padding: 12px 14px; gap: 10px; }
     #holidayBannerEmoji { font-size: 28px; }
     #holidayBannerTitle { font-size: 12px; }
@@ -5003,7 +5003,7 @@ input[type="color"] {
     </div>
 
     <!-- HOLIDAY FESTIVAL BANNER -->
-    <div id="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
+    <div id="holidayBannerWrap" class="holidayBannerWrap" style="display:none; margin:8px 12px; border-radius:12px; overflow:hidden; position:relative;">
         <img id="holidayBannerImg" style="display:none; width:100%; height:auto; max-height:200px; object-fit:cover;" alt="Banner">
         <div id="holidayBannerInner" style="padding:16px 20px; display:flex; align-items:center; gap:14px;">
             <div id="holidayBannerEmoji" style="font-size:36px; flex-shrink:0;">🎊</div>
@@ -10920,69 +10920,75 @@ async function loadHolidayBanners() {
     try {
         const isMobile = window.innerWidth <= 600 || /Mobi|Android/i.test(navigator.userAgent);
         const r = await fetch(API + '/api/banners?device=' + (isMobile ? 'mobile' : 'desktop')).then(r => r.json());
-        const wrap = document.getElementById('holidayBannerWrap');
-        if (!wrap) return;
-        if (!r.success || !r.banners || !r.banners.length) { wrap.style.display = 'none'; return; }
-        const banner = r.banners[0];
-        if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) { wrap.style.display = 'none'; return; }
-        wrap.style.display = 'block';
-        wrap.style.background = banner.bgColor || '#ff6b35';
-        wrap.style.color = banner.textColor || '#ffffff';
-        const h = isMobile ? 180 : (banner.bannerHeight || 120);
-        wrap.style.height = h + 'px';
-        wrap.style.minHeight = h + 'px';
-        wrap.style.maxHeight = '400px';
-        const bannerImg = document.getElementById('holidayBannerImg');
-        if (bannerImg) {
-            if (banner.imageUrl) {
-                bannerImg.src = banner.imageUrl;
-                bannerImg.style.display = 'block';
-                bannerImg.style.height = h + 'px';
-                bannerImg.style.objectFit = 'cover';
-            } else {
-                bannerImg.style.display = 'none';
-                bannerImg.src = '';
+        const template = document.getElementById('holidayBannerWrap');
+        if (!template) return;
+        document.querySelectorAll('.holidayBannerWrap[id^="holidayBannerWrap_"]').forEach(el => el.remove());
+        if (!r.success || !r.banners || !r.banners.length) { template.style.display = 'none'; return; }
+        let shown = 0;
+        for (const banner of r.banners) {
+            if (sessionStorage.getItem('hbanner_dismissed_' + banner.id)) continue;
+            const wrap = template.cloneNode(true);
+            wrap.id = 'holidayBannerWrap_' + banner.id;
+            wrap.classList.add('holidayBannerWrap');
+            wrap.dataset.bannerId = banner.id;
+            wrap.style.display = 'block';
+            wrap.style.background = banner.bgColor || '#ff6b35';
+            wrap.style.color = banner.textColor || '#ffffff';
+            const h = isMobile ? 180 : (banner.bannerHeight || 120);
+            wrap.style.height = h + 'px';
+            wrap.style.minHeight = h + 'px';
+            wrap.style.maxHeight = '400px';
+            const bannerImg = wrap.querySelector('#holidayBannerImg');
+            if (bannerImg) {
+                if (banner.imageUrl) {
+                    bannerImg.src = banner.imageUrl;
+                    bannerImg.style.display = 'block';
+                    bannerImg.style.height = h + 'px';
+                    bannerImg.style.objectFit = 'cover';
+                } else {
+                    bannerImg.style.display = 'none';
+                    bannerImg.src = '';
+                }
             }
-        }
-        const titleEl = document.getElementById('holidayBannerTitle');
-        if (titleEl) {
-            if (banner.showTitle === false) {
-                titleEl.style.display = 'none';
-            } else {
-                titleEl.style.display = 'block';
-                titleEl.textContent = banner.title;
-                titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
-                titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+            const titleEl = wrap.querySelector('#holidayBannerTitle');
+            if (titleEl) {
+                if (banner.showTitle === false) {
+                    titleEl.style.display = 'none';
+                } else {
+                    titleEl.style.display = 'block';
+                    titleEl.textContent = banner.title;
+                    titleEl.style.color = banner.titleColor || banner.textColor || '#ffffff';
+                    titleEl.style.fontSize = (banner.titleSize || 22) + 'px';
+                }
             }
-        }
-        const msgEl = document.getElementById('holidayBannerMsg');
-        if (msgEl) {
-            if (banner.showMessage === false) {
-                msgEl.style.display = 'none';
-            } else {
-                msgEl.style.display = 'block';
-                msgEl.textContent = banner.message || '';
-                msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
-                msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+            const msgEl = wrap.querySelector('#holidayBannerMsg');
+            if (msgEl) {
+                if (banner.showMessage === false) {
+                    msgEl.style.display = 'none';
+                } else {
+                    msgEl.style.display = 'block';
+                    msgEl.textContent = banner.message || '';
+                    msgEl.style.color = banner.msgColor || banner.textColor || '#ffffff';
+                    msgEl.style.fontSize = (banner.msgSize || 13) + 'px';
+                }
             }
+            const emojiEl = wrap.querySelector('#holidayBannerEmoji');
+            if (emojiEl) emojiEl.textContent = banner.emoji || '🎊';
+            const inner = wrap.querySelector('#holidayBannerInner');
+            if (inner) inner.style.display = 'flex';
+            const dismissBtn = wrap.querySelector('#holidayBannerDismissBtn');
+            if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
+            positionBanner(wrap, banner.position || 'afterDisclaimer');
+            shown++;
         }
-        const emojiEl = document.getElementById('holidayBannerEmoji');
-        if (emojiEl) {
-            emojiEl.textContent = banner.emoji || '🎊';
-        }
-        const inner = document.getElementById('holidayBannerInner');
-        if (inner) inner.style.display = 'flex';
-        const dismissBtn = document.getElementById('holidayBannerDismissBtn');
-        if (dismissBtn) dismissBtn.dataset.bannerId = banner.id;
-        try { positionBanner(banner.position || 'afterDisclaimer'); } catch(e) {}
+        if (shown === 0) template.style.display = 'none';
     } catch (e) {
         const wrap = document.getElementById('holidayBannerWrap');
         if (wrap) wrap.style.display = 'none';
     }
 }
 
-function positionBanner(pos) {
-    const wrap = document.getElementById('holidayBannerWrap');
+function positionBanner(wrap, pos) {
     const targets = {
         'top': 'div[data-section="indices"]',
         'afterDisclaimer': '#disclaimerTicker',
@@ -10999,10 +11005,12 @@ function positionBanner(pos) {
 }
 
 function dismissHolidayBanner(bannerId) {
-    const wrap = document.getElementById('holidayBannerWrap');
+    let wrap = bannerId ? document.querySelector('[data-banner-id="' + bannerId + '"]') : null;
+    if (!wrap) wrap = document.getElementById('holidayBannerWrap');
+    if (!wrap) return;
     wrap.style.transition = 'all 0.3s ease';
     wrap.style.maxHeight = '0'; wrap.style.opacity = '0'; wrap.style.margin = '0';
-    setTimeout(() => { wrap.style.display = 'none'; }, 300);
+    setTimeout(() => { if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 300);
     try { sessionStorage.setItem('hbanner_dismissed_' + (bannerId || 'current'), '1'); } catch(e) {}
 }
 
