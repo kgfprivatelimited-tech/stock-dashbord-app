@@ -3942,7 +3942,7 @@ app.get('/api/admin/offers', checkAdmin, (req, res) => {
 
 app.post('/api/admin/offers', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses, badgeText, showBadge, showTitle, showDescription, showCode } = req.body;
         if (!title) return res.json({ success: false, message: 'Title required' });
         const settings = loadSettings();
         if (!settings.offers) settings.offers = [];
@@ -3959,6 +3959,11 @@ app.post('/api/admin/offers', checkAdmin, (req, res) => {
             selectedUsers: (selectedUsers || []),
             theme: (theme || 'golden'),
             bgImage: (bgImage || ''),
+            badgeText: (badgeText || 'LIMITED OFFER'),
+            showBadge: showBadge !== false,
+            showTitle: showTitle !== false,
+            showDescription: showDescription !== false,
+            showCode: showCode !== false,
             active: true,
             createdAt: new Date().toISOString()
         };
@@ -4063,7 +4068,7 @@ app.post('/api/admin/offers/:id/toggle', checkAdmin, (req, res) => {
 
 app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
     try {
-        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses } = req.body;
+        const { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays, maxUses, badgeText, showBadge, showTitle, showDescription, showCode } = req.body;
         const settings = loadSettings();
         const offer = (settings.offers || []).find(o => o.id === req.params.id);
         if (!offer) return res.json({ success: false, message: 'Offer not found' });
@@ -4077,6 +4082,11 @@ app.put('/api/admin/offers/:id', checkAdmin, (req, res) => {
         if (selectedUsers !== undefined) offer.selectedUsers = selectedUsers;
         if (theme !== undefined) offer.theme = theme;
         if (bgImage !== undefined) { if (bgImage) { offer.bgImage = bgImage; } else { delete offer.bgImage; } }
+        if (badgeText !== undefined) offer.badgeText = badgeText || 'LIMITED OFFER';
+        if (showBadge !== undefined) offer.showBadge = showBadge;
+        if (showTitle !== undefined) offer.showTitle = showTitle;
+        if (showDescription !== undefined) offer.showDescription = showDescription;
+        if (showCode !== undefined) offer.showCode = showCode;
         offer.updatedAt = new Date().toISOString();
         saveSettings(settings);
         res.json({ success: true, message: 'Offer updated', offer });

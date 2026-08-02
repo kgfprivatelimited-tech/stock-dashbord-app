@@ -4333,6 +4333,16 @@ input[type="color"] {
                     </div>
                   </div>
                 </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">👁️ Display Settings</label>
+                  <input type="text" id="offerBadgeText" class="admin-form-input" value="LIMITED OFFER" placeholder="e.g. LIMITED OFFER" style="margin-bottom:6px;">
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--atext);">
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="offerShowBadge" checked style="accent-color:#7c3aed;"> Badge</label>
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="offerShowTitle" checked style="accent-color:#7c3aed;"> Title</label>
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="offerShowDesc" checked style="accent-color:#7c3aed;"> Description</label>
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="offerShowCode" checked style="accent-color:#7c3aed;"> Promo Code</label>
+                  </div>
+                </div>
               </div>
               <div>
                 <div class="admin-form-group">
@@ -10553,8 +10563,14 @@ function updateOfferPreview() {
     const title = document.getElementById('offerTitle').value || 'Offer Title';
     const desc = document.getElementById('offerDesc').value || '';
     const code = document.getElementById('offerCode').value;
+    const badgeText = document.getElementById('offerBadgeText').value.trim() || 'LIMITED OFFER';
+    const showBadge = document.getElementById('offerShowBadge').checked;
+    const showTitle = document.getElementById('offerShowTitle').checked;
+    const showDesc = document.getElementById('offerShowDesc').checked;
+    const showCode = document.getElementById('offerShowCode').checked;
     const box = document.getElementById('offerPreviewBox');
     const s = getOfferThemeStyles(_selectedOfferTheme);
+    const badgeHtml = showBadge ? '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">' + badgeText + '</div>' : '';
     const bgUrl = _selectedOfferBgData || document.getElementById('offerBgImage').value;
     box.style.background = bgUrl ? 'url(' + bgUrl + ') center/cover' : 'linear-gradient(135deg,' + s.bg + ',#0a0a0a)';
     box.style.textAlign = s.layout === 'center' ? 'center' : (s.layout === 'right' ? 'right' : 'left');
@@ -10567,25 +10583,25 @@ function updateOfferPreview() {
             box.innerHTML = '<div style="text-align:center;padding:12px;color:#666;font-size:10px;">🖼️ Upload banner image to preview</div>';
         }
     } else if (s.layout === 'center') {
-        box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-            '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + title + '</div>' +
-            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + desc + '</div>' : '') +
-            (code ? '<div style="margin-top:6px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.5);padding:3px 10px;border-radius:4px;display:inline-block;border:1px dashed ' + s.accent + ';">Code: ' + code + '</div>' : '');
+        box.innerHTML = (showBadge ? '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">' + badgeText + '</div>' : '') +
+            (showTitle ? '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + title + '</div>' : '') +
+            (desc && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + desc + '</div>' : '') +
+            (code && showCode ? '<div style="margin-top:6px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.5);padding:3px 10px;border-radius:4px;display:inline-block;border:1px dashed ' + s.accent + ';">Code: ' + code + '</div>' : '');
     } else if (s.layout === 'right') {
         box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div>' +
-            '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-            (code ? '<div style="margin-top:3px;font-size:9px;color:' + s.accent + ';font-weight:700;">Code: ' + code + '</div>' : '') +
+            badgeHtml +
+            (code && showCode ? '<div style="margin-top:3px;font-size:9px;color:' + s.accent + ';font-weight:700;">Code: ' + code + '</div>' : '') +
             '</div>' +
             '<div style="text-align:right;">' +
-            '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + title + '</div>' +
-            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
+            (showTitle ? '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + title + '</div>' : '') +
+            (desc && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
             '</div></div>';
     } else {
-        box.innerHTML = '<div style="background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');display:inline-block;padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-            '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;">' + title + '</div>' +
-            (desc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
-            (code ? '<div style="margin-top:4px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Code: ' + code + '</div>' : '');
+        box.innerHTML = badgeHtml +
+            (showTitle ? '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;">' + title + '</div>' : '') +
+            (desc && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + desc + '</div>' : '') +
+            (code && showCode ? '<div style="margin-top:4px;font-size:9px;color:' + s.accent + ';background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Code: ' + code + '</div>' : '');
     }
 }
 
@@ -10613,9 +10629,13 @@ function getSelectedOfferUsers() {
 }
 
 function loadOffersPreviewListeners() {
-    ['offerTitle','offerDesc','offerCode'].forEach(id => {
+    ['offerTitle','offerDesc','offerCode','offerBadgeText'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', updateOfferPreview);
+    });
+    ['offerShowBadge','offerShowTitle','offerShowDesc','offerShowCode'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateOfferPreview);
     });
 }
 
@@ -10729,7 +10749,7 @@ async function createOffer() {
     if (target === 'specific' && !selectedUsers.length) { st.innerHTML = '<span style="color:#ef4444;">Select at least 1 user</span>'; return; }
     if (bgImage && bgImage.startsWith('data:') && bgImage.length > 300000) { st.innerHTML = '<span style="color:#ef4444;">Image too large (max 200KB)</span>'; return; }
     try {
-        const body = { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays: parseInt(document.getElementById('offerBonusDays').value) || 7, maxUses: parseInt(document.getElementById('offerMaxUses').value) || 0 };
+        const body = { title, description, code, expiry, target, selectedUsers, theme, bgImage, bonusDays: parseInt(document.getElementById('offerBonusDays').value) || 7, maxUses: parseInt(document.getElementById('offerMaxUses').value) || 0, badgeText: document.getElementById('offerBadgeText').value.trim() || 'LIMITED OFFER', showBadge: document.getElementById('offerShowBadge').checked, showTitle: document.getElementById('offerShowTitle').checked, showDescription: document.getElementById('offerShowDesc').checked, showCode: document.getElementById('offerShowCode').checked };
         const url = editId ? API + '/api/admin/offers/' + editId : API + '/api/admin/offers';
         const r = await fetch(url, {
             method: editId ? 'PUT' : 'POST',
@@ -10758,6 +10778,11 @@ function editOffer(id) {
         document.getElementById('offerExpiry').value = o.expiry || '';
         document.getElementById('offerBonusDays').value = o.bonusDays || 7;
         document.getElementById('offerMaxUses').value = o.maxUses || 0;
+        document.getElementById('offerBadgeText').value = o.badgeText || 'LIMITED OFFER';
+        document.getElementById('offerShowBadge').checked = o.showBadge !== false;
+        document.getElementById('offerShowTitle').checked = o.showTitle !== false;
+        document.getElementById('offerShowDesc').checked = o.showDescription !== false;
+        document.getElementById('offerShowCode').checked = o.showCode !== false;
         document.getElementById('offerTarget').value = o.target || 'all';
         _selectedOfferTheme = o.theme || 'golden';
         document.querySelectorAll('#offerColorPick .offer-theme-card').forEach(c => c.style.borderColor = 'transparent');
@@ -10783,6 +10808,8 @@ function resetOfferForm() {
     document.getElementById('offerFormTitle').textContent = '✨ Create New Offer';
     document.getElementById('offerSubmitBtn').textContent = '🚀 Send Offer Now';
     ['offerTitle','offerDesc','offerCode','offerExpiry','offerBgImage'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('offerBadgeText').value = 'LIMITED OFFER';
+    ['offerShowBadge','offerShowTitle','offerShowDesc','offerShowCode'].forEach(id => document.getElementById(id).checked = true);
     document.getElementById('offerTarget').value = 'all';
     document.getElementById('offerSpecificUsers').style.display = 'none';
     document.getElementById('offerStatus').innerHTML = '';
@@ -11038,7 +11065,13 @@ async function loadActiveOffers() {
             const s = themes[o.theme] || themes.golden;
             const lay = s.layout || 'left';
             const bgImg = o.bgImage ? 'background-image:url(' + o.bgImage + ');background-size:cover;background-position:center;' : '';
-            const codeBlock = o.code ? '<div onclick="event.stopPropagation();navigator.clipboard.writeText(\'' + o.code + '\');this.querySelector(\'span\').textContent=\'Copied!\';setTimeout(()=>this.querySelector(\'span\').textContent=\'' + o.code + '\',1500);" style="cursor:pointer;text-align:center;background:rgba(0,0,0,0.5);border:1px dashed ' + s.accent + ';border-radius:5px;padding:4px 8px;flex-shrink:0;">' +
+            const badgeText = o.badgeText || 'LIMITED OFFER';
+            const showBadge = o.showBadge !== false;
+            const showTitle = o.showTitle !== false;
+            const showDesc = o.showDescription !== false;
+            const showCode = o.showCode !== false;
+            const badgeHtml = showBadge ? '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">' + badgeText + '</div>' : '';
+            const codeBlock = (o.code && showCode) ? '<div onclick="event.stopPropagation();navigator.clipboard.writeText(\'' + o.code + '\');this.querySelector(\'span\').textContent=\'Copied!\';setTimeout(()=>this.querySelector(\'span\').textContent=\'' + o.code + '\',1500);" style="cursor:pointer;text-align:center;background:rgba(0,0,0,0.5);border:1px dashed ' + s.accent + ';border-radius:5px;padding:4px 8px;flex-shrink:0;">' +
                 '<div style="font-size:6px;color:' + s.accent + ';letter-spacing:0.5px;">CODE</div>' +
                 '<span style="font-size:11px;font-weight:800;color:' + s.accent + ';letter-spacing:1px;">' + o.code + '</span>' +
                 '</div>' : '';
@@ -11051,29 +11084,29 @@ async function loadActiveOffers() {
                 }
             } else if (lay === 'center') {
                 inner = '<div style="text-align:center;padding:4px 0;">' +
-                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-                    '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + o.title + '</div>' +
-                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + o.description + '</div>' : '') +
+                    (showBadge ? '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:2px 10px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">' + badgeText + '</div>' : '') +
+                    (showTitle ? '<div style="font-size:15px;font-weight:800;color:' + s.text + ';margin-top:6px;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.6);">' + o.title + '</div>' : '') +
+                    (o.description && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:3px;">' + o.description + '</div>' : '') +
                     (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
-                    (o.code ? '<div style="margin-top:6px;">' + codeBlock + '</div>' : '') +
+                    (o.code && showCode ? '<div style="margin-top:6px;">' + codeBlock + '</div>' : '') +
                     '</div>';
             } else if (lay === 'right') {
                 inner = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                     '<div style="flex:1;padding-right:10px;">' +
-                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
+                    badgeHtml +
                     (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
                     '</div>' +
                     '<div style="text-align:right;">' +
-                    '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + o.title + '</div>' +
-                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + o.description + '</div>' : '') +
+                    (showTitle ? '<div style="font-size:13px;font-weight:800;color:' + s.text + ';text-shadow:0 1px 4px rgba(0,0,0,0.8);">' + o.title + '</div>' : '') +
+                    (o.description && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;">' + o.description + '</div>' : '') +
                     '</div>' +
                     codeBlock + '</div>';
             } else {
                 inner = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                     '<div style="flex:1;padding-right:8px;">' +
-                    '<div style="display:inline-block;background:linear-gradient(135deg,' + s.accent + ',' + s.accentDark + ');padding:1px 8px;border-radius:3px;font-size:7px;font-weight:800;color:' + s.badgeText + ';letter-spacing:0.5px;">LIMITED OFFER</div>' +
-                    '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' + o.title + '</div>' +
-                    (o.description ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;line-height:1.3;">' + o.description + '</div>' : '') +
+                    badgeHtml +
+                    (showTitle ? '<div style="font-size:13px;font-weight:800;color:' + s.text + ';margin-top:4px;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' + o.title + '</div>' : '') +
+                    (o.description && showDesc ? '<div style="font-size:9px;color:' + s.desc + ';margin-top:2px;line-height:1.3;">' + o.description + '</div>' : '') +
                     (o.expiry ? '<div style="margin-top:4px;font-size:7px;color:#888;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;display:inline-block;">Valid till ' + o.expiry + '</div>' : '') +
                     '</div>' +
                     codeBlock + '</div>';
