@@ -10576,8 +10576,8 @@ function updateOfferPreview() {
     box.style.textAlign = s.layout === 'center' ? 'center' : (s.layout === 'right' ? 'right' : 'left');
     if (s.layout === 'banner') {
         if (bgUrl) {
-            box.style.background = 'url(' + bgUrl + ') center/cover';
-            box.innerHTML = '<div style="min-height:50px;"></div>';
+            box.style.background = 'linear-gradient(135deg,' + s.bg + ',#0a0a0a)';
+            box.innerHTML = '<div style="width:100%;aspect-ratio:1200/300;min-height:100px;max-height:480px;background:url(' + bgUrl + ') center/cover no-repeat;border-radius:8px;"></div>';
         } else {
             box.style.background = 'linear-gradient(135deg,#1a1a1a,#111)';
             box.innerHTML = '<div style="text-align:center;padding:12px;color:#666;font-size:10px;">🖼️ Upload banner image to preview</div>';
@@ -11078,7 +11078,7 @@ async function loadActiveOffers() {
             let inner = '';
             if (lay === 'banner') {
                 if (o.bgImage) {
-                    inner = '<div style="width:100%;min-height:60px;background:url(' + o.bgImage + ') center/cover no-repeat;border-radius:8px;"></div>';
+                    inner = '<div style="width:100%;aspect-ratio:1200/300;min-height:120px;max-height:480px;background:url(' + o.bgImage + ') center/cover no-repeat;border-radius:8px;"></div>';
                 } else {
                     inner = '<div style="text-align:center;padding:12px;color:#888;font-size:10px;">Banner image not uploaded</div>';
                 }
@@ -11111,7 +11111,7 @@ async function loadActiveOffers() {
                     '</div>' +
                     codeBlock + '</div>';
             }
-            return '<div style="margin-bottom:8px;border-radius:10px;overflow:hidden;position:relative;border:1px solid ' + s.border + ';box-shadow:0 2px 12px ' + s.accent + '25;' + (bgImg || 'background:' + s.bg + ';') + '">' +
+            return '<div style="margin-bottom:8px;border-radius:10px;overflow:hidden;position:relative;border:1px solid ' + s.border + ';box-shadow:0 2px 12px ' + s.accent + '25;' + (lay === 'banner' ? 'background:' + s.bg + ';' : (bgImg || 'background:' + s.bg + ';')) + '">' +
                 '<div style="position:relative;padding:10px 12px;min-height:50px;">' + inner + '</div></div>';
         }).join('');
         if (!wrap.innerHTML.trim()) return;

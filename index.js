@@ -4470,7 +4470,7 @@ app.post('/api/admin/sector-stocks/reset', checkAdmin, (req, res) => {
 // HOLIDAY/FESTIVAL BANNERS
 // ========================================
 
-app.get('/api/banners', (req, res) => {
+app.get('/api/banners', async (req, res) => {
     try {
         const settings = loadSettings();
         const banners = settings.holidayBanners || [];
@@ -4484,17 +4484,15 @@ app.get('/api/banners', (req, res) => {
             if (deviceType === 'mobile' && !b.showOnMobile) return false;
             return true;
         });
-        const first = active[0];
-        if (first && first.hasImage && db.isConnected()) {
-            const imgPromise = db.getBannerImage(first.id);
-            imgPromise.then(img => {
-                if (img) first.imageUrl = img;
-                else first.imageUrl = '';
-                res.json({ success: true, banners: active });
-            }).catch(() => res.json({ success: true, banners: active }));
-        } else {
-            res.json({ success: true, banners: active });
+        if (db.isConnected()) {
+            await Promise.all(active.map(async b => {
+                if (b.hasImage) {
+                    const img = await db.getBannerImage(b.id);
+                    b.imageUrl = img || '';
+                }
+            }));
         }
+        res.json({ success: true, banners: active });
     } catch (e) { res.json({ success: true, banners: [] }); }
 });
 
@@ -4569,6 +4567,9 @@ app.post('/api/admin/banners', checkAdmin, async (req, res) => {
             } else {
                 banner.imageUrl = imageUrl;
             }
+        } else if (imageUrl) {
+            banner.hasImage = false;
+            banner.imageUrl = imageUrl;
         }
         settings.holidayBanners.push(banner);
         saveSettings(settings);
@@ -4620,6 +4621,10 @@ app.put('/api/admin/banners/:id', checkAdmin, async (req, res) => {
                 banner.hasImage = false;
                 banner.imageUrl = '';
                 if (db.isConnected()) await db.deleteBannerImage(banner.id);
+            } else if (imageUrl) {
+                banner.hasImage = false;
+                banner.imageUrl = imageUrl;
+                if (db.isConnected() && banner.id) await db.deleteBannerImage(banner.id);
             }
         }
         saveSettings(settings);
