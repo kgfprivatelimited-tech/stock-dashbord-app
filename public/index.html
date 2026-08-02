@@ -10962,20 +10962,29 @@ async function loadHolidayBanners() {
             wrap.style.background = banner.bgColor || '#ff6b35';
             wrap.style.color = banner.textColor || '#ffffff';
             const h = isMobile ? 180 : (banner.bannerHeight || 120);
-            wrap.style.height = h + 'px';
-            wrap.style.minHeight = h + 'px';
-            wrap.style.maxHeight = '400px';
             const bannerImg = wrap.querySelector('#holidayBannerImg');
             if (bannerImg) {
                 if (banner.imageUrl) {
+                    wrap.style.height = 'auto';
+                    wrap.style.minHeight = '0';
+                    wrap.style.maxHeight = 'none';
                     bannerImg.src = banner.imageUrl;
                     bannerImg.style.display = 'block';
-                    bannerImg.style.height = h + 'px';
-                    bannerImg.style.objectFit = 'cover';
+                    bannerImg.style.width = '100%';
+                    bannerImg.style.height = 'auto';
+                    bannerImg.style.maxHeight = 'none';
+                    bannerImg.style.objectFit = 'contain';
                 } else {
+                    wrap.style.height = h + 'px';
+                    wrap.style.minHeight = h + 'px';
+                    wrap.style.maxHeight = '400px';
                     bannerImg.style.display = 'none';
                     bannerImg.src = '';
                 }
+            } else {
+                wrap.style.height = h + 'px';
+                wrap.style.minHeight = h + 'px';
+                wrap.style.maxHeight = '400px';
             }
             const titleEl = wrap.querySelector('#holidayBannerTitle');
             if (titleEl) {
@@ -11000,7 +11009,10 @@ async function loadHolidayBanners() {
                 }
             }
             const emojiEl = wrap.querySelector('#holidayBannerEmoji');
-            if (emojiEl) emojiEl.textContent = banner.emoji || '🎊';
+            if (emojiEl) {
+                if (banner.imageUrl) emojiEl.style.display = 'none';
+                else emojiEl.textContent = banner.emoji || '🎊';
+            }
             const inner = wrap.querySelector('#holidayBannerInner');
             if (inner) inner.style.display = 'flex';
             const dismissBtn = wrap.querySelector('#holidayBannerDismissBtn');
