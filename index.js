@@ -1776,11 +1776,13 @@ let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bearfighter@admin';
 const _savedSettings = loadSettings();
 if (_savedSettings.adminPassword) ADMIN_PASSWORD = _savedSettings.adminPassword;
 
-// ========== SECURE ADMIN AUTH (Password + Telegram OTP + Session) ==========
+// ========== SECURE ADMIN AUTH (Password + Telegram OTP + PIN + Session) ==========
 const ADMIN_SESSION_TTL = 30 * 60 * 1000;   // 30 min sliding expiry
 const ADMIN_OTP_TTL = 3 * 60 * 1000;        // OTP valid 3 min
+const ADMIN_PIN_TOKEN_TTL = 5 * 60 * 1000;  // PIN step must complete in 5 min
 const adminSessions = new Map();            // token -> { expiresAt }
 const adminOtps = new Map();                // otp -> { expiresAt, attempts }
+const adminPinTokens = new Map();           // pinToken -> { expiresAt }
 const adminFails = new Map();               // ip -> { count, lockedUntil }
 
 function getClientIp(req) {
@@ -1802,6 +1804,23 @@ function createAdminToken() {
     const token = crypto.randomBytes(32).toString('hex');
     adminSessions.set(token, { expiresAt: Date.now() + ADMIN_SESSION_TTL });
     return token;
+}
+// ---- Admin security PIN (hashed, stored in settings) ----
+function getAdminPinRec() {
+    const s = loadSettings();
+    return s.adminPin || null;
+}
+function setAdminPin(salt, hash) {
+    const s = loadSettings();
+    s.adminPin = { salt, hash };
+    saveSettings(s);
+}
+function hashAdminPin(pin, salt) {
+    return crypto.createHash('sha256').update(salt + ':' + pin).digest('hex');
+}
+function verifyAdminPin(pin, rec) {
+    if (!rec || !rec.salt || !rec.hash) return false;
+    return hashAdminPin(String(pin || '').trim(), rec.salt) === rec.hash;
 }
 function isValidAdminRequest(req) {
     const token = req.headers['admin-key'];
@@ -1868,8 +1887,49 @@ app.post('/api/admin/login/verify', (req, res) => {
     if (rec.attempts > 5) { adminOtps.delete(otpKey); recordAdminFail(ip); return res.json({ success: false, message: 'Too many OTP attempts. Request a new OTP.' }); }
     adminOtps.delete(otpKey);
     clearAdminFails(ip);
+    const pinRec = getAdminPinRec();
+    const pinToken = crypto.randomBytes(24).toString('hex');
+    adminPinTokens.set(pinToken, { expiresAt: Date.now() + ADMIN_PIN_TOKEN_TTL });
+    logActivity('admin_login', 'OTP verified, awaiting PIN');
+    res.json({
+        success: true,
+        message: 'OTP verified',
+        pinStep: pinRec ? 'verify' : 'setup',
+        pinToken
+    });
+});
+
+// Step 3: verify or set admin PIN, then issue session token
+app.post('/api/admin/login/pin', (req, res) => {
+    const ip = getClientIp(req);
+    if (adminLoginLocked(ip)) {
+        return res.json({ success: false, locked: true, message: 'Too many attempts. Try again in 5 minutes.' });
+    }
+    const { pinToken, pin } = req.body || {};
+    const ptRec = adminPinTokens.get(pinToken);
+    if (!ptRec || Date.now() > ptRec.expiresAt) {
+        adminPinTokens.delete(pinToken);
+        return res.json({ success: false, message: 'PIN session expired. Restart login.' });
+    }
+    const pinStr = String(pin || '').trim();
+    if (!/^\d{4,6}$/.test(pinStr)) {
+        return res.json({ success: false, message: 'PIN must be 4 to 6 digits' });
+    }
+    const pinRec = getAdminPinRec();
+    if (pinRec) {
+        if (!verifyAdminPin(pinStr, pinRec)) {
+            recordAdminFail(ip);
+            return res.json({ success: false, message: 'Wrong PIN' });
+        }
+    } else {
+        const salt = crypto.randomBytes(16).toString('hex');
+        setAdminPin(salt, hashAdminPin(pinStr, salt));
+        logActivity('admin_security', 'Admin security PIN set');
+    }
+    adminPinTokens.delete(pinToken);
+    clearAdminFails(ip);
     const token = createAdminToken();
-    logActivity('admin_login', 'Admin login successful (OTP verified)');
+    logActivity('admin_login', 'Admin login successful (OTP + PIN verified)');
     res.json({ success: true, message: 'Login successful', token });
 });
 

@@ -1423,61 +1423,156 @@ header {
 .admin-login-screen {
     display: none;
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--abg) 100%);
+    background: #07070d;
     z-index: 99999;
     justify-content: center; align-items: center;
     font-family: 'Inter', sans-serif;
+    overflow: hidden;
 }
 .admin-login-screen.show { display: flex; }
-.admin-login-box {
-    background: var(--acard);
-    border: 1px solid var(--aborder);
-    border-radius: 16px;
-    padding: 40px 36px;
-    width: 340px;
-    max-width: 90vw;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+.admin-bg { position: absolute; inset: 0; overflow: hidden; }
+.admin-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(245,158,11,0.16), transparent 45%),
+                radial-gradient(circle at 80% 30%, rgba(124,58,237,0.2), transparent 45%),
+                radial-gradient(circle at 60% 80%, rgba(59,130,246,0.13), transparent 45%);
+    background-size: 220% 220%;
+    animation: adminBgShift 13s ease infinite;
 }
+@keyframes adminBgShift { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+.admin-bg .blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(70px); opacity: 0.45;
+    animation: adminBlobFloat 16s ease-in-out infinite;
+}
+.blob.b1 { width: 320px; height: 320px; left: -80px; top: -60px; background: #f59e0b; }
+.blob.b2 { width: 380px; height: 380px; right: -120px; top: 20%; background: #7c3aed; animation-delay: -5s; }
+.blob.b3 { width: 260px; height: 260px; left: 35%; bottom: -90px; background: #3b82f6; animation-delay: -9s; }
+@keyframes adminBlobFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(30px,-40px) scale(1.1); }
+    66% { transform: translate(-25px,25px) scale(0.95); }
+}
+.admin-particle {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: #f59e0b; opacity: 0.5;
+    animation: adminParticleUp 9s linear infinite;
+}
+.p1 { left: 10%; top: 90%; animation-delay: 0s; }
+.p2 { left: 25%; top: 85%; animation-delay: 2s; background: #7c3aed; }
+.p3 { left: 45%; top: 95%; animation-delay: 4s; }
+.p4 { left: 65%; top: 80%; animation-delay: 1s; background: #3b82f6; }
+.p5 { left: 80%; top: 92%; animation-delay: 6s; }
+.p6 { left: 90%; top: 88%; animation-delay: 3s; background: #7c3aed; }
+.p7 { left: 55%; top: 96%; animation-delay: 5s; }
+.p8 { left: 15%; top: 94%; animation-delay: 7s; background: #3b82f6; }
+@keyframes adminParticleUp {
+    0% { transform: translateY(0) scale(1); opacity: 0.6; }
+    70% { opacity: 0.4; }
+    100% { transform: translateY(-110vh) scale(0.3); opacity: 0; }
+}
+.admin-login-box {
+    position: relative;
+    background: rgba(18,18,28,0.82);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 20px;
+    padding: 36px 36px 30px;
+    width: 350px;
+    max-width: 92vw;
+    text-align: center;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.06), 0 0 60px rgba(245,158,11,0.05);
+}
+.admin-login-screen.show .admin-login-box { animation: adminCardIn 0.6s cubic-bezier(0.16,1,0.3,1); }
+@keyframes adminCardIn {
+    from { opacity: 0; transform: translateY(28px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.admin-logo {
+    width: 66px; height: 66px; margin: 0 auto 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    animation: adminLogoPulse 2.6s ease-in-out infinite;
+}
+@keyframes adminLogoPulse {
+    0%,100% { transform: translateY(0) scale(1); box-shadow: 0 8px 26px rgba(245,158,11,0.35); }
+    50% { transform: translateY(-5px) scale(1.06); box-shadow: 0 16px 38px rgba(245,158,11,0.5); }
+}
+.admin-steps { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.admin-steps .step-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #33334a; transition: all 0.35s;
+}
+.admin-steps .step-dot.active { background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.8); width: 22px; border-radius: 4px; }
 .admin-login-box h1 {
     color: #f59e0b;
     font-size: 22px;
     font-weight: 800;
     margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    animation: adminStepIn 0.4s ease;
 }
 .admin-login-box p {
-    color: var(--adim);
+    color: #a1a1aa;
     font-size: 12px;
     margin-bottom: 20px;
+    min-height: 16px;
+    animation: adminStepIn 0.4s ease;
+}
+@keyframes adminStepIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .admin-login-box input {
     width: 100%;
-    padding: 12px 16px;
-    background: var(--aelevated);
-    border: 1px solid var(--aborder);
-    border-radius: 8px;
-    color: var(--atext);
+    padding: 13px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--atext, #fff);
     font-size: 14px;
     text-align: center;
     outline: none;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.admin-login-box input:focus { border-color: #f59e0b; }
+.admin-login-box input:focus {
+    border-color: #f59e0b;
+    background: rgba(245,158,11,0.06);
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.18);
+}
 .admin-login-box button {
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: #000;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    transition: all 0.25s;
 }
-.admin-login-box button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
-.admin-error { color: #ef4444; font-size: 12px; margin-top: 12px; min-height: 16px; }
+.admin-login-box button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+.admin-login-box button:active { transform: translateY(0) scale(0.98); }
+.admin-error {
+    color: #ef4444; font-size: 12px; margin-top: 12px; min-height: 16px;
+}
+.admin-login-box.shake { animation: adminShake 0.4s; }
+@keyframes adminShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+.admin-login-box.loading button { opacity: 0.7; pointer-events: none; }
 
 /* ═══════ ADMIN PANEL ═══════ */
 .admin-panel {
@@ -3147,12 +3242,35 @@ input[type="color"] {
 
 <!-- ═══════ ADMIN LOGIN ═══════ -->
 <div class="admin-login-screen" id="adminLoginScreen">
-    <div class="admin-login-box">
+    <div class="admin-bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="admin-particle p1"></div>
+        <div class="admin-particle p2"></div>
+        <div class="admin-particle p3"></div>
+        <div class="admin-particle p4"></div>
+        <div class="admin-particle p5"></div>
+        <div class="admin-particle p6"></div>
+        <div class="admin-particle p7"></div>
+        <div class="admin-particle p8"></div>
+    </div>
+    <div class="admin-login-box" id="adminLoginBox">
+        <div class="admin-logo">🐻</div>
+        <div class="admin-steps">
+            <div class="step-dot active" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+        </div>
         <h1 id="adminLoginHead">🔐 ADMIN ACCESS</h1>
-        <p id="adminLoginSub" style="color: var(--text-dim); font-size: 11px; margin-bottom: 20px;">Enter password to access admin panel</p>
+        <p id="adminLoginSub">Enter password to access admin panel</p>
         <input type="password" id="adminPassword" placeholder="Admin Password" autocomplete="off">
         <div id="adminOtpWrap" style="display:none;">
-            <input type="text" id="adminOtp" placeholder="Enter 6-digit OTP from Telegram" autocomplete="off" inputmode="numeric" maxlength="6" style="letter-spacing:6px;font-weight:700;">
+            <input type="text" id="adminOtp" placeholder="Enter 6-digit OTP" autocomplete="off" inputmode="numeric" maxlength="6" style="letter-spacing:6px;font-weight:700;">
+        </div>
+        <div id="adminPinWrap" style="display:none;">
+            <input type="password" id="adminPin" placeholder="Enter 4-6 digit PIN" autocomplete="off" inputmode="numeric" maxlength="6" style="letter-spacing:8px;font-weight:700;">
+            <input type="password" id="adminPinConfirm" placeholder="Confirm PIN" autocomplete="off" inputmode="numeric" maxlength="6" style="letter-spacing:8px;font-weight:700;display:none;">
         </div>
         <button id="adminLoginBtn" onclick="adminLogin()">🔓 LOGIN</button>
         <div class="admin-error" id="adminError"></div>
@@ -6832,6 +6950,24 @@ document.addEventListener('DOMContentLoaded', () => {
             adminLogin();
         }
     });
+    document.getElementById('adminOtp').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            adminLogin();
+        }
+    });
+    document.getElementById('adminPin').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            adminLogin();
+        }
+    });
+    document.getElementById('adminPinConfirm').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            adminLogin();
+        }
+    });
     document.getElementById('newUsername').addEventListener('keydown', e => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -6855,6 +6991,8 @@ document.addEventListener('DOMContentLoaded', () => {
 let ADMIN_KEY = sessionStorage.getItem('bf_admin_token') || '';
 let _adminPass = '';
 let _adminLoginStep = 1;
+let _adminPinToken = '';
+let _pinMode = 'verify';
 
 function showAdmin() {
     window.location.href = '/admin';
@@ -6864,14 +7002,12 @@ function enterAdminPanel() {
     isAdmin = true;
     localStorage.setItem('bf_admin', '1');
     document.getElementById('adminLoginScreen').classList.remove('show');
-    document.getElementById('adminPassword').value = '';
+    _adminPinToken = '';
+    _pinMode = 'verify';
     document.getElementById('adminOtp').value = '';
-    document.getElementById('adminOtpWrap').style.display = 'none';
-    document.getElementById('adminPassword').style.display = '';
-    document.getElementById('adminLoginBtn').textContent = '🔓 LOGIN';
-    document.getElementById('adminLoginHead').textContent = '🔐 ADMIN ACCESS';
-    document.getElementById('adminLoginSub').textContent = 'Enter password to access admin panel';
-    _adminLoginStep = 1;
+    document.getElementById('adminPin').value = '';
+    document.getElementById('adminPinConfirm').value = '';
+    goAdminStep(1);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
@@ -6886,61 +7022,119 @@ function enterAdminPanel() {
     if (!window._adminFetchInterval) window._adminFetchInterval = setInterval(fetchAdminIndices, 3000);
 }
 
+function goAdminStep(step) {
+    _adminLoginStep = step;
+    const p = document.getElementById('adminPassword');
+    const o = document.getElementById('adminOtpWrap');
+    const pw = document.getElementById('adminPinWrap');
+    const pcon = document.getElementById('adminPinConfirm');
+    if (p) p.style.display = step === 1 ? '' : 'none';
+    if (o) o.style.display = step === 2 ? 'block' : 'none';
+    if (pw) pw.style.display = step === 3 ? 'block' : 'none';
+    if (pcon) pcon.style.display = (step === 3 && _pinMode === 'setup') ? 'block' : 'none';
+    const btn = document.getElementById('adminLoginBtn');
+    if (btn) btn.textContent = step === 1 ? '🔓 LOGIN' : (step === 2 ? '✅ VERIFY OTP' : (_pinMode === 'setup' ? '🔒 SET PIN & LOGIN' : '🔒 VERIFY PIN'));
+    const head = document.getElementById('adminLoginHead');
+    if (head) head.textContent = step === 1 ? '🔐 ADMIN ACCESS' : (step === 2 ? '🔐 ENTER OTP' : (_pinMode === 'setup' ? '🔐 SET SECURITY PIN' : '🔐 ENTER PIN'));
+    const sub = document.getElementById('adminLoginSub');
+    if (sub) sub.textContent = step === 1 ? 'Enter password to access admin panel' : (step === 2 ? 'Enter the 6-digit OTP sent to your Telegram (valid 3 min)' : (_pinMode === 'setup' ? 'Set a 4-6 digit PIN. It will be required on every login.' : 'Enter your 4-6 digit security PIN'));
+    document.querySelectorAll('.admin-steps .step-dot').forEach((d, i) => d.classList.toggle('active', i + 1 === step));
+    if (head) { head.style.animation = 'none'; void head.offsetWidth; head.style.animation = ''; }
+    if (sub) { sub.style.animation = 'none'; void sub.offsetWidth; sub.style.animation = ''; }
+}
+
+function setAdminBtnLoading(on) {
+    const box = document.getElementById('adminLoginBox');
+    if (box) box.classList.toggle('loading', !!on);
+}
+
 function resetAdminLoginForm() {
-    _adminLoginStep = 1;
-    document.getElementById('adminOtpWrap').style.display = 'none';
-    document.getElementById('adminPassword').style.display = '';
-    document.getElementById('adminLoginBtn').textContent = '🔓 LOGIN';
-    document.getElementById('adminLoginHead').textContent = '🔐 ADMIN ACCESS';
-    document.getElementById('adminLoginSub').textContent = 'Enter password to access admin panel';
+    _adminPinToken = '';
+    _pinMode = 'verify';
+    document.getElementById('adminOtp').value = '';
+    document.getElementById('adminPin').value = '';
+    document.getElementById('adminPinConfirm').value = '';
+    goAdminStep(1);
 }
 
 async function adminLogin() {
     const err = document.getElementById('adminError');
+    const box = document.getElementById('adminLoginBox');
+    function fail(msg) {
+        if (err) err.textContent = '❌ ' + msg;
+        goAdminStep(_adminLoginStep);
+        if (box) { box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); }
+    }
     if (_adminLoginStep === 1) {
         _adminPass = document.getElementById('adminPassword').value;
-        if (!_adminPass) { err.textContent = 'Please enter password'; return; }
+        if (!_adminPass) { fail('Please enter password'); return; }
+        setAdminBtnLoading(true);
         try {
             const r = await fetch(API + '/api/admin/login', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: _adminPass })
             }).then(r => r.json());
-            if (r.locked) { err.textContent = '⏳ ' + (r.message || 'Too many attempts. Wait 5 minutes.'); return; }
+            setAdminBtnLoading(false);
+            if (r.locked) { fail(r.message || 'Too many attempts. Wait 5 minutes.'); return; }
+            if (!r.success) { fail(r.message || 'Wrong password'); document.getElementById('adminPassword').value = ''; return; }
+            _adminLoginStep = 2;
+            goAdminStep(2);
+            if (err) err.textContent = '';
+            document.getElementById('adminOtp').focus();
+            return;
+        } catch (e) { setAdminBtnLoading(false); fail('Server error'); return; }
+    }
+    if (_adminLoginStep === 2) {
+        const otp = document.getElementById('adminOtp').value.trim();
+        if (!otp) { fail('Enter the OTP'); return; }
+        setAdminBtnLoading(true);
+        try {
+            const r = await fetch(API + '/api/admin/login/verify', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: _adminPass, otp })
+            }).then(r => r.json());
+            setAdminBtnLoading(false);
+            if (r.locked) { fail(r.message || 'Too many attempts. Wait 5 minutes.'); resetAdminLoginForm(); return; }
             if (!r.success) {
-                err.textContent = '❌ ' + (r.message || 'Wrong password');
-                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminOtp').value = '';
+                fail(r.message || 'Invalid OTP');
+                if (r.message && r.message.indexOf('expired') !== -1) resetAdminLoginForm();
                 return;
             }
-            _adminLoginStep = 2;
-            document.getElementById('adminPassword').style.display = 'none';
-            document.getElementById('adminOtpWrap').style.display = 'block';
-            document.getElementById('adminLoginBtn').textContent = '✅ VERIFY';
-            document.getElementById('adminLoginHead').textContent = '🔐 ENTER OTP';
-            document.getElementById('adminLoginSub').textContent = 'Enter the 6-digit OTP sent to your Telegram (valid 3 min)';
-            document.getElementById('adminOtp').focus();
-            err.textContent = '';
+            _adminPinToken = r.pinToken || '';
+            _pinMode = r.pinStep === 'setup' ? 'setup' : 'verify';
+            _adminLoginStep = 3;
+            goAdminStep(3);
+            if (err) err.textContent = '';
+            document.getElementById('adminPin').focus();
             return;
-        } catch (e) { err.textContent = 'Server error'; return; }
+        } catch (e) { setAdminBtnLoading(false); fail('Server error'); return; }
     }
-    const otp = document.getElementById('adminOtp').value.trim();
-    if (!otp) { err.textContent = 'Enter the OTP'; return; }
+    const pin = document.getElementById('adminPin').value.trim();
+    if (!/^\d{4,6}$/.test(pin)) { fail('Enter a 4-6 digit PIN'); return; }
+    if (_pinMode === 'setup') {
+        const confirmPin = document.getElementById('adminPinConfirm').value.trim();
+        if (!confirmPin) { fail('Confirm your PIN'); return; }
+        if (confirmPin !== pin) { fail('PINs do not match'); document.getElementById('adminPinConfirm').value = ''; return; }
+    }
+    setAdminBtnLoading(true);
     try {
-        const r = await fetch(API + '/api/admin/login/verify', {
+        const r = await fetch(API + '/api/admin/login/pin', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: _adminPass, otp })
+            body: JSON.stringify({ pinToken: _adminPinToken, pin })
         }).then(r => r.json());
-        if (r.locked) { err.textContent = '⏳ ' + (r.message || 'Too many attempts. Wait 5 minutes.'); resetAdminLoginForm(); return; }
+        setAdminBtnLoading(false);
+        if (r.locked) { fail(r.message || 'Too many attempts. Wait 5 minutes.'); resetAdminLoginForm(); return; }
         if (!r.success) {
-            err.textContent = '❌ ' + (r.message || 'Invalid OTP');
-            document.getElementById('adminOtp').value = '';
-            if (r.message && r.message.indexOf('expired') !== -1) resetAdminLoginForm();
+            document.getElementById('adminPin').value = '';
+            fail(r.message || 'Wrong PIN');
             return;
         }
         ADMIN_KEY = r.token;
         sessionStorage.setItem('bf_admin_token', r.token);
-        err.textContent = '';
+        if (err) err.textContent = '';
         enterAdminPanel();
-    } catch (e) { err.textContent = 'Server error'; }
+    } catch (e) { setAdminBtnLoading(false); fail('Server error'); }
 }
 
 function adminLogout() {
