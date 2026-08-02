@@ -2040,6 +2040,11 @@ app.post('/api/admin/renew', checkAdmin, (req, res) => {
         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
         user.subscriptionExpiry = new Date(baseDate.getTime() + totalDays * 24 * 60 * 60 * 1000).toISOString();
         user.approved = true;
+        // Clear stale expiry-reminder message so renewed users stop seeing "Renew now" alerts
+        if (user.message && /expires|renew/i.test(user.message)) {
+            user.message = '';
+            user.messageImageUrl = '';
+        }
         if (amount) user.paymentAmount = (parseFloat(user.paymentAmount) || 0) + parseFloat(amount);
         user.lastRenewDate = new Date().toISOString();
         saveUsers(data);
@@ -4195,6 +4200,11 @@ app.post('/api/admin/renewal-requests/:id/approve', checkAdmin, (req, res) => {
         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
         user.subscriptionExpiry = new Date(baseDate.getTime() + totalDays * 24 * 60 * 60 * 1000).toISOString();
         user.approved = true;
+        // Clear stale expiry-reminder message so renewed users stop seeing "Renew now" alerts
+        if (user.message && /expires|renew/i.test(user.message)) {
+            user.message = '';
+            user.messageImageUrl = '';
+        }
         if (request.amount) user.paymentAmount = (parseFloat(user.paymentAmount) || 0) + request.amount;
         user.lastRenewDate = new Date().toISOString();
         saveUsers(data);
