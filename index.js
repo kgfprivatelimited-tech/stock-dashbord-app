@@ -2248,40 +2248,107 @@ function seedFxLivePrices() {
 }
 seedFxLivePrices();
 
+// Cloud-friendly fallback sources (no API key) — used when Yahoo blocks datacenter IPs (common on Render/cloud)
+const FX_BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+const FX_FRANKFURTER_URL = 'https://api.frankfurter.app/latest?from=USD'; // ECB rates, no key
+const FX_PAIR_MAP = {
+    'EUR/USD':['EUR','USD'],'GBP/USD':['GBP','USD'],'USD/JPY':['USD','JPY'],'USD/CHF':['USD','CHF'],'USD/INR':['USD','INR'],'AUD/USD':['AUD','USD'],
+    'NZD/USD':['NZD','USD'],'USD/CAD':['USD','CAD'],'EUR/GBP':['EUR','GBP'],'EUR/JPY':['EUR','JPY'],'GBP/JPY':['GBP','JPY'],
+    'AUD/JPY':['AUD','JPY'],'EUR/INR':['EUR','INR'],'GBP/INR':['GBP','INR'],'USD/CNY':['USD','CNY']
+};
+const FX_CRYPTO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin,solana,xrp,dogecoin,cardano,litecoin,polkadot,chainlink&vs_currencies=usd';
+const FX_CRYPTO_MAP = { 'BTC/USD':'bitcoin','ETH/USD':'ethereum','USDT':'tether','BNB/USD':'binancecoin','SOL/USD':'solana','XRP/USD':'xrp','DOGE/USD':'dogecoin','ADA/USD':'cardano','LTC/USD':'litecoin','DOT/USD':'polkadot','LINK/USD':'chainlink' };
+const FX_GOLD_SYMS = { 'XAU/USD': 'XAU', 'XAG/USD': 'XAG' }; // gold-api.com
+
+function fxApply(id, price, prev) {
+    const s = _fxLivePrices[id];
+    if (!s || !isFinite(price) || price <= 0) return false;
+    if (prev && isFinite(prev) && prev > 0) {
+        s.price = price; s.base = prev; s.chg = prev > 0 ? Math.round(((price - prev) / prev) * 10000) / 100 : 0;
+    } else {
+        s.price = price;
+        if (s.base <= 0 || s.base === 100) { s.base = price; s.chg = 0; }
+    }
+    return true;
+}
+
 async function fetchFxRealData() {
+    const sources = [];
+    let any = false;
+    // 1) Yahoo primary (real-time; works from home ISPs, often blocked on cloud IPs)
     try {
         const ids = Object.keys(FOREX_YAHOO_SYMBOLS);
-        const chunkSize = 20;
-        for (let i = 0; i < ids.length; i += chunkSize) {
-            const chunkIds = ids.slice(i, i + chunkSize);
-            const symStr = chunkIds.map(id => FOREX_YAHOO_SYMBOLS[id]).join(',');
-            const url = 'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + encodeURIComponent(symStr) + '&range=1d&interval=1m';
-            const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(12000) });
+        let n = 0;
+        for (let i = 0; i < ids.length; i += 20) {
+            const chunk = ids.slice(i, i + 20);
+            const url = 'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + encodeURIComponent(chunk.map(id => FOREX_YAHOO_SYMBOLS[id]).join(',')) + '&range=1d&interval=1m';
+            const res = await fetch(url, { headers: { 'User-Agent': FX_BROWSER_UA, 'Accept': 'application/json,text/plain,*/*', 'Accept-Language': 'en-US,en;q=0.9' }, signal: AbortSignal.timeout(12000) });
             if (!res.ok) continue;
             const j = await res.json();
             if (j && j.spark && j.spark.result) {
                 j.spark.result.forEach(r => {
-                    const id = chunkIds.find(x => FOREX_YAHOO_SYMBOLS[x] === r.symbol);
+                    const id = chunk.find(x => FOREX_YAHOO_SYMBOLS[x] === r.symbol);
                     if (!id || !r.response || !r.response[0]) return;
                     const meta = r.response[0].meta;
                     const price = parseFloat(meta.regularMarketPrice);
                     const prev = parseFloat(meta.chartPreviousClose) || parseFloat(meta.previousClose) || price;
-                    if (isFinite(price) && price > 0) {
-                        const s = _fxLivePrices[id];
-                        s.price = price;
-                        s.base = prev;
-                        s.chg = prev > 0 ? Math.round(((price - prev) / prev) * 10000) / 100 : 0;
-                    }
+                    if (fxApply(id, price, prev)) n++;
                 });
             }
         }
-        _fxLiveStatus = { lastUpdate: Date.now(), source: 'yahoo-real', ok: true };
-    } catch (e) {
-        _fxLiveStatus = { lastUpdate: Date.now(), source: 'last-known', ok: _fxLiveStatus.ok };
+        if (n > 0) { sources.push('yahoo'); any = true; }
+    } catch (e) {}
+    // 2) FX pairs fallback (frankfurter/ECB — no key, cloud-friendly)
+    try {
+        const res = await fetch(FX_FRANKFURTER_URL, { headers: { 'User-Agent': FX_BROWSER_UA }, signal: AbortSignal.timeout(12000) });
+        if (res.ok) {
+            const j = await res.json();
+            if (j && j.rates) {
+                const rates = j.rates;
+                const V = c => { if (c === 'USD') return 1; const v = parseFloat(rates[c]); return isFinite(v) && v > 0 ? v : null; };
+                let n = 0;
+                Object.keys(FX_PAIR_MAP).forEach(id => {
+                    const cc = FX_PAIR_MAP[id];
+                    const rb = V(cc[0]), rq = V(cc[1]);
+                    if (rb === null || rq === null) return;
+                    const price = cc[1] === 'USD' ? 1 / rb : (cc[0] === 'USD' ? rq : rq / rb);
+                    if (fxApply(id, price, null)) n++;
+                });
+                if (n > 0) { sources.push('frankfurter'); any = true; }
+            }
+        }
+    } catch (e) {}
+    // 3) Crypto fallback (CoinGecko — no key, cloud-friendly)
+    try {
+        const res = await fetch(FX_CRYPTO_URL, { headers: { 'User-Agent': FX_BROWSER_UA }, signal: AbortSignal.timeout(12000) });
+        if (res.ok) {
+            const j = await res.json();
+            let n = 0;
+            Object.keys(FX_CRYPTO_MAP).forEach(id => {
+                const coin = FX_CRYPTO_MAP[id];
+                if (j[coin] && j[coin].usd && fxApply(id, parseFloat(j[coin].usd), null)) n++;
+            });
+            if (n > 0) { sources.push('coingecko'); any = true; }
+        }
+    } catch (e) {}
+    // 4) Gold/Silver fallback (gold-api.com — no key, cloud-friendly)
+    let goldN = 0;
+    for (const id of Object.keys(FX_GOLD_SYMS)) {
+        try {
+            const res = await fetch('https://api.gold-api.com/price/' + FX_GOLD_SYMS[id], { headers: { 'User-Agent': FX_BROWSER_UA }, signal: AbortSignal.timeout(12000) });
+            if (res.ok) {
+                const j = await res.json();
+                if (fxApply(id, parseFloat(j.price), null)) goldN++;
+            }
+        } catch (e) {}
     }
+    if (goldN > 0) { sources.push('gold-api'); any = true; }
+    // Only report ok when real data actually updated (fixes false "ok" status)
+    _fxLiveStatus = { lastUpdate: Date.now(), source: sources.length ? sources.join('+') : 'last-known', ok: any || _fxLiveStatus.ok };
+    console.log('[FX] source=' + _fxLiveStatus.source + ' ok=' + _fxLiveStatus.ok + ' eurusd=' + (_fxLivePrices['EUR/USD'] ? _fxLivePrices['EUR/USD'].price.toFixed(4) : '?') + ' btc=' + (_fxLivePrices['BTC/USD'] ? _fxLivePrices['BTC/USD'].price.toFixed(2) : '?'));
 }
 fetchFxRealData();
-setInterval(fetchFxRealData, 5000);
+setInterval(fetchFxRealData, 15000);
 
 app.get('/api/forex/live', checkForexAccess, (req, res) => {
     const out = {};
